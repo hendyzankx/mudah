@@ -56,6 +56,7 @@
         .payment-input:focus { border-color: var(--primary); }
 
         /* --- PAGE: STOK --- */
+        .page-header-action { margin-bottom: 15px; }
         .search-box { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; background: white; }
         .stock-list { display: flex; flex-direction: column; gap: 10px; }
         .stock-card { background: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -65,6 +66,8 @@
         .stock-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
         .badge-ok { background: #d1fae5; color: #065f46; }
         .badge-low { background: #fee2e2; color: #991b1b; }
+        
+        .btn-add-stock { background: var(--secondary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 
         /* Bottom Navigation */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); height: 60px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 20; }
@@ -72,7 +75,7 @@
         .nav-item svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
 
-        /* Floating Action Button (Checkout) di Tab Kasir */
+        /* Floating Action Button (Checkout & Scan) di Tab Kasir */
         .fab-checkout { position: fixed; bottom: 80px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(37,99,235,0.4); border: none; cursor: pointer; z-index: 15; }
         .fab-scan { position: fixed; bottom: 80px; left: 20px; width: 60px; height: 60px; border-radius: 50%; background: var(--secondary); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(30,64,175,0.4); border: none; cursor: pointer; z-index: 15; }
 
@@ -82,6 +85,14 @@
         .modal-content { background: white; width: 90%; max-width: 400px; padding: 1.5rem; border-radius: 12px; animation: slideUp 0.3s ease; }
         #reader { width: 100%; border-radius: 8px; overflow: hidden; background: black; }
         
+        /* Forms in Modals */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        .form-group .input-with-icon { position: relative; }
+        .form-group .input-with-icon input { padding-right: 40px; background: #f9fafb; }
+        .form-group .scan-icon-btn { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+
         /* Settings */
         .settings-group { margin-bottom: 1rem; }
         .settings-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
@@ -155,12 +166,18 @@
         <div class="status-bar" style="justify-content: flex-end;">
              <span id="total-items-display">0 Barang</span>
         </div>
+
+        <div class="page-header-action">
+            <button class="btn-add-stock" onclick="openAddProductModal()">
+                <span>+</span> Tambah Barang Baru
+            </button>
+        </div>
         
         <input type="text" id="stock-search" class="search-box" placeholder="Cari nama barang atau kode..." onkeyup="renderStockList()">
         
         <div class="stock-list" id="stock-list-container">
             <!-- Daftar stok akan dirender di sini -->
-            <div class="empty-state">Silakan sinkronisasi data stok terlebih dahulu.</div>
+            <div class="empty-state">Belum ada data stok.</div>
         </div>
     </div>
 
@@ -194,7 +211,7 @@
     </div>
 </div>
 
-<!-- Modal Manual Input -->
+<!-- Modal Input Manual Kasir -->
 <div id="manual-modal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0;">Input Manual</h3>
@@ -207,11 +224,46 @@
     </div>
 </div>
 
+<!-- Modal Input Produk Baru (Stok) -->
+<div id="add-product-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0;">Tambah Produk Baru</h3>
+        
+        <div class="form-group">
+            <label>Kode Barcode</label>
+            <div class="input-with-icon">
+                <input type="text" id="new-prod-code" placeholder="Scan atau ketik kode...">
+                <button class="scan-icon-btn" onclick="openScannerForNewProduct()">📷</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Nama Produk</label>
+            <input type="text" id="new-prod-name" placeholder="Contoh: Indomie Goreng">
+        </div>
+
+        <div class="form-group">
+            <label>Harga Satuan (Rp)</label>
+            <input type="number" id="new-prod-price" placeholder="0">
+        </div>
+
+        <div class="form-group">
+            <label>Stok Awal</label>
+            <input type="number" id="new-prod-stock" value="0">
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn btn-secondary" onclick="closeModal('add-product-modal')">Batal</button>
+            <button class="btn btn-primary" onclick="saveNewProduct()">Simpan Produk</button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Settings / Sync -->
 <div id="settings-modal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0;">Pengaturan Sinkronisasi</h3>
-        <p style="font-size:0.8rem; color:#666;">Hubungkan ke Google Sheet untuk update harga dan stok otomatis.</p>
+        <p style="font-size:0.8rem; color:#666;">Hubungkan ke Google Sheet.</p>
         
         <div class="settings-group">
             <label>URL Google Apps Script</label>
@@ -246,9 +298,10 @@
 <script>
     // --- STATE ---
     let cart = [];
-    let products = []; // Data Stok
+    let products = []; 
     let html5QrcodeScanner = null;
     let currentTab = 'kasir';
+    let scannerMode = 'checkout'; // 'checkout' or 'new_product'
 
     const defaultProducts = [
         { code: "899123456", name: "Air Mineral 600ml", price: 3500, stock: 50 },
@@ -268,7 +321,6 @@
             if (e.key === 'Enter') processCheckout();
         });
         
-        // Initial render of stock
         renderStockList();
     });
 
@@ -294,27 +346,21 @@
 
     // --- NAVIGATION ---
     function switchPage(pageId, btnElement) {
-        // Hide all pages
         document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-        // Show target
         document.getElementById('page-' + pageId).classList.add('active');
         
-        // Update title
         const titles = { 'kasir': 'Kasir', 'stok': 'Data Stok' };
         document.getElementById('page-title').innerText = titles[pageId];
 
-        // Update Nav Active State
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         if(btnElement) btnElement.classList.add('active');
 
-        // Show/Hide FABs
         const fabs = document.querySelectorAll('.fab-scan, .fab-checkout');
         if(pageId === 'kasir') {
             fabs.forEach(el => el.classList.remove('hidden'));
         } else {
             fabs.forEach(el => el.classList.add('hidden'));
         }
-
         currentTab = pageId;
     }
 
@@ -331,7 +377,7 @@
 
     function saveLocalProducts() {
         localStorage.setItem('kasir_products', JSON.stringify(products));
-        renderStockList(); // Refresh stok view if open
+        renderStockList();
     }
 
     // --- STOCK VIEW LOGIC ---
@@ -377,6 +423,52 @@
         });
     }
 
+    // --- ADD PRODUCT LOGIC ---
+    function openAddProductModal() {
+        document.getElementById('add-product-modal').classList.add('active');
+        // Reset form
+        document.getElementById('new-prod-code').value = "";
+        document.getElementById('new-prod-name').value = "";
+        document.getElementById('new-prod-price').value = "";
+        document.getElementById('new-prod-stock').value = "0";
+    }
+
+    function openScannerForNewProduct() {
+        scannerMode = 'new_product';
+        openScanner();
+    }
+
+    function saveNewProduct() {
+        const code = document.getElementById('new-prod-code').value.trim();
+        const name = document.getElementById('new-prod-name').value.trim();
+        const price = parseInt(document.getElementById('new-prod-price').value);
+        const stock = parseInt(document.getElementById('new-prod-stock').value);
+
+        if (!code || !name || isNaN(price)) {
+            showToast("Mohon lengkapi data (Kode, Nama, Harga)");
+            return;
+        }
+
+        // Cek duplikat
+        const exists = products.find(p => p.code === code);
+        if (exists) {
+            showToast("Kode barang sudah ada!");
+            return;
+        }
+
+        products.push({
+            code: code,
+            name: name,
+            price: price,
+            stock: stock || 0
+        });
+
+        saveLocalProducts();
+        closeModal('add-product-modal');
+        showToast("Produk berhasil disimpan");
+        renderStockList();
+    }
+
     // --- CART LOGIC ---
     function addToCart(code) {
         let product = products.find(p => p.code === code);
@@ -386,7 +478,6 @@
             return;
         }
 
-        // Cek Stok Fisik
         const inCart = cart.find(i => i.code === code);
         const currentQty = inCart ? inCart.qty : 0;
 
@@ -433,7 +524,6 @@
         if (item) {
             const product = products.find(p => p.code === code);
             
-            // Cek stok max saat nambah
             if (change > 0 && product && item.qty >= product.stock) {
                 showToast("Stok maksimal tercapai");
                 return;
@@ -515,7 +605,7 @@
 
         if (pay < total) return showToast("Uang kurang");
 
-        // Kurangi Stok Lokal
+        // Kurangi Stok
         cart.forEach(cItem => {
             const pIndex = products.findIndex(p => p.code === cItem.code);
             if (pIndex !== -1) {
@@ -524,7 +614,6 @@
         });
         saveLocalProducts();
 
-        // Simpan Transaksi
         const transaction = {
             id: Date.now(),
             date: new Date().toISOString(),
@@ -538,7 +627,6 @@
         transactions.push(transaction);
         localStorage.setItem('kasir_transactions', JSON.stringify(transactions));
 
-        // UI Reset
         document.getElementById('receipt-total').innerText = "Rp " + total.toLocaleString('id-ID');
         document.getElementById('receipt-pay').innerText = "Rp " + pay.toLocaleString('id-ID');
         document.getElementById('receipt-change').innerText = "Rp " + (pay - total).toLocaleString('id-ID');
@@ -549,7 +637,7 @@
         document.getElementById('payment-amount').value = "";
     }
 
-    // --- SCANNER ---
+    // --- SCANNER LOGIC ---
     function openScanner() {
         document.getElementById('scanner-modal').classList.add('active');
         if (!html5QrcodeScanner) {
@@ -562,12 +650,25 @@
             });
         }
     }
+
     function onScanSuccess(decodedText, decodedResult) {
         playBeep();
-        addToCart(decodedText);
-        html5QrcodeScanner.pause();
-        setTimeout(() => html5QrcodeScanner.resume(), 1500);
+        
+        // Tentukan aksi berdasarkan mode
+        if (scannerMode === 'new_product') {
+            // Masukkan kode ke form tambah produk
+            document.getElementById('new-prod-code').value = decodedText;
+            closeScanner();
+            scannerMode = 'checkout'; // Reset mode
+            showToast("Kode terdeteksi");
+        } else {
+            // Mode normal (Kasir)
+            addToCart(decodedText);
+            html5QrcodeScanner.pause();
+            setTimeout(() => html5QrcodeScanner.resume(), 1500);
+        }
     }
+
     function closeScanner() {
         document.getElementById('scanner-modal').classList.remove('active');
         if (html5QrcodeScanner) {
@@ -577,6 +678,7 @@
             }).catch(e => console.log(e));
         }
     }
+
     function playBeep() {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
@@ -592,7 +694,7 @@
         if(modal.style.display === 'flex') closeModal('settings-modal');
         else {
             modal.classList.add('active');
-            modal.style.display = 'flex'; // force override for consistency
+            modal.style.display = 'flex'; 
         }
     }
 
@@ -681,7 +783,9 @@
     }
     function closeModal(id) {
         document.getElementById(id).classList.remove('active');
-        document.getElementById(id).style.display = 'none'; // cleanup
+        document.getElementById(id).style.display = 'none'; 
+        // Pastikan scanner mode reset jika ditutup secara paksa
+        if(id === 'scanner-modal') scannerMode = 'checkout';
     }
     function showToast(msg) {
         const x = document.getElementById("toast");
