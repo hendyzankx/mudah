@@ -2,7 +2,7 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <!-- Link ke Manifest agar bisa diinstall di HP -->
     <link rel="manifest" href="manifest.json" />
     <title>Kasir Pro Offline</title>
@@ -29,11 +29,12 @@
         margin: 0;
         padding: 0;
         font-family: "Inter", sans-serif;
+        -webkit-tap-highlight-color: transparent;
       }
       body {
         background: var(--abu);
         padding: 10px;
-        padding-bottom: 80px; /* Space agar tidak tertutup notifikasi di HP */
+        padding-bottom: 90px; /* Space lebih aman untuk keyboard HP */
       }
       .app {
         max-width: 1200px;
@@ -67,6 +68,7 @@
         cursor: pointer;
         font-size: 14px;
         white-space: nowrap;
+        color: #64748b;
       }
       .tabs button.aktif {
         background: white;
@@ -99,7 +101,8 @@
         color: #334155;
       }
       input,
-      select {
+      select,
+      textarea {
         width: 100%;
         padding: 12px;
         margin: 6px 0;
@@ -107,6 +110,14 @@
         border-radius: 8px;
         font-size: 15px;
         background: white;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--biru);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
       button,
@@ -121,25 +132,26 @@
         cursor: pointer;
         background: var(--biru);
         color: white;
-        display: block;
-        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
         line-height: 1.5;
       }
-      button:hover,
-      .btn-action:hover {
-        opacity: 0.9;
+      button:active,
+      .btn-action:active {
+        transform: scale(0.98);
       }
       .btn-kamera {
         background: var(--oren) !important;
       }
       .btn-hapus {
         background: var(--merah) !important;
-        padding: 4px 8px !important;
+        padding: 6px 12px !important;
         width: auto !important;
         font-size: 12px !important;
       }
 
-      /* Tombol Plus Minus Kecil */
       .btn-qty-kecil {
         background: var(--biru) !important;
         padding: 4px 10px !important;
@@ -149,14 +161,9 @@
         margin: 0 2px !important;
         min-width: 30px;
       }
-      .btn-qty-kecil:hover {
-        opacity: 0.8;
-        transform: scale(1.1);
-      }
       .btn-qty-minus {
-        background: #f59e0b !important; /* Warna Oranye untuk minus */
+        background: #f59e0b !important;
       }
-
       .btn-edit {
         background: #0284c7 !important;
         padding: 6px 12px !important;
@@ -167,9 +174,12 @@
         background: var(--hijau) !important;
         font-size: 18px !important;
         padding: 16px !important;
+        margin-top: 10px !important;
+      }
+      .btn-secondary {
+        background: #94a3b8 !important;
       }
 
-      /* Style khusus tab Pengaturan */
       .setting-row {
         margin-bottom: 15px;
       }
@@ -211,23 +221,24 @@
         background: white;
         border-radius: 8px;
         overflow: hidden;
+        font-size: 13px;
       }
       th,
       td {
         padding: 10px;
         text-align: left;
         border-bottom: 1px solid #e2e8f0;
-        font-size: 14px;
       }
       th {
         background: #f1f5f9;
         font-weight: 600;
-        font-size: 13px;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #64748b;
       }
-      /* Kolom aksi di struk agar rapi */
       td:last-child {
         white-space: nowrap;
-        width: 110px; /* Lebar kolom aksi diperbesar sedikit */
+        width: 110px;
         text-align: right;
       }
       .total-box {
@@ -236,25 +247,20 @@
         padding: 16px;
         border-radius: 12px;
         margin: 16px 0;
+        text-align: center;
       }
       .total-box .label {
         font-size: 14px;
         opacity: 0.9;
       }
       .total-box .angka {
-        font-size: 28px;
+        font-size: 24px;
         font-weight: 700;
       }
 
-      .total-box.hijau {
-        background: var(--hijau);
-      }
-      .total-box.emas {
-        background: var(--emas);
-      }
-      .total-box.abu-gelap {
-        background: #475569;
-      }
+      .total-box.hijau { background: var(--hijau); }
+      .total-box.emas { background: var(--emas); }
+      .total-box.abu-gelap { background: #475569; }
 
       .info-box {
         background: #ecfdf5;
@@ -262,64 +268,45 @@
         color: #065f46;
         padding: 10px;
         border-radius: 8px;
-        font-size: 14px;
+        font-size: 13px;
         margin: 6px 0;
         display: none;
       }
 
-      #reader,
-      #readerBarang {
+      #reader, #readerBarang {
         width: 100% !important;
         border-radius: 12px;
         margin-top: 10px;
         overflow: hidden;
+        background: #000;
       }
-      #reader video,
-      #readerBarang video {
-        width: 100% !important;
+      #reader video, #readerBarang video {
+        object-fit: cover;
         border-radius: 8px;
       }
-      #reader img,
-      #readerBarang img {
-        display: none;
-      }
-
-      .hide {
-        display: none !important;
-      }
+      .hide { display: none !important; }
+      
       .uang-cepat {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         gap: 8px;
         margin-bottom: 12px;
       }
       .uang-cepat button {
         background: #e2e8f0 !important;
         color: #334550 !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
         padding: 10px !important;
-      }
-      .uang-cepat button:hover {
-        background: #cbd5e1 !important;
       }
 
       .ringkasan-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         gap: 12px;
         margin-bottom: 16px;
       }
       @media (max-width: 600px) {
-        .ringkasan-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-      .ringkasan-grid .total-box {
-        margin: 0;
-        text-align: center;
-      }
-      .ringkasan-grid .total-box .angka {
-        font-size: 20px;
+        .ringkasan-grid { grid-template-columns: 1fr; }
       }
 
       .laba-struk {
@@ -338,12 +325,11 @@
         color: var(--hijau);
       }
 
-      /* ===== STYLE STRUK CETAK PROFESIONAL ===== */
+      /* ===== STYLE STRUK CETAK ===== */
       #cetakStruk {
         display: none;
-        font-family: "Courier Prime", "Courier New", monospace;
+        font-family: "Courier Prime", monospace;
         padding: 0;
-        margin: 0;
         background: white;
         color: black;
         width: 100%;
@@ -351,337 +337,118 @@
         margin: 0 auto;
       }
       #cetakStruk .paper {
-        padding: 10px;
+        padding: 2mm;
         border: 1px dashed #ccc;
       }
       #cetakStruk .header-store {
         text-align: center;
-        margin-bottom: 15px;
-        border-bottom: 2px dashed #000;
-        padding-bottom: 10px;
+        margin-bottom: 2mm;
+        border-bottom: 1px dashed #000;
+        padding-bottom: 2mm;
       }
       #cetakStruk .store-name {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: bold;
         text-transform: uppercase;
-        margin-bottom: 4px;
+        margin-bottom: 1mm;
       }
-      #cetakStruk .store-address {
-        font-size: 11px;
+      #cetakStruk .store-address, #cetakStruk .store-contact {
+        font-size: 10px;
         line-height: 1.2;
-        color: #333;
       }
       #cetakStruk .meta-info {
         display: flex;
         justify-content: space-between;
-        font-size: 11px;
-        margin-bottom: 10px;
+        font-size: 10px;
+        margin: 2mm 0;
       }
       #cetakStruk table.items {
         width: 100%;
         font-size: 12px;
-        margin-bottom: 10px;
         border-collapse: collapse;
+        margin-bottom: 2mm;
       }
       #cetakStruk table.items th {
         text-align: left;
         border-bottom: 1px dashed #000;
-        padding-bottom: 2px;
-        margin-bottom: 5px;
-        font-size: 11px;
+        font-size: 10px;
       }
       #cetakStruk table.items td {
-        padding: 2px 0;
+        padding: 1px 0;
         vertical-align: top;
       }
-      #cetakStruk .col-name {
-        width: 55%;
-      }
-      #cetakStruk .col-qty {
-        width: 15%;
-        text-align: center;
-      }
-      #cetakStruk .col-price {
-        width: 30%;
-        text-align: right;
-      }
+      #cetakStruk .col-name { width: 55%; }
+      #cetakStruk .col-qty { width: 15%; text-align: center; }
+      #cetakStruk .col-price { width: 30%; text-align: right; }
       #cetakStruk .summary-row {
         display: flex;
         justify-content: space-between;
-        font-size: 12px;
-        margin-bottom: 4px;
+        font-size: 11px;
+        margin-bottom: 1mm;
       }
       #cetakStruk .summary-row.total {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: bold;
-        margin-top: 8px;
         border-top: 1px dashed #000;
-        padding-top: 8px;
+        padding-top: 1mm;
+        margin-top: 2mm;
       }
-      #cetakStruk .divider {
-        border-top: 1px dashed #000;
-        margin: 10px 0;
-      }
-      #cetakStruk .footer {
-        text-align: center;
-        font-size: 11px;
-        margin-top: 15px;
-        color: #555;
-      }
-      #cetakStruk .thank-you {
-        font-weight: bold;
-        margin-top: 5px;
-        text-transform: uppercase;
-      }
-      /* ===== AKHIR STYLE STRUK CETAK ===== */
+      #cetakStruk .divider { border-top: 1px dashed #000; margin: 2mm 0; }
+      #cetakStruk .footer { text-align: center; font-size: 10px; margin-top: 2mm; }
+      #cetakStruk .thank-you { font-weight: bold; margin-top: 1mm; text-transform: uppercase; font-size: 11px; }
 
-      /* ===== Dropdown pencarian barang manual ===== */
-      .pencarian-wrap {
-        position: relative;
-      }
-      #cariManual {
-        font-size: 16px;
-        background: #f0fdf4;
-        border: 2px solid #86efac;
-        padding-right: 40px;
-      }
-      #cariManual:focus {
-        border-color: var(--hijau);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
-      }
-      .cari-icon {
-        position: absolute;
-        right: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 16px;
-        pointer-events: none;
-        color: #16a34a;
-      }
+      /* Dropdown */
+      .pencarian-wrap { position: relative; }
+      #cariManual { font-size: 16px; background: #f0fdf4; border: 2px solid #86efac; padding-right: 40px; }
+      .cari-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; color: #16a34a; }
       #dropdownHasil {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: white;
-        border: 2px solid #86efac;
-        border-top: none;
+        position: absolute; top: 100%; left: 0; right: 0;
+        background: white; border: 2px solid #86efac; border-top: none;
         border-radius: 0 0 10px 10px;
-        max-height: 250px;
-        overflow-y: auto;
-        z-index: 100;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        display: none;
+        max-height: 250px; overflow-y: auto; z-index: 100;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12); display: none;
       }
-      #dropdownHasil.show {
-        display: block;
-      }
-      .dd-item {
-        padding: 10px 14px;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 14px;
-        transition: background 0.1s;
-      }
-      .dd-item:last-child {
-        border-bottom: none;
-        border-radius: 0 0 8px 8px;
-      }
-      .dd-item:hover,
-      .dd-item.diangkat {
-        background: #f0fdf4;
-      }
-      .dd-item .dd-nama {
-        font-weight: 600;
-        color: #1e293b;
-      }
-      .dd-item .dd-kategori {
-        display: inline-block;
-        background: #e0e7ff;
-        color: #4338ca;
-        font-size: 10px;
-        font-weight: 700;
-        padding: 2px 6px;
-        border-radius: 4px;
-        margin-left: 6px;
-        vertical-align: middle;
-      }
-      .dd-item .dd-info {
-        font-size: 12px;
-        color: #64748b;
-        text-align: right;
-      }
-      .dd-item .dd-harga {
-        font-weight: 700;
-        color: var(--hijau);
-      }
-      .dd-empty {
-        padding: 16px;
-        text-align: center;
-        color: #94a3b8;
-        font-size: 14px;
-      }
-      .qty-inline {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 6px;
-      }
-      .qty-inline input {
-        flex: 1;
-        margin: 0;
-      }
-      .qty-inline .btn-qty-inline {
-        background: var(--hijau) !important;
-        width: auto !important;
-        padding: 12px 16px !important;
-        margin: 0 !important;
-        white-space: nowrap;
-      }
+      #dropdownHasil.show { display: block; }
+      .dd-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+      .dd-item:hover, .dd-item.diangkat { background: #f0fdf4; }
+      .dd-nama { font-weight: 600; color: #1e293b; }
+      .dd-kategori { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+      .dd-info { font-size: 12px; color: #64748b; text-align: right; }
+      .qty-inline { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+      .qty-inline input { flex: 1; margin: 0; }
+      .qty-inline .btn-qty-inline { background: var(--hijau) !important; padding: 12px !important; margin: 0 !important; }
 
-      /* ===== Badge kategori di tabel barang ===== */
-      .badge-kategori {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 700;
-        white-space: nowrap;
-      }
-      .badge-makanan {
-        background: #fef3c7;
-        color: #92400e;
-      }
-      .badge-minuman {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-      .badge-rokok {
-        background: #f3e8ff;
-        color: #7c3aed;
-      }
-      .badge-snack {
-        background: #fce7f3;
-        color: #be185d;
-      }
-      .badge-kebutuhan {
-        background: #d1fae5;
-        color: #065f46;
-      }
-      .badge-lainnya {
-        background: #f1f5f9;
-        color: #475569;
-      }
+      /* Badges */
+      .badge-kategori { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+      .badge-makanan { background: #fef3c7; color: #92400e; }
+      .badge-minuman { background: #dbeafe; color: #1e40af; }
+      .badge-rokok { background: #f3e8ff; color: #7c3aed; }
+      .badge-snack { background: #fce7f3; color: #be185d; }
+      .badge-kebutuhan { background: #d1fae5; color: #065f46; }
+      .badge-lainnya { background: #f1f5f9; color: #475569; }
 
-      /* ===== Filter kategori di tab barang ===== */
-      .filter-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-bottom: 14px;
-      }
-      .filter-chip {
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        border: 2px solid #cbd5e1;
-        background: white;
-        color: #475569;
-        transition: all 0.15s;
-      }
-      .filter-chip:hover {
-        border-color: var(--biru);
-        color: var(--biru);
-      }
-      .filter-chip.aktif {
-        background: var(--biru);
-        color: white;
-        border-color: var(--biru);
-      }
+      /* Filter Chips */
+      .filter-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+      .filter-chip { padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid #cbd5e1; background: white; color: #475569; }
+      .filter-chip.aktif { background: var(--biru); color: white; border-color: var(--biru); }
 
-      /* ===== TOAST NOTIFICATION ===== */
-      .toast-container {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        width: 90%;
-        max-width: 400px;
-        pointer-events: none;
-      }
+      /* Toast */
+      .toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 350px; pointer-events: none; }
       .toast {
-        background: white;
-        color: #064e3b;
-        padding: 16px;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        pointer-events: auto;
-        border-left: 6px solid var(--hijau);
+        background: white; color: #064e3b; padding: 12px; border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-top: 10px;
+        display: flex; align-items: center; gap: 10px;
+        opacity: 0; transform: translateY(20px); transition: all 0.3s;
+        pointer-events: auto; border-left: 5px solid var(--hijau);
       }
-      .toast.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      .toast-icon {
-        font-size: 24px;
-        color: var(--hijau);
-      }
-      .toast-content {
-        flex: 1;
-      }
-      .toast-title {
-        font-weight: 700;
-        font-size: 15px;
-        margin-bottom: 2px;
-      }
-      .toast-msg {
-        font-size: 13px;
-        color: #4b5563;
-      }
+      .toast.show { opacity: 1; transform: translateY(0); }
 
       @media print {
-        .no-print,
-        .tabs,
-        .header,
-        .toast-container {
-          display: none !important;
-        }
-        body {
-          background: white;
-          padding: 0;
-          margin: 0;
-        }
-        .app {
-          box-shadow: none;
-          border-radius: 0;
-          max-width: 100%;
-        }
-        #cetakStruk {
-          display: block !important;
-          margin: 0;
-          padding: 0;
-          width: 100%;
-        }
-        #cetakStruk .paper {
-          border: none;
-          padding: 0;
-        }
+        .no-print, .tabs, .header, .toast-container, #scanInput, .card { display: none !important; }
+        body { background: white; padding: 0; margin: 0; }
+        .app { box-shadow: none; border-radius: 0; max-width: 100%; }
+        #cetakStruk { display: block !important; margin: 0; padding: 0; width: 100%; }
+        #cetakStruk .paper { border: none; padding: 0; }
       }
     </style>
   </head>
@@ -689,18 +456,14 @@
     <div class="app">
       <div class="header no-print">
         <h1>💰 KASIR PRO OFFLINE</h1>
-        <small>Scan cepat, atur jumlah, pantau keuntungan otomatis</small>
+        <small style="opacity: 0.9">Aplikasi Kasir Cepat & Handal</small>
       </div>
 
       <div class="tabs no-print">
-        <button onclick="gantiTab('kasir')" id="tabKasir" class="aktif">
-          Kasir
-        </button>
+        <button onclick="gantiTab('kasir')" id="tabKasir" class="aktif">Kasir</button>
         <button onclick="gantiTab('barang')" id="tabBarang">Barang</button>
         <button onclick="gantiTab('laporan')" id="tabLaporan">Laporan</button>
-        <button onclick="gantiTab('pengaturan')" id="tabPengaturan">
-          ⚙️ Pengaturan
-        </button>
+        <button onclick="gantiTab('pengaturan')" id="tabPengaturan">⚙️ Setelan</button>
       </div>
 
       <div class="konten">
@@ -708,74 +471,39 @@
         <div id="kasir" class="grid">
           <div class="card no-print">
             <h3>1. Scan Barcode</h3>
-            <input
-              type="text"
-              id="scanInput"
-              placeholder="Tembak scanner disini..."
-              autofocus
-            />
+            <input type="text" id="scanInput" placeholder="Klik & Scan disini..." autofocus />
             <div id="statusScan" class="status-scan"></div>
-            <button class="btn-kamera" onclick="mulaiScanKamera('kasir')">
-              📷 Buka Kamera HP
-            </button>
-            <button
-              onclick="stopScanKamera()"
-              id="btnStop"
-              class="hide btn-hapus"
-            >
-              Tutup Kamera
-            </button>
+            <button class="btn-kamera" onclick="mulaiScanKamera('kasir')">📷 Buka Kamera</button>
+            <button onclick="stopScanKamera()" id="btnStop" class="hide btn-hapus">Tutup Kamera</button>
             <div id="reader" class="hide"></div>
 
             <h3 style="margin-top: 20px">2. Cari Manual</h3>
-            <select id="filterKategoriKasir" onchange="triggerCariManual()">
-              <option value="">Semua Kategori</option>
-            </select>
             <div class="pencarian-wrap">
-              <input
-                type="text"
-                id="cariManual"
-                placeholder="Ketik nama barang..."
-                autocomplete="off"
-              />
+              <input type="text" id="cariManual" placeholder="Ketik nama barang..." autocomplete="off" />
               <span class="cari-icon">🔍</span>
               <div id="dropdownHasil"></div>
             </div>
             <div class="qty-inline hide" id="qtyInlineWrap">
-              <input
-                type="number"
-                id="qtyManualCari"
-                value="1"
-                min="1"
-                placeholder="Qty"
-              />
-              <button class="btn-qty-inline" onclick="tambahDariPencarian()">
-                + Tambah
-              </button>
+              <input type="number" id="qtyManualCari" value="1" min="1" placeholder="Qty" />
+              <button class="btn-qty-inline" onclick="tambahDariPencarian()">+ Tambah</button>
             </div>
 
-            <h3 style="margin-top: 16px">3. Pilih dari Daftar</h3>
+            <h3 style="margin-top: 16px">3. Pilih Manual</h3>
             <select id="pilihBarang"></select>
-            <input
-              type="number"
-              id="qtyManual"
-              value="1"
-              min="1"
-              placeholder="Jumlah"
-            />
+            <input type="number" id="qtyManual" value="1" min="1" placeholder="Jumlah" />
             <button onclick="tambahManual()">+ Tambah ke Struk</button>
           </div>
 
           <div class="card no-print">
-            <h3>Struk Belanja</h3>
-            <div style="overflow-x: auto">
+            <h3>Keranjang Belanja</h3>
+            <div style="overflow-x: auto; max-height: 300px; overflow-y: auto;">
               <table id="tabelStruk">
                 <thead>
                   <tr>
                     <th>Barang</th>
-                    <th>Qty</th>
-                    <th>Jual</th>
-                    <th>Sub</th>
+                    <th style="text-align:center">Qty</th>
+                    <th>Harga</th>
+                    <th>Subtotal</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
@@ -789,66 +517,41 @@
             </div>
 
             <div class="laba-struk">
-              Estimasi Laba Transaksi Ini:
-              <div class="angka-laba">Rp <span id="labaStruk">0</span></div>
+              Estimasi Laba: Rp <span id="labaStruk">0</span>
             </div>
 
             <div class="uang-cepat">
-              <button onclick="setUang('pas')">💰 Uang Pas</button>
-              <button onclick="setUang(10000)">Rp 10.000</button>
-              <button onclick="setUang(20000)">Rp 20.000</button>
-              <button onclick="setUang(50000)">Rp 50.000</button>
-              <button onclick="setUang(100000)">Rp 100.000</button>
-              <button onclick="setUang(0)">Reset Uang</button>
+              <button onclick="setUang('pas')">Uang Pas</button>
+              <button onclick="setUang(20000)">20rb</button>
+              <button onclick="setUang(50000)">50rb</button>
+              <button onclick="setUang(100000)">100rb</button>
+              <button onclick="setUang(0)">Reset</button>
             </div>
 
-            <input
-              type="number"
-              id="bayar"
-              placeholder="Uang dari pembeli"
-              oninput="hitungKembali()"
-            />
+            <input type="number" id="bayar" placeholder="Uang Diterima (Rp)" oninput="hitungKembali()" />
             <div class="total-box hijau">
               <div class="label">KEMBALIAN</div>
               <div class="angka">Rp <span id="kembalian">0</span></div>
             </div>
-            <button class="btn-selesai" onclick="selesaiTransaksi()">
-              SELESAI & CETAK
-            </button>
-            <button
-              onclick="resetStruk()"
-              style="background: #64748b !important"
-            >
-              Reset Struk
-            </button>
+            
+            <button class="btn-selesai" onclick="selesaiTransaksi()">SELESAI & CETAK</button>
+            <button class="btn-secondary" onclick="resetStruk()">Batal / Reset</button>
           </div>
         </div>
 
         <!-- TAB BARANG -->
         <div id="barang" class="hide no-print">
           <div class="card">
-            <h3>Tambah / Tambah Stok Barang</h3>
-            <button class="btn-kamera" onclick="mulaiScanKamera('barang')">
-              📷 Scan Barcode Barang
-            </button>
-            <button
-              onclick="stopScanKamera()"
-              id="btnStopBarang"
-              class="hide btn-hapus"
-            >
-              Tutup Kamera
-            </button>
+            <h3 id="judulFormBarang">Tambah / Edit Barang</h3>
+            <button class="btn-kamera" onclick="mulaiScanKamera('barang')" style="margin-bottom:10px">📷 Scan Barcode</button>
+            <button onclick="stopScanKamera()" id="btnStopBarang" class="hide btn-hapus">Tutup</button>
             <div id="readerBarang" class="hide"></div>
-            <input
-              type="text"
-              id="barcode"
-              placeholder="Barcode - Scan atau ketik"
-            />
-            <div id="infoStok" class="info-box">
-              ✅ Barang sudah terdaftar. Stok akan <b>DITAMBAHKAN</b> ke stok
-              lama.
+            
+            <div class="grid" style="gap: 10px">
+                <input type="text" id="barcode" placeholder="Barcode (Scan/Ketik)" />
+                <input type="text" id="nama" placeholder="Nama Barang" />
             </div>
-            <input type="text" id="nama" placeholder="Nama Barang" />
+            
             <select id="kategoriInput">
               <option value="">-- Pilih Kategori --</option>
               <option value="Makanan">🍜 Makanan</option>
@@ -858,34 +561,23 @@
               <option value="Kebutuhan Rumah">🧹 Kebutuhan Rumah</option>
               <option value="Lainnya">📦 Lainnya</option>
             </select>
-            <input
-              type="number"
-              id="hargaBeli"
-              placeholder="Harga Pembelian / Modal"
-            />
-            <input
-              type="number"
-              id="hargaJual"
-              placeholder="Harga Penjualan / Jual"
-            />
-            <input
-              type="number"
-              id="stok"
-              placeholder="Jumlah Stok (Untuk Ditambahkan)"
-            />
-            <button onclick="simpanBarang()">💾 Simpan / Tambah Stok</button>
-            <button
-              onclick="batalEditBarang()"
-              style="background: #64748b !important; display: none"
-              id="btnBatalEdit"
-            >
-              Batal Edit
-            </button>
+            
+            <div class="grid" style="gap: 10px">
+                <input type="number" id="hargaBeli" placeholder="Modal (Rp)" />
+                <input type="number" id="hargaJual" placeholder="Harga Jual (Rp)" />
+            </div>
+
+            <input type="number" id="stok" placeholder="Stok Awal / Tambahan" />
+            <div id="infoStok" class="info-box"></div>
+            
+            <button onclick="simpanBarang()" class="btn-save">💾 Simpan Data</button>
+            <button onclick="batalEditBarang()" id="btnBatalEdit" class="hide btn-secondary">Batal Edit</button>
           </div>
-          <div class="card" style="margin-top: 20px">
+
+          <div class="card">
             <h3>Daftar Barang</h3>
             <div class="filter-grid" id="filterGrid"></div>
-            <div style="overflow-x: auto">
+            <div style="overflow-x: auto;">
               <table id="tabelBarang">
                 <thead>
                   <tr>
@@ -894,7 +586,6 @@
                     <th>Kategori</th>
                     <th>Modal</th>
                     <th>Jual</th>
-                    <th>Laba/pcs</th>
                     <th>Stok</th>
                     <th>Aksi</th>
                   </tr>
@@ -911,7 +602,7 @@
             <h3>Ringkasan Hari Ini</h3>
             <div class="ringkasan-grid">
               <div class="total-box">
-                <div class="label">OMSET (PENJUALAN)</div>
+                <div class="label">OMSET</div>
                 <div class="angka">Rp <span id="totalHariIni">0</span></div>
               </div>
               <div class="total-box abu-gelap">
@@ -919,22 +610,16 @@
                 <div class="angka">Rp <span id="modalHariIni">0</span></div>
               </div>
               <div class="total-box emas">
-                <div class="label">KEUNTUNGAN</div>
+                <div class="label">LABA</div>
                 <div class="angka">Rp <span id="labaHariIni">0</span></div>
               </div>
             </div>
-            <button onclick="exportCSV()">📊 Download Excel</button>
-            <button
-              onclick="hapusLaporan()"
-              class="btn-hapus"
-              style="width: 100%"
-            >
-              🗑️ Hapus Laporan
-            </button>
+            <button onclick="exportCSV()">📊 Download Laporan (.CSV)</button>
+            <button onclick="hapusLaporan()" class="btn-hapus" style="margin-top:10px">🗑️ Hapus Riwayat</button>
           </div>
           <div class="card" style="margin-top: 20px">
             <h3>Riwayat Transaksi</h3>
-            <div style="overflow-x: auto">
+            <div style="overflow-x: auto;">
               <table id="tabelLaporan">
                 <thead>
                   <tr>
@@ -942,7 +627,7 @@
                     <th>Omset</th>
                     <th>Modal</th>
                     <th>Laba</th>
-                    <th>Detail Item</th>
+                    <th>Item</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -951,262 +636,124 @@
           </div>
         </div>
 
-        <!-- TAB PENGATURAN (BARU) -->
+        <!-- TAB PENGATURAN -->
         <div id="pengaturan" class="hide no-print">
-          <!-- Profil Toko -->
           <div class="card">
-            <h3>⚙️ Pengaturan Profil Toko</h3>
+            <h3>⚙️ Profil Toko</h3>
             <div class="setting-row">
               <label>Nama Toko</label>
-              <input
-                type="text"
-                id="setNamaToko"
-                placeholder="Contoh: Toko Maju Jaya"
-              />
+              <input type="text" id="setNamaToko" />
             </div>
             <div class="setting-row">
-              <label>Alamat Toko</label>
-              <input
-                type="text"
-                id="setAlamatToko"
-                placeholder="Jl. Raya No. 1, Jakarta"
-              />
+              <label>Alamat</label>
+              <input type="text" id="setAlamatToko" />
             </div>
             <div class="setting-row">
-              <label>No. Telepon / Kontak</label>
-              <input
-                type="text"
-                id="setTeleponToko"
-                placeholder="0812-xxxx-xxxx"
-              />
+              <label>No. Telp</label>
+              <input type="text" id="setTeleponToko" />
             </div>
             <div class="setting-row">
-              <label>Pesan Footer Struk (Terima Kasih...)</label>
-              <textarea
-                id="setFooterStruk"
-                rows="2"
-                style="
-                  width: 100%;
-                  padding: 10px;
-                  margin: 5px 0;
-                  border: 1px solid #cbd5e1;
-                  border-radius: 8px;
-                "
-                placeholder="Barang yang dibeli tidak dapat ditukar..."
-              ></textarea>
+              <label>Footer Struk</label>
+              <textarea id="setFooterStruk" rows="2"></textarea>
             </div>
-            <button onclick="simpanPengaturan()" class="btn-save">
-              💾 Simpan Perubahan
-            </button>
+            <button onclick="simpanPengaturan()" class="btn-save">Simpan Perubahan</button>
           </div>
 
-          <!-- Backup & Restore -->
           <div class="card">
-            <h3>💾 Backup & Restore Data</h3>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 10px">
-              Gunakan fitur ini untuk memindahkan data ke HP lain atau menyimpan
-              cadangan data.
-            </p>
-            <button onclick="backupData()" style="margin-bottom: 10px">
-              📥 Download Backup (.JSON)
-            </button>
-
-            <div style="border-top: 1px dashed #cbd5e1; margin: 15px 0"></div>
-
-            <label style="font-weight: 600; font-size: 13px; color: #475569"
-              >Restore Data</label
-            >
-            <input
-              type="file"
-              id="fileRestore"
-              accept=".json"
-              style="margin-top: 5px"
-            />
-            <button onclick="restoreData()" style="margin-top: 10px">
-              📤 Upload & Restore
-            </button>
+            <h3>💾 Backup Data</h3>
+            <button onclick="backupData()">📥 Download Backup (.JSON)</button>
+            <div style="margin:10px 0; border-top:1px dashed #ccc"></div>
+            <label>Restore Data (.JSON)</label>
+            <input type="file" id="fileRestore" accept=".json" />
+            <button onclick="restoreData()" style="margin-top:5px">📤 Upload & Restore</button>
           </div>
-
-          <!-- Danger Zone -->
-          <div
-            class="card"
-            style="border: 1px solid #fca5a5; background: #fef2f2"
-          >
-            <h3 style="color: #991b1b">⚠️ Zona Bahaya (Hapus Data)</h3>
-            <p style="font-size: 13px; color: #7f1d1d; margin-bottom: 10px">
-              Tindakan ini tidak dapat dibatalkan. Pastikan Anda sudah melakukan
-              Backup sebelum menghapus data.
-            </p>
-            <button
-              onclick="hapusData('barang')"
-              class="btn-hapus"
-              style="margin-bottom: 10px"
-            >
-              🗑️ Hapus Semua Barang
-            </button>
-            <button onclick="hapusData('transaksi')" class="btn-hapus">
-              🗑️ Hapus Semua Laporan Transaksi
-            </button>
+          
+          <div class="card" style="border: 1px solid #fecaca; background: #fef2f2">
+            <h3 style="color: #b91c1c">Zona Bahaya</h3>
+            <button onclick="hapusData('barang')" class="btn-hapus">Hapus Semua Barang</button>
+            <button onclick="hapusData('transaksi')" class="btn-hapus" style="margin-top:5px">Hapus Semua Laporan</button>
           </div>
         </div>
 
-        <!-- AREA CETAK STRUK -->
+        <!-- CETAK STRUK -->
         <div id="cetakStruk">
           <div class="paper">
-            <!-- Header -->
             <div class="header-store">
-              <div class="store-name" id="printStoreName">TOKO KASIR PRO</div>
-              <div class="store-address" id="printStoreAddress">
-                Jl. Merdeka No. 45, Jakarta Selatan<br />
-                Telp: 0812-3456-7890
-              </div>
+              <div class="store-name" id="printStoreName">TOKO MAJU</div>
+              <div class="store-address" id="printStoreAddress">Jl. Raya No. 1</div>
+              <div class="store-contact" id="printStoreContact">Telp: 0812</div>
             </div>
-
-            <!-- Info Transaksi -->
             <div class="meta-info">
               <span id="printDate">Tgl: -</span>
               <span id="printNoStruk">No: #001</span>
-              <span id="printKasir">Kasir: Admin</span>
             </div>
-
-            <!-- Tabel Item -->
             <table class="items">
               <thead>
                 <tr>
                   <th class="col-name">ITEM</th>
-                  <th class="col-qty">QTY</th>
+                  <th class="col-qty">Q</th>
                   <th class="col-price">HARGA</th>
                 </tr>
               </thead>
               <tbody id="tbodyCetak"></tbody>
             </table>
-
-            <!-- Total -->
             <div class="divider"></div>
             <div class="summary-row">
-              <span>Total Belanja</span>
+              <span>TOTAL</span>
               <span id="totalCetak">Rp 0</span>
             </div>
             <div class="summary-row">
-              <span>Tunai</span>
+              <span>TUNAI</span>
               <span id="bayarCetak">Rp 0</span>
             </div>
             <div class="summary-row">
-              <span>Kembali</span>
+              <span>KEMBALI</span>
               <span id="kembaliCetak">Rp 0</span>
             </div>
-
-            <!-- Footer -->
             <div class="divider"></div>
             <div class="footer">
               <div class="thank-you">TERIMA KASIH</div>
-              <div id="printFooterMsg">
-                Barang yang sudah dibeli tidak dapat ditukar/dikembalikan
-              </div>
-              <div style="margin-top: 5px" id="printStoreContact">
-                www.tokomajujaya.com
-              </div>
+              <div id="printFooterMsg"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- CONTAINER TOAST NOTIFICATION -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-      const GAS_URL =
-        "https://script.google.com/macros/s/AKfycbxvOaxIJerNRO-wTtXkAkeBb-5oX5rhYy8NzTdXh-tPGe-Cb3kFq4m6HGMZ256gbt0z2Q/exec";
-      // === VARIABEL GLOBAL & STATE ===
+      // === VARIABEL GLOBAL ===
       let dbBarang = JSON.parse(localStorage.getItem("barang") || "[]");
       let dbTransaksi = JSON.parse(localStorage.getItem("transaksi") || "[]");
       let dbPengaturan = JSON.parse(localStorage.getItem("pengaturan") || "{}");
-
-      // Default Pengaturan jika kosong
+      
+      // Default Pengaturan
       if (!dbPengaturan.namaToko) dbPengaturan.namaToko = "TOKO KASIR PRO";
-      if (!dbPengaturan.alamatToko)
-        dbPengaturan.alamatToko = "Jl. Merdeka No. 45, Jakarta Selatan";
-      if (!dbPengaturan.teleponToko)
-        dbPengaturan.teleponToko = "0812-3456-7890";
-      if (!dbPengaturan.footerStruk)
-        dbPengaturan.footerStruk =
-          "Barang yang sudah dibeli\nTidak dapat ditukar/dikembalikan";
+      if (!dbPengaturan.alamatToko) dbPengaturan.alamatToko = "Jl. Raya No. 1";
+      if (!dbPengaturan.teleponToko) dbPengaturan.teleponToko = "-";
+      if (!dbPengaturan.footerStruk) dbPengaturan.footerStruk = "Barang yang dibeli tidak dapat ditukar.";
 
       let struk = [];
       let html5QrcodeScanner = null;
       let modeScan = "kasir";
       let isScanning = false;
       let debounceTimer = null;
-      const SCAN_DELAY_MS = 1000;
+      let isEditingBarang = false; // Flag untuk edit mode
+      let originalBarcode = ""; // Simpan barcode asli saat edit
 
-      // Variabel dropdown pencarian
-      let barangTerpilihCari = null;
-      let indeksDiangkat = -1;
-      let filterKategoriAktif = "";
-
-      // Data awal dummy jika barang kosong
+      // Data Dummy Awal (Hanya jika kosong)
       if (dbBarang.length === 0) {
         dbBarang = [
-          {
-            barcode: "8992761120015",
-            nama: "Indomie Goreng",
-            kategori: "Makanan",
-            hargaBeli: 2500,
-            hargaJual: 3500,
-            stok: 100,
-          },
-          {
-            barcode: "8999909015032",
-            nama: "Aqua 600ml",
-            kategori: "Minuman",
-            hargaBeli: 2000,
-            hargaJual: 3000,
-            stok: 50,
-          },
-          {
-            barcode: "8992388111113",
-            nama: "Teh Pucuk",
-            kategori: "Minuman",
-            hargaBeli: 3000,
-            hargaJual: 4000,
-            stok: 80,
-          },
+          { barcode: "8991001", nama: "Indomie Goreng", kategori: "Makanan", hargaBeli: 2500, hargaJual: 3500, stok: 50 },
+          { barcode: "8991002", nama: "Aqua 600ml", kategori: "Minuman", hargaBeli: 2000, hargaJual: 3000, stok: 24 },
         ];
         simpanDb();
       }
 
       // === FUNGSI UTILITY ===
-      const DAFTAR_KATEGORI = [
-        { nama: "Makanan", emoji: "🍜", kelas: "badge-makanan" },
-        { nama: "Minuman", emoji: "🥤", kelas: "badge-minuman" },
-        { nama: "Rokok", emoji: "🚬", kelas: "badge-rokok" },
-        { nama: "Snack", emoji: "🍿", kelas: "badge-snack" },
-        { nama: "Kebutuhan Rumah", emoji: "🧹", kelas: "badge-kebutuhan" },
-        { nama: "Lainnya", emoji: "📦", kelas: "badge-lainnya" },
-      ];
-
-      function getInfoKategori(namaKategori) {
-        return (
-          DAFTAR_KATEGORI.find((k) => k.nama === namaKategori) || {
-            nama: namaKategori || "Lainnya",
-            emoji: "📦",
-            kelas: "badge-lainnya",
-          }
-        );
-      }
-      function buatBadgeHtml(namaKategori) {
-        let info = getInfoKategori(namaKategori);
-        return `<span class="badge-kategori ${info.kelas}">${info.emoji} ${info.nama}</span>`;
-      }
-
-      function getKategoriUnik() {
-        let set = new Set();
-        dbBarang.forEach((b) => {
-          if (b.kategori) set.add(b.kategori);
-        });
-        DAFTAR_KATEGORI.forEach((k) => set.add(k.nama));
-        return Array.from(set).sort();
+      function formatRupiah(angka) {
+        return "Rp " + angka.toLocaleString("id-ID");
       }
 
       function simpanDb() {
@@ -1217,151 +764,34 @@
         renderBarang();
         renderPilihBarang();
         renderLaporan();
-        // Render nilai input pengaturan saat ini
-        document.getElementById("setNamaToko").value = dbPengaturan.namaToko;
-        document.getElementById("setAlamatToko").value =
-          dbPengaturan.alamatToko;
-        document.getElementById("setTeleponToko").value =
-          dbPengaturan.teleponToko;
-        document.getElementById("setFooterStruk").value =
-          dbPengaturan.footerStruk;
+        loadPengaturan();
       }
 
-      // === LOGIKA TAB & UI ===
+      function tampilkanToast(judul, pesan) {
+        let container = document.getElementById("toastContainer");
+        let toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerHTML = `<div style="font-size:20px">✅</div><div><strong>${judul}</strong><br><small>${pesan}</small></div>`;
+        container.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add("show"));
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      // === MANAJEMEN TAB ===
       function gantiTab(tab) {
         stopScanKamera();
         tutupDropdown();
-        document
-          .querySelectorAll(".konten > div[id]")
-          .forEach((d) => d.classList.add("hide"));
+        document.querySelectorAll(".konten > div[id]").forEach(d => d.classList.add("hide"));
         document.getElementById(tab).classList.remove("hide");
-        document
-          .querySelectorAll(".tabs button")
-          .forEach((b) => b.classList.remove("aktif"));
-        let tabId = {
-          kasir: "tabKasir",
-          barang: "tabBarang",
-          laporan: "tabLaporan",
-          pengaturan: "tabPengaturan",
-        };
-        document.getElementById(tabId[tab]).classList.add("aktif");
-        if (tab === "kasir")
-          setTimeout(() => document.getElementById("scanInput").focus(), 100);
-        if (tab === "pengaturan") {
-          // Pastikan input terisi data terbaru
-          document.getElementById("setNamaToko").value = dbPengaturan.namaToko;
-          document.getElementById("setAlamatToko").value =
-            dbPengaturan.alamatToko;
-          document.getElementById("setTeleponToko").value =
-            dbPengaturan.teleponToko;
-          document.getElementById("setFooterStruk").value =
-            dbPengaturan.footerStruk;
-        }
+        document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("aktif"));
+        document.getElementById("tab" + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add("aktif");
+        if (tab === "kasir") setTimeout(() => document.getElementById("scanInput").focus(), 100);
       }
 
-      // === LOGIKA PENGATURAN ===
-      function simpanPengaturan() {
-        dbPengaturan.namaToko = document.getElementById("setNamaToko").value;
-        dbPengaturan.alamatToko =
-          document.getElementById("setAlamatToko").value;
-        dbPengaturan.teleponToko =
-          document.getElementById("setTeleponToko").value;
-        dbPengaturan.footerStruk =
-          document.getElementById("setFooterStruk").value;
-
-        simpanDb();
-        tampilkanToast(
-          "Pengaturan Berhasil Disimpan",
-          "Profil toko dan struk sudah diperbarui.",
-        );
-      }
-
-      function backupData() {
-        let dataStr = JSON.stringify(
-          {
-            pengaturan: dbPengaturan,
-            barang: dbBarang,
-            transaksi: dbTransaksi,
-          },
-          null,
-          2,
-        );
-
-        let blob = new Blob([dataStr], { type: "application/json" });
-        let a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `backup_kasir_${new Date().toISOString().slice(0, 10)}.json`;
-        a.click();
-      }
-
-      function restoreData() {
-        let fileInput = document.getElementById("fileRestore");
-        let file = fileInput.files[0];
-        if (!file) return alert("Pilih file backup terlebih dahulu!");
-
-        let reader = new FileReader();
-        reader.onload = function (e) {
-          try {
-            let data = JSON.parse(e.target.result);
-            if (data.pengaturan && data.barang && data.transaksi) {
-              if (
-                confirm(
-                  "Data backup akan menimpa data yang ada sekarang. Lanjutkan?",
-                )
-              ) {
-                dbPengaturan = data.pengaturan;
-                dbBarang = data.barang;
-                dbTransaksi = data.transaksi;
-                simpanDb();
-                alert("Restore Data Berhasil!");
-                fileInput.value = ""; // Reset input file
-              }
-            } else {
-              alert("Format file salah atau rusak.");
-            }
-          } catch (err) {
-            alert("Gagal membaca file JSON. Pastikan file benar.");
-          }
-        };
-        reader.readAsText(file);
-      }
-
-      function hapusData(tipe) {
-        if (tipe === "barang") {
-          if (
-            confirm(
-              "Yakin ingin menghapus SEMUA DATA BARANG? Stok akan kembali 0.",
-            )
-          ) {
-            dbBarang = [];
-            simpanDb();
-            alert("Data barang berhasil dihapus.");
-          }
-        } else if (tipe === "transaksi") {
-          if (confirm("Yakin ingin menghapus SEMUA RIWAYAT TRANSAKSI?")) {
-            dbTransaksi = [];
-            simpanDb();
-            alert("Riwayat transaksi berhasil dihapus.");
-          }
-        }
-      }
-
-      // === LOGIKA KASIR & SCANNER ===
-      function beep() {
-        try {
-          let ctx = new (window.AudioContext || window.webkitAudioContext)();
-          let osc = ctx.createOscillator();
-          let gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.frequency.value = 1000;
-          osc.type = "sine";
-          gain.gain.value = 0.3;
-          osc.start();
-          osc.stop(ctx.currentTime + 0.1);
-        } catch (e) {}
-      }
-
+      // === KASIR & SCANNER ===
       function mulaiScanKamera(mode) {
         modeScan = mode;
         stopScanKamera();
@@ -1369,45 +799,32 @@
         let btnStopId = mode === "kasir" ? "btnStop" : "btnStopBarang";
         document.getElementById(readerId).classList.remove("hide");
         document.getElementById(btnStopId).classList.remove("hide");
-        html5QrcodeScanner = new Html5QrcodeScanner(readerId, {
-          fps: 10,
-          qrbox: { width: 250, height: 150 },
-        });
+        
+        html5QrcodeScanner = new Html5QrcodeScanner(readerId, { fps: 10, qrbox: { width: 250, height: 150 } });
         html5QrcodeScanner.render(onScanSuccess);
       }
 
       function onScanSuccess(decodedText) {
         if (isScanning) return;
         isScanning = true;
-        tampilkanStatusScan("Menunggu jeda scan...");
+        tampilkanStatusScan("Menunggu jeda...");
+        
         if (modeScan === "kasir") {
           tambahKeStruk(decodedText);
-          document.getElementById("scanInput").focus();
-          setTimeout(() => {
-            isScanning = false;
-            hapusStatusScan();
-          }, SCAN_DELAY_MS);
+          setTimeout(() => { isScanning = false; hapusStatusScan(); }, 1000);
         } else {
+          // Mode Barang
           document.getElementById("barcode").value = decodedText;
-          cekKetersediaanBarcode();
+          cekKetersediaanBarcode(); // Cek apakah barang sudah ada
           stopScanKamera();
           document.getElementById("nama").focus();
-          beep();
-          isScanning = false;
-          hapusStatusScan();
+          setTimeout(() => { isScanning = false; hapusStatusScan(); }, 1000);
         }
       }
 
       function stopScanKamera() {
         if (html5QrcodeScanner) {
-          html5QrcodeScanner
-            .clear()
-            .then(() => {
-              html5QrcodeScanner = null;
-            })
-            .catch(() => {
-              html5QrcodeScanner = null;
-            });
+          html5QrcodeScanner.clear().catch(err => {}).finally(() => { html5QrcodeScanner = null; });
         }
         document.getElementById("reader").classList.add("hide");
         document.getElementById("readerBarang").classList.add("hide");
@@ -1424,662 +841,524 @@
         document.getElementById("scanInput").classList.remove("cooldown");
       }
 
-      document
-        .getElementById("scanInput")
-        .addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            if (isScanning) {
-              this.value = "";
-              return;
-            }
-            let kode = this.value.trim();
-            if (kode) {
-              isScanning = true;
-              tampilkanStatusScan("Menunggu jeda scan...");
-              tambahKeStruk(kode);
-              debounceTimer = setTimeout(() => {
-                isScanning = false;
-                hapusStatusScan();
-                document.getElementById("scanInput").focus();
-              }, SCAN_DELAY_MS);
-            }
+      document.getElementById("scanInput").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (isScanning) { this.value = ""; return; }
+          let kode = this.value.trim();
+          if (kode) {
+            isScanning = true;
+            tampilkanStatusScan("Scanning...");
+            tambahKeStruk(kode);
             this.value = "";
+            setTimeout(() => { isScanning = false; hapusStatusScan(); this.focus(); }, 800);
           }
-        });
-
-      document.getElementById("barcode").addEventListener("input", function () {
-        cekKetersediaanBarcode();
+        }
       });
 
-      function cekKetersediaanBarcode() {
-        let kode = document.getElementById("barcode").value.trim();
-        let infoBox = document.getElementById("infoStok");
-        let barangAda = dbBarang.find((b) => b.barcode === kode);
-        if (barangAda) {
-          infoBox.style.display = "block";
-          document.getElementById("nama").value = barangAda.nama;
-          document.getElementById("kategoriInput").value = barangAda.kategori;
-          document.getElementById("hargaBeli").value = barangAda.hargaBeli;
-          document.getElementById("hargaJual").value = barangAda.hargaJual;
-          document.getElementById("stok").focus();
-        } else {
-          infoBox.style.display = "none";
-        }
-      }
-
-      // === PENCARIAN MANUAL ===
+      // === PENCARIAN MANUAL & DROPDOWN ===
       const inputCari = document.getElementById("cariManual");
       const dropdown = document.getElementById("dropdownHasil");
       const qtyWrap = document.getElementById("qtyInlineWrap");
-
-      function triggerCariManual() {
-        inputCari.dispatchEvent(new Event("input"));
-        if (!inputCari.value.trim()) {
-          inputCari.value = " ";
-          inputCari.value = "";
-        }
-      }
+      let barangTerpilihCari = null;
 
       inputCari.addEventListener("input", function () {
         let q = this.value.trim().toLowerCase();
-        let filterKat = document.getElementById("filterKategoriKasir").value;
         barangTerpilihCari = null;
         qtyWrap.classList.add("hide");
-        if (q.length === 0 && !filterKat) {
-          tutupDropdown();
-          return;
-        }
-        let hasil = dbBarang.filter((b) => {
-          if (b.stok <= 0) return false;
-          if (filterKat && b.kategori !== filterKat) return false;
-          if (q.length > 0)
-            return (
-              b.nama.toLowerCase().includes(q) ||
-              b.barcode.toLowerCase().includes(q)
-            );
-          return true;
-        });
-        hasil = hasil.slice(0, 20);
-        indeksDiangkat = -1;
+        if (q.length === 0) { tutupDropdown(); return; }
+        
+        let hasil = dbBarang.filter(b => b.stok > 0 && (b.nama.toLowerCase().includes(q) || b.barcode.includes(q)));
+        hasil = hasil.slice(0, 10);
+        
         if (hasil.length === 0) {
-          dropdown.innerHTML =
-            '<div class="dd-empty">Tidak ditemukan barang yang cocok</div>';
+          dropdown.innerHTML = '<div style="padding:10px;text-align:center;color:#888">Tidak ada barang</div>';
           dropdown.classList.add("show");
           return;
         }
-        let html = "";
-        hasil.forEach((b, i) => {
-          let namaHtml = q ? highlightTeks(b.nama, q) : b.nama;
-          let katInfo = getInfoKategori(b.kategori);
-          html += `<div class="dd-item" data-index="${i}" data-barcode="${b.barcode}" onclick="pilihDariDropdown('${b.barcode}')">
-            <div><div class="dd-nama">${namaHtml} <span class="dd-kategori">${katInfo.emoji} ${katInfo.nama}</span></div><div style="font-size:11px;color:#94a3b8">${b.barcode}</div></div>
-            <div class="dd-info"><div class="dd-harga">Rp${b.hargaJual.toLocaleString()}</div><div>Stok: ${b.stok}</div></div>
-          </div>`;
-        });
-        dropdown.innerHTML = html;
+        
+        dropdown.innerHTML = hasil.map((b, i) => `
+          <div class="dd-item" onclick="pilihDariDropdown('${b.barcode}')">
+            <div class="dd-nama">${b.nama}</div>
+            <div class="dd-info">${formatRupiah(b.hargaJual)} | Stok: ${b.stok}</div>
+          </div>
+        `).join("");
         dropdown.classList.add("show");
       });
 
-      inputCari.addEventListener("keydown", function (e) {
-        let items = dropdown.querySelectorAll(".dd-item");
-        if (!items.length) return;
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          indeksDiangkat = Math.min(indeksDiangkat + 1, items.length - 1);
-          updateDiangkat(items);
-        } else if (e.key === "ArrowUp") {
-          e.preventDefault();
-          indeksDiangkat = Math.max(indeksDiangkat - 1, 0);
-          updateDiangkat(items);
-        } else if (e.key === "Enter") {
-          e.preventDefault();
-          if (indeksDiangkat >= 0 && items[indeksDiangkat])
-            pilihDariDropdown(items[indeksDiangkat].dataset.barcode);
-          else if (barangTerpilihCari) tambahDariPencarian();
-        } else if (e.key === "Escape") {
-          tutupDropdown();
-          this.blur();
-        }
+      document.addEventListener("click", function(e) {
+        if (!e.target.closest(".pencarian-wrap")) tutupDropdown();
       });
 
-      function updateDiangkat(items) {
-        items.forEach((it) => it.classList.remove("diangkat"));
-        if (indeksDiangkat >= 0 && items[indeksDiangkat]) {
-          items[indeksDiangkat].classList.add("diangkat");
-          items[indeksDiangkat].scrollIntoView({ block: "nearest" });
-        }
-      }
-      function highlightTeks(teks, query) {
-        if (!query) return teks;
-        let regex = new RegExp(
-          "(" + query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
-          "gi",
-        );
-        return teks.replace(
-          regex,
-          '<span style="background:#bbf7d0;color:#166534;font-weight:700;border-radius:2px;padding:0 2px">$1</span>',
-        );
-      }
-      function pilihDariDropdown(barcode) {
-        let barang = dbBarang.find((b) => b.barcode === barcode);
-        if (!barang) return;
-        barangTerpilihCari = barang;
-        inputCari.value = barang.nama;
+      function pilihDariDropdown(bc) {
+        let b = dbBarang.find(x => x.barcode === bc);
+        if (!b) return;
+        barangTerpilihCari = b;
+        inputCari.value = b.nama;
         tutupDropdown();
         qtyWrap.classList.remove("hide");
-        let qtyInput = document.getElementById("qtyManualCari");
-        qtyInput.value = 1;
-        qtyInput.focus();
-        qtyInput.select();
+        document.getElementById("qtyManualCari").focus();
       }
+      function tutupDropdown() { dropdown.classList.remove("show"); dropdown.innerHTML = ""; }
+
       function tambahDariPencarian() {
         if (!barangTerpilihCari) return;
         let qty = parseInt(document.getElementById("qtyManualCari").value) || 1;
-        if (qty < 1) qty = 1;
         tambahKeStruk(barangTerpilihCari.barcode, qty);
         inputCari.value = "";
         barangTerpilihCari = null;
         qtyWrap.classList.add("hide");
         inputCari.focus();
       }
-      document
-        .getElementById("qtyManualCari")
-        .addEventListener("keydown", function (e) {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            tambahDariPencarian();
-          } else if (e.key === "Escape") {
-            barangTerpilihCari = null;
-            qtyWrap.classList.add("hide");
-            inputCari.focus();
-            inputCari.select();
-          }
-        });
-      function tutupDropdown() {
-        dropdown.classList.remove("show");
-        dropdown.innerHTML = "";
-        indeksDiangkat = -1;
-      }
-      document.addEventListener("click", function (e) {
-        if (!e.target.closest(".pencarian-wrap")) tutupDropdown();
-      });
 
+      // === LOGIKA STRUK ===
       function tambahManual() {
         let kode = document.getElementById("pilihBarang").value;
         let qty = parseInt(document.getElementById("qtyManual").value) || 1;
-        if (kode) {
-          tambahKeStruk(kode, qty);
-          document.getElementById("qtyManual").value = 1;
-          document.getElementById("scanInput").focus();
-        }
+        if (kode) tambahKeStruk(kode, qty);
       }
 
       function tambahKeStruk(barcode, qty = 1) {
-        let barang = dbBarang.find((b) => b.barcode === barcode);
+        let barang = dbBarang.find(b => b.barcode === barcode);
         if (!barang) return alert("Barang tidak ditemukan: " + barcode);
-        if (barang.stok < qty)
-          return alert("Stok kurang! Sisa: " + barang.stok);
-        let diStruk = struk.find((s) => s.barcode === barcode);
+        
+        if (barang.stok < qty) return alert(`Stok tidak cukup! Sisa: ${barang.stok}`);
+        
+        let diStruk = struk.find(s => s.barcode === barcode);
         if (diStruk) {
-          if (barang.stok < diStruk.qty + qty) {
-            alert("Stok kurang! Sisa: " + barang.stok);
-            return;
-          }
+          if (barang.stok < diStruk.qty + qty) return alert(`Stok tidak cukup! Sisa: ${barang.stok}`);
           diStruk.qty += qty;
         } else {
           struk.push({
             barcode: barang.barcode,
             nama: barang.nama,
-            kategori: barang.kategori,
             hargaBeli: barang.hargaBeli,
             hargaJual: barang.hargaJual,
-            qty: qty,
+            qty: qty
           });
         }
-        beep();
+        // Suara beep sederhana
+        try {
+            let ctx = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = ctx.createOscillator();
+            let gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 1200;
+            osc.start(); osc.stop(ctx.currentTime + 0.1);
+        } catch(e){}
+        
         renderStruk();
       }
 
-      function kurangiJumlah(index) {
-        let item = struk[index];
-        if (item.qty > 1) {
-          item.qty--;
-          renderStruk();
-        } else {
-          if (confirm(`Hapus "${item.nama}" dari struk?`))
-            hapusItemStruk(index);
-        }
+      function kurangiJumlah(i) {
+        if (struk[i].qty > 1) { struk[i].qty--; renderStruk(); } 
+        else { if(confirm("Hapus item ini?")) { struk.splice(i, 1); renderStruk(); } }
       }
-      function tambahJumlah(index) {
-        let item = struk[index];
-        let barangDb = dbBarang.find((b) => b.barcode === item.barcode);
-        if (barangDb && item.qty + 1 <= barangDb.stok) {
-          item.qty++;
-          renderStruk();
-        } else {
-          let sisa = barangDb ? barangDb.stok : 0;
-          alert(`Stok tidak mencukupi!\nMaksimal bisa beli: ${sisa}`);
-        }
+      function tambahJumlah(i) {
+        let item = struk[i];
+        let barang = dbBarang.find(b => b.barcode === item.barcode);
+        if (barang && item.qty + 1 <= barang.stok) { item.qty++; renderStruk(); }
+        else { alert("Stok mentok!"); }
       }
-      function setUang(nominal) {
-        let total = struk.reduce((a, b) => a + b.hargaJual * b.qty, 0);
-        document.getElementById("bayar").value =
-          nominal === "pas" ? total : nominal;
-        hitungKembali();
-      }
+      function hapusItemStruk(i) { struk.splice(i, 1); renderStruk(); }
+
       function renderStruk() {
         let tbody = document.querySelector("#tabelStruk tbody");
         tbody.innerHTML = "";
-        let totalJual = 0;
-        let totalModal = 0;
+        let total = 0, modal = 0;
+        
         struk.forEach((item, i) => {
-          let subtotal = item.hargaJual * item.qty;
-          let modalTotal = item.hargaBeli * item.qty;
-          totalJual += subtotal;
-          totalModal += modalTotal;
-          let btnAksi = `<button class="btn-qty-kecil btn-qty-minus" onclick="kurangiJumlah(${i})">-</button><button class="btn-qty-kecil" onclick="tambahJumlah(${i})">+</button><button class="btn-hapus" onclick="hapusItemStruk(${i})" title="Hapus">X</button>`;
-          tbody.innerHTML += `<tr><td>${item.nama}</td><td>${item.qty}</td><td>${item.hargaJual.toLocaleString()}</td><td>${subtotal.toLocaleString()}</td><td>${btnAksi}</td></tr>`;
+          let sub = item.hargaJual * item.qty;
+          total += sub;
+          modal += (item.hargaBeli * item.qty);
+          tbody.innerHTML += `
+            <tr>
+              <td><div style="font-weight:600;font-size:13px">${item.nama}</div></td>
+              <td style="text-align:center">
+                <button class="btn-qty-kecil btn-qty-minus" onclick="kurangiJumlah(${i})">-</button>
+                <span style="font-size:14px;margin:0 4px">${item.qty}</span>
+                <button class="btn-qty-kecil" onclick="tambahJumlah(${i})">+</button>
+              </td>
+              <td>${item.hargaJual.toLocaleString()}</td>
+              <td>${sub.toLocaleString()}</td>
+              <td><button class="btn-hapus" onclick="hapusItemStruk(${i})">X</button></td>
+            </tr>`;
         });
-        let laba = totalJual - totalModal;
-        document.getElementById("totalHarga").innerText =
-          totalJual.toLocaleString();
-        document.getElementById("labaStruk").innerText = laba.toLocaleString();
+        
+        document.getElementById("totalHarga").innerText = total.toLocaleString();
+        document.getElementById("labaStruk").innerText = (total - modal).toLocaleString();
         hitungKembali();
       }
-      function hapusItemStruk(i) {
-        struk.splice(i, 1);
+
+      function setUang(n) {
+        let total = struk.reduce((a, b) => a + (b.hargaJual * b.qty), 0);
+        document.getElementById("bayar").value = n === "pas" ? total : n;
+        hitungKembali();
+      }
+      function hitungKembali() {
+        let total = struk.reduce((a, b) => a + (b.hargaJual * b.qty), 0);
+        let bayar = parseInt(document.getElementById("bayar").value) || 0;
+        document.getElementById("kembalian").innerText = Math.max(0, bayar - total).toLocaleString();
+      }
+      
+      function resetStruk() {
+        if(struk.length > 0 && !confirm("Batalkan transaksi ini?")) return;
+        struk = [];
+        document.getElementById("bayar").value = "";
         renderStruk();
         document.getElementById("scanInput").focus();
       }
-      function hitungKembali() {
-        let total = struk.reduce((a, b) => a + b.hargaJual * b.qty, 0);
-        let bayar = parseInt(document.getElementById("bayar").value) || 0;
-        let kembali = bayar - total;
-        document.getElementById("kembalian").innerText =
-          kembali > 0 ? kembali.toLocaleString() : 0;
-      }
 
+      // === PROSES SELESAI & CETAK ===
       function selesaiTransaksi() {
-        if (struk.length === 0) return alert("Struk masih kosong");
-        let totalJual = struk.reduce((a, b) => a + b.hargaJual * b.qty, 0);
-        let totalModal = struk.reduce((a, b) => a + b.hargaBeli * b.qty, 0);
-        let laba = totalJual - totalModal;
+        if (struk.length === 0) return alert("Struk kosong!");
+        
+        let totalJual = struk.reduce((a, b) => a + (b.hargaJual * b.qty), 0);
+        let totalModal = struk.reduce((a, b) => a + (b.hargaBeli * b.qty), 0);
         let bayar = parseInt(document.getElementById("bayar").value) || 0;
-        if (bayar < totalJual) return alert("Uang bayar kurang!");
+        
+        if (bayar < totalJual) return alert("Uang pembayaran kurang!");
 
-        let stokMasalah = "";
-        for (let i = 0; i < struk.length; i++) {
-          let itemStruk = struk[i];
-          let barangDb = dbBarang.find((b) => b.barcode === itemStruk.barcode);
-          if (!barangDb) {
-            stokMasalah += `❌ Barang hilang: ${itemStruk.nama}\n`;
-          } else if (barangDb.stok < itemStruk.qty) {
-            stokMasalah += `❌ Stok tidak cukup untuk ${itemStruk.nama}. Minta: ${itemStruk.qty}, Sisa: ${barangDb.stok}\n`;
-          }
-        }
-        if (stokMasalah !== "") {
-          alert(
-            "⛔ TRANSAKSI DIBATALKAN!\n\n" +
-              stokMasalah +
-              "\nSilakan periksa stok atau kurangi jumlah barang.",
-          );
-          return;
+        // Cek stok real-time terakhir
+        for (let s of struk) {
+            let b = dbBarang.find(x => x.barcode === s.barcode);
+            if (!b || b.stok < s.qty) {
+                return alert(`Gagal! Stok ${s.nama} tidak cukup saat ini. Mohon scan ulang.`);
+            }
         }
 
-        struk.forEach((s) => {
-          let b = dbBarang.find((x) => x.barcode === s.barcode);
-          if (b) b.stok -= s.qty;
+        // Kurangi Stok
+        struk.forEach(s => {
+            let b = dbBarang.find(x => x.barcode === s.barcode);
+            if(b) b.stok -= s.qty;
         });
-        dbTransaksi.push({
-          waktu: new Date().toLocaleString("id-ID"),
-          totalJual: totalJual,
-          totalModal: totalModal,
-          laba: laba,
-          item: struk.map((s) => `${s.nama} x${s.qty}`).join(", "),
+
+        // Simpan Transaksi
+        dbTransaksi.unshift({
+            waktu: new Date().toLocaleString("id-ID"),
+            totalJual: totalJual,
+            totalModal: totalModal,
+            laba: totalJual - totalModal,
+            items: struk.map(s => `${s.nama} x${s.qty}`).join(", ")
         });
 
         siapkanCetak(totalJual, bayar);
         simpanDb();
-        tampilkanToast(
-          "Transaksi Berhasil!",
-          `Total: Rp${totalJual.toLocaleString()}\nLaba: Rp${laba.toLocaleString()}`,
-        );
         window.print();
+        
+        tampilkanToast("Transaksi Sukses", "Kembalian: Rp " + (bayar - totalJual).toLocaleString());
         resetStruk();
       }
 
       function siapkanCetak(total, bayar) {
-        // 1. Terapkan Pengaturan ke Struk
-        document.getElementById("printStoreName").innerText =
-          dbPengaturan.namaToko.toUpperCase();
-        document.getElementById("printStoreAddress").innerHTML =
-          dbPengaturan.alamatToko + "<br/>Telp: " + dbPengaturan.teleponToko;
-        document.getElementById("printFooterMsg").innerText =
-          dbPengaturan.footerStruk;
-        document.getElementById("printStoreContact").innerText = ""; // Opsional: bisa diisi website toko dari pengaturan
+        document.getElementById("printStoreName").innerText = dbPengaturan.namaToko.toUpperCase();
+        document.getElementById("printStoreAddress").innerText = dbPengaturan.alamatToko;
+        document.getElementById("printStoreContact").innerText = "Telp: " + dbPengaturan.teleponToko;
+        document.getElementById("printFooterMsg").innerText = dbPengaturan.footerStruk;
 
-        // 2. Data Transaksi
-        const noStruk = "#" + Date.now().toString().slice(-6);
-        const tanggalCetak = new Date().toLocaleString("id-ID", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        });
-        document.getElementById("printDate").innerText = tanggalCetak;
-        document.getElementById("printNoStruk").innerText = noStruk;
-        document.getElementById("printKasir").innerText = "Kasir: Admin";
+        document.getElementById("printDate").innerText = new Date().toLocaleString("id-ID");
+        document.getElementById("printNoStruk").innerText = "#" + Date.now().toString().slice(-6);
 
-        // 3. Item
         let tbody = document.getElementById("tbodyCetak");
-        tbody.innerHTML = "";
-        struk.forEach((item) => {
-          let sub = item.hargaJual * item.qty;
-          tbody.innerHTML += `<tr><td class="col-name"><div>${item.nama}</div></td><td class="col-qty">${item.qty}</td><td class="col-price">${sub.toLocaleString("id-ID")}</td></tr>`;
-        });
+        tbody.innerHTML = struk.map(s => `
+          <tr>
+            <td class="col-name">${s.nama}</td>
+            <td class="col-qty">${s.qty}</td>
+            <td class="col-price">${(s.hargaJual * s.qty).toLocaleString()}</td>
+          </tr>
+        `).join("");
 
-        // 4. Summary
-        document.getElementById("totalCetak").innerText =
-          "Rp " + total.toLocaleString("id-ID");
-        document.getElementById("bayarCetak").innerText =
-          "Rp " + bayar.toLocaleString("id-ID");
-        let kembali = bayar - total;
-        document.getElementById("kembaliCetak").innerText =
-          "Rp " + kembali.toLocaleString("id-ID");
+        document.getElementById("totalCetak").innerText = formatRupiah(total);
+        document.getElementById("bayarCetak").innerText = formatRupiah(bayar);
+        document.getElementById("kembaliCetak").innerText = formatRupiah(bayar - total);
       }
 
-      function tampilkanToast(judul, pesan) {
-        let container = document.getElementById("toastContainer");
-        let toast = document.createElement("div");
-        toast.className = "toast";
-        toast.innerHTML = `<div class="toast-icon">✅</div><div class="toast-content"><div class="toast-title">${judul}</div><div class="toast-msg">${pesan}</div></div>`;
-        container.appendChild(toast);
-        requestAnimationFrame(() => toast.classList.add("show"));
-        setTimeout(() => {
-          toast.classList.remove("show");
-          setTimeout(() => toast.remove(), 300);
-        }, 4000);
+      // === MANAJEMEN BARANG ===
+      document.getElementById("barcode").addEventListener("input", cekKetersediaanBarcode);
+
+      function cekKetersediaanBarcode() {
+        let kode = document.getElementById("barcode").value.trim();
+        let info = document.getElementById("infoStok");
+        let barang = dbBarang.find(b => b.barcode === kode);
+        
+        if (barang) {
+            if (!isEditingBarang) {
+                info.style.display = "block";
+                info.innerHTML = `⚠️ Barang <b>${barang.nama}</b> sudah ada.<br>Mode ini akan <b>Menambah Stok</b> ke stok lama.`;
+                document.getElementById("nama").value = barang.nama;
+                document.getElementById("kategoriInput").value = barang.kategori;
+                document.getElementById("hargaBeli").value = barang.hargaBeli;
+                document.getElementById("hargaJual").value = barang.hargaJual;
+                document.getElementById("stok").focus();
+            } else {
+                // Sedang edit
+                info.style.display = "none";
+            }
+        } else {
+            info.style.display = "none";
+        }
       }
 
-      function resetStruk() {
-        struk = [];
-        document.getElementById("bayar").value = "";
-        document.getElementById("labaStruk").innerText = "0";
-        renderStruk();
-        if (debounceTimer) clearTimeout(debounceTimer);
-        isScanning = false;
-        hapusStatusScan();
-        inputCari.value = "";
-        barangTerpilihCari = null;
-        qtyWrap.classList.add("hide");
-        tutupDropdown();
-        document.getElementById("scanInput").focus();
-      }
-
-      // === FITUR BARANG ===
       function simpanBarang() {
         let barcode = document.getElementById("barcode").value.trim();
         let nama = document.getElementById("nama").value.trim();
         let kategori = document.getElementById("kategoriInput").value;
-        let hargaBeli =
-          parseInt(document.getElementById("hargaBeli").value) || 0;
-        let hargaJual =
-          parseInt(document.getElementById("hargaJual").value) || 0;
+        let beli = parseInt(document.getElementById("hargaBeli").value) || 0;
+        let jual = parseInt(document.getElementById("hargaJual").value) || 0;
         let stokInput = parseInt(document.getElementById("stok").value) || 0;
-        if (!barcode || !nama) return alert("Isi Barcode dan Nama Barang");
-        if (!kategori) return alert("Pilih kategori barang");
-        if (hargaJual <= 0) return alert("Harga jual harus lebih dari 0");
-        if (stokInput <= 0)
-          return alert("Jumlah stok yang ditambahkan harus lebih dari 0");
 
-        let idx = dbBarang.findIndex((b) => b.barcode === barcode);
-        if (idx >= 0) {
-          dbBarang[idx].stok += stokInput;
-          dbBarang[idx].nama = nama;
-          dbBarang[idx].kategori = kategori;
-          dbBarang[idx].hargaBeli = hargaBeli;
-          dbBarang[idx].hargaJual = hargaJual;
-          alert(
-            `Berhasil menambahkan ${stokInput} stok. Total stok ${nama} sekarang: ${dbBarang[idx].stok}`,
-          );
+        if (!barcode || !nama) return alert("Barcode dan Nama wajib diisi!");
+        if (!kategori) return alert("Pilih kategori!");
+        if (jual <= 0) return alert("Harga jual harus > 0");
+
+        let idx = dbBarang.findIndex(b => b.barcode === barcode);
+
+        if (isEditingBarang) {
+            // UPDATE DATA
+            if (idx !== -1) {
+                dbBarang[idx].nama = nama;
+                dbBarang[idx].kategori = kategori;
+                dbBarang[idx].hargaBeli = beli;
+                dbBarang[idx].hargaJual = jual;
+                // Hanya update stok jika user mengubahnya secara manual
+                // Karena user mungkin hanya edit harga, bukan stok
+                dbBarang[idx].stok = stokInput; 
+                alert("Data barang berhasil diperbarui.");
+            } else {
+                alert("Data barang asli tidak ditemukan (mungkin barcode diubah)");
+            }
+            batalEditBarang();
+
         } else {
-          dbBarang.push({
-            barcode,
-            nama,
-            kategori,
-            hargaBeli,
-            hargaJual,
-            stok: stokInput,
-          });
-          alert("Barang baru berhasil disimpan");
+            // TAMBAH BARU / TAMBAH STOK
+            if (idx >= 0) {
+                // Tambah Stok (Jika barang sudah ada dan bukan mode edit)
+                dbBarang[idx].stok += stokInput;
+                dbBarang[idx].nama = nama; // Update info lain juga siapa tau
+                dbBarang[idx].kategori = kategori;
+                dbBarang[idx].hargaBeli = beli;
+                dbBarang[idx].hargaJual = jual;
+                alert(`Stok bertambah ${stokInput}. Total: ${dbBarang[idx].stok}`);
+            } else {
+                // Barang Baru
+                dbBarang.push({ barcode, nama, kategori, hargaBeli: beli, hargaJual: jual, stok: stokInput });
+                alert("Barang baru tersimpan.");
+            }
+            // Reset Form
+            document.getElementById("barcode").value = "";
+            document.getElementById("nama").value = "";
+            document.getElementById("kategoriInput").value = "";
+            document.getElementById("hargaBeli").value = "";
+            document.getElementById("hargaJual").value = "";
+            document.getElementById("stok").value = "";
+            document.getElementById("infoStok").style.display = "none";
         }
-        batalEditBarang();
         simpanDb();
       }
 
-      function editBarang(i) {
-        let b = dbBarang[i];
+      function editBarang(index) {
+        let b = dbBarang[index];
+        isEditingBarang = true;
+        originalBarcode = b.barcode;
+        
+        document.getElementById("judulFormBarang").innerText = "Edit Mode";
         document.getElementById("barcode").value = b.barcode;
         document.getElementById("nama").value = b.nama;
         document.getElementById("kategoriInput").value = b.kategori;
         document.getElementById("hargaBeli").value = b.hargaBeli;
         document.getElementById("hargaJual").value = b.hargaJual;
         document.getElementById("stok").value = b.stok;
-        document.getElementById("btnBatalEdit").style.display = "block";
-        document.getElementById("infoStok").style.display = "none";
-        document.getElementById("nama").focus();
+        document.getElementById("infoStok").style.display = "none"; // Sembunyikan info stok agar tidak bingung
+        
+        document.getElementById("btnBatalEdit").classList.remove("hide");
+        document.getElementById("barcode").focus();
         window.scrollTo(0, 0);
       }
+
       function batalEditBarang() {
+        isEditingBarang = false;
+        originalBarcode = "";
+        document.getElementById("judulFormBarang").innerText = "Tambah / Edit Barang";
         document.getElementById("barcode").value = "";
         document.getElementById("nama").value = "";
         document.getElementById("kategoriInput").value = "";
         document.getElementById("hargaBeli").value = "";
         document.getElementById("hargaJual").value = "";
         document.getElementById("stok").value = "";
-        document.getElementById("btnBatalEdit").style.display = "none";
         document.getElementById("infoStok").style.display = "none";
-      }
-
-      function renderOpsiKategori() {
-        let kategoriUnik = getKategoriUnik();
-        let filterKasir = document.getElementById("filterKategoriKasir");
-        let valKasir = filterKasir.value;
-        filterKasir.innerHTML = '<option value="">Semua Kategori</option>';
-        kategoriUnik.forEach((k) => {
-          let info = getInfoKategori(k);
-          filterKasir.innerHTML += `<option value="${k}">${info.emoji} ${k}</option>`;
-        });
-        filterKasir.value = valKasir;
-
-        let kategoriInput = document.getElementById("kategoriInput");
-        let valInput = kategoriInput.value;
-        kategoriInput.innerHTML =
-          '<option value="">-- Pilih Kategori --</option>';
-        kategoriUnik.forEach((k) => {
-          let info = getInfoKategori(k);
-          kategoriInput.innerHTML += `<option value="${k}">${info.emoji} ${k}</option>`;
-        });
-        kategoriInput.innerHTML +=
-          '<option value="__baru__">➕ Buat Kategori Baru...</option>';
-        kategoriInput.value = valInput;
-
-        kategoriInput.onchange = function () {
-          if (this.value === "__baru__") {
-            let namaBaru = prompt("Masukkan nama kategori baru:");
-            if (namaBaru && namaBaru.trim()) {
-              namaBaru = namaBaru.trim();
-              if (!getKategoriUnik().includes(namaBaru)) {
-                DAFTAR_KATEGORI.push({
-                  nama: namaBaru,
-                  emoji: "📌",
-                  kelas: "badge-lainnya",
-                });
-              }
-              this.value = namaBaru;
-              renderOpsiKategori();
-              renderFilterChips();
-            } else {
-              this.value = "";
-            }
-          }
-        };
-        renderFilterChips();
-      }
-
-      function renderFilterChips() {
-        let grid = document.getElementById("filterGrid");
-        let kategoriUnik = getKategoriUnik();
-        let html = `<div class="filter-chip ${filterKategoriAktif === "" ? "aktif" : ""}" onclick="setFilterBarang('')">Semua</div>`;
-        kategoriUnik.forEach((k) => {
-          let info = getInfoKategori(k);
-          let count = dbBarang.filter((b) => b.kategori === k).length;
-          html += `<div class="filter-chip ${filterKategoriAktif === k ? "aktif" : ""}" onclick="setFilterBarang('${k}')">${info.emoji} ${k} (${count})</div>`;
-        });
-        grid.innerHTML = html;
-        renderBarang();
-      }
-      function setFilterBarang(kategori) {
-        filterKategoriAktif = kategori;
-        renderFilterChips();
+        document.getElementById("btnBatalEdit").classList.add("hide");
       }
 
       function renderBarang() {
         let tbody = document.querySelector("#tabelBarang tbody");
         tbody.innerHTML = "";
-        let daftarTampil = filterKategoriAktif
-          ? dbBarang.filter((b) => b.kategori === filterKategoriAktif)
-          : dbBarang;
-        daftarTampil.forEach((b, i) => {
-          let asliIdx = dbBarang.indexOf(b);
-          let labaPerPcs = b.hargaJual - b.hargaBeli;
-          let labaColor = labaPerPcs >= 0 ? "var(--hijau)" : "var(--merah)";
-          tbody.innerHTML += `<tr>
-            <td style="font-size:12px">${b.barcode}</td>
-            <td><b>${b.nama}</b></td>
-            <td>${buatBadgeHtml(b.kategori)}</td>
-            <td>Rp${b.hargaBeli.toLocaleString()}</td>
-            <td>Rp${b.hargaJual.toLocaleString()}</td>
-            <td style="color:${labaColor};font-weight:600">Rp${labaPerPcs.toLocaleString()}</td>
-            <td><b>${b.stok}</b></td>
-            <td>
-              <button class="btn-edit" onclick="editBarang(${asliIdx})">✏️</button>
-              <button class="btn-hapus" onclick="hapusBarang(${asliIdx})">🗑️</button>
-            </td>
-          </tr>`;
+        // Filter Kategori sederhana
+        let list = dbBarang; // Bisa ditambahkan logika filter di sini jika mau
+        
+        list.forEach((b, i) => {
+            let badgeColor = 'badge-lainnya';
+            if(b.kategori === 'Makanan') badgeColor = 'badge-makanan';
+            if(b.kategori === 'Minuman') badgeColor = 'badge-minuman';
+            
+            tbody.innerHTML += `
+            <tr>
+                <td style="font-size:11px">${b.barcode}</td>
+                <td>${b.nama}</td>
+                <td><span class="badge-kategori ${badgeColor}">${b.kategori}</span></td>
+                <td>${b.hargaBeli.toLocaleString()}</td>
+                <td>${b.hargaJual.toLocaleString()}</td>
+                <td style="font-weight:bold">${b.stok}</td>
+                <td>
+                    <button class="btn-edit" onclick="editBarang(${i})">✏️</button>
+                    <button class="btn-hapus" onclick="hapusBarang(${i})">🗑️</button>
+                </td>
+            </tr>`;
         });
-        if (daftarTampil.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:20px;color:#94a3b8">Tidak ada barang dalam kategori ini</td></tr>`;
-        }
       }
+
       function hapusBarang(i) {
-        if (confirm("Hapus barang ini?")) {
-          dbBarang.splice(i, 1);
-          simpanDb();
-        }
+          if(confirm("Yakin hapus barang ini?")) {
+              dbBarang.splice(i, 1);
+              simpanDb();
+          }
       }
 
-      function renderPilihBarang() {
-        let select = document.getElementById("pilihBarang");
-        select.innerHTML = '<option value="">-- Pilih Barang --</option>';
-        let kategoriUnik = getKategoriUnik();
-        let processedBarcodes = new Set();
-        kategoriUnik.forEach((kat) => {
-          let barangKat = dbBarang.filter((b) => b.kategori === kat);
-          if (barangKat.length === 0) return;
-          let info = getInfoKategori(kat);
-          let optgroup = document.createElement("optgroup");
-          optgroup.label = `${info.emoji} ${kat}`;
-          barangKat.forEach((b) => {
-            if (!processedBarcodes.has(b.barcode)) {
-              let opt = document.createElement("option");
-              opt.value = b.barcode;
-              opt.textContent = `${b.nama} - Rp${b.hargaJual.toLocaleString()} (Stok: ${b.stok})`;
-              optgroup.appendChild(opt);
-              processedBarcodes.add(b.barcode);
-            }
-          });
-          select.appendChild(optgroup);
-        });
-        let tanpaKat = dbBarang.filter(
-          (b) =>
-            !b.kategori ||
-            b.kategori === "" ||
-            b.kategori === null ||
-            b.kategori === undefined,
-        );
-        tanpaKat = tanpaKat.filter((b) => !processedBarcodes.has(b.barcode));
-        if (tanpaKat.length > 0) {
-          let optgroup = document.createElement("optgroup");
-          optgroup.label = "📦 Tanpa Kategori";
-          tanpaKat.forEach((b) => {
-            let opt = document.createElement("option");
-            opt.value = b.barcode;
-            opt.textContent = `${b.nama} - Rp${b.hargaJual.toLocaleString()} (Stok: ${b.stok})`;
-            optgroup.appendChild(opt);
-          });
-          select.appendChild(optgroup);
-        }
-      }
-
-      // === LAPORAN & EXPORT ===
+      // === LAPORAN & BACKUP ===
       function renderLaporan() {
         let tbody = document.querySelector("#tabelLaporan tbody");
         tbody.innerHTML = "";
-        let totalOmset = 0;
-        let totalModal = 0;
-        let totalLaba = 0;
-        let hariIni = new Date().toLocaleDateString("id-ID");
-        dbTransaksi
-          .filter((t) => t.waktu.includes(hariIni))
-          .forEach((t) => {
-            let modal = t.totalModal !== undefined ? t.totalModal : 0;
-            let laba = t.laba !== undefined ? t.laba : t.total;
-            let omset = t.totalJual !== undefined ? t.totalJual : t.total;
-            totalOmset += omset;
-            totalModal += modal;
-            totalLaba += laba;
-            let labaColor = laba >= 0 ? "var(--hijau)" : "var(--merah)";
-            tbody.innerHTML += `<tr><td>${t.waktu}</td><td>Rp${omset.toLocaleString()}</td><td>Rp${modal.toLocaleString()}</td><td style="color:${labaColor};font-weight:600">Rp${laba.toLocaleString()}</td><td>${t.item}</td></tr>`;
-          });
-        document.getElementById("totalHariIni").innerText =
-          totalOmset.toLocaleString();
-        document.getElementById("modalHariIni").innerText =
-          totalModal.toLocaleString();
-        document.getElementById("labaHariIni").innerText =
-          totalLaba.toLocaleString();
+        let omset = 0, modal = 0, laba = 0;
+        let today = new Date().toLocaleDateString("id-ID");
+        
+        dbTransaksi.forEach(t => {
+            if (t.waktu.includes(today)) {
+                omset += t.totalJual;
+                modal += t.totalModal;
+                laba += t.laba;
+                tbody.innerHTML += `
+                <tr>
+                    <td>${t.waktu.split(",")[1]}</td>
+                    <td>${t.totalJual.toLocaleString()}</td>
+                    <td>${t.totalModal.toLocaleString()}</td>
+                    <td style="color:var(--hijau);font-weight:bold">${t.laba.toLocaleString()}</td>
+                    <td style="font-size:11px;color:#64748b">${t.items}</td>
+                </tr>`;
+            }
+        });
+        
+        document.getElementById("totalHariIni").innerText = omset.toLocaleString();
+        document.getElementById("modalHariIni").innerText = modal.toLocaleString();
+        document.getElementById("labaHariIni").innerText = laba.toLocaleString();
       }
+
       function exportCSV() {
         let csv = "Waktu,Omset,Modal,Laba,Item\n";
-        dbTransaksi.forEach((t) => {
-          let modal = t.totalModal !== undefined ? t.totalModal : 0;
-          let laba = t.laba !== undefined ? t.laba : t.total;
-          let omset = t.totalJual !== undefined ? t.totalJual : t.total;
-          csv += `"${t.waktu}",${omset},${modal},${laba},"${t.item}"\n`;
+        dbTransaksi.forEach(t => {
+            csv += `"${t.waktu}",${t.totalJual},${t.totalModal},${t.laba},"${t.items}"\n`;
         });
         let blob = new Blob([csv], { type: "text/csv" });
         let a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "laporan_kasir.csv";
+        a.download = `Laporan_${new Date().toISOString().slice(0,10)}.csv`;
         a.click();
       }
+      
       function hapusLaporan() {
-        if (confirm("Yakin hapus semua laporan?")) {
-          dbTransaksi = [];
-          simpanDb();
-        }
+          if(confirm("Hapus semua riwayat transaksi?")) {
+              dbTransaksi = [];
+              simpanDb();
+          }
       }
 
-      document
-        .getElementById("qtyManual")
-        .addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            tambahManual();
+      // === PENGATURAN ===
+      function loadPengaturan() {
+        document.getElementById("setNamaToko").value = dbPengaturan.namaToko;
+        document.getElementById("setAlamatToko").value = dbPengaturan.alamatToko;
+        document.getElementById("setTeleponToko").value = dbPengaturan.teleponToko;
+        document.getElementById("setFooterStruk").value = dbPengaturan.footerStruk;
+      }
+
+      function simpanPengaturan() {
+        dbPengaturan.namaToko = document.getElementById("setNamaToko").value;
+        dbPengaturan.alamatToko = document.getElementById("setAlamatToko").value;
+        dbPengaturan.teleponToko = document.getElementById("setTeleponToko").value;
+        dbPengaturan.footerStruk = document.getElementById("setFooterStruk").value;
+        simpanDb();
+        tampilkanToast("Pengaturan", "Data toko berhasil disimpan.");
+      }
+
+      function backupData() {
+        let data = JSON.stringify({ pengaturan: dbPengaturan, barang: dbBarang, transaksi: dbTransaksi });
+        let blob = new Blob([data], { type: "application/json" });
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `Backup_Kasir_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+      }
+
+      function restoreData() {
+        let file = document.getElementById("fileRestore").files[0];
+        if (!file) return alert("Pilih file .JSON");
+        
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                let data = JSON.parse(e.target.result);
+                if (data.barang && data.transaksi) {
+                    if(confirm("Data lama akan ditimpa. Lanjutkan?")) {
+                        dbBarang = data.barang;
+                        dbTransaksi = data.transaksi;
+                        if(data.pengaturan) dbPengaturan = data.pengaturan;
+                        simpanDb();
+                        alert("Restore Berhasil!");
+                    }
+                } else {
+                    alert("Format file salah.");
+                }
+            } catch (err) {
+                alert("File rusak atau bukan JSON.");
+            }
+        };
+        reader.readAsText(file);
+      }
+
+      function hapusData(tipe) {
+          if (tipe === 'barang' && confirm("HAPUS SEMUA BARANG? Stok jadi 0.")) {
+              dbBarang = [];
+              simpanDb();
+          } else if (tipe === 'transaksi' && confirm("HAPUS SEMUA LAPORAN?")) {
+              dbTransaksi = [];
+              simpanDb();
           }
+      }
+
+      // === HELPER RENDER KATEGORI ===
+      function renderOpsiKategori() {
+        let kats = new Set(dbBarang.map(b => b.kategori));
+        let el = document.getElementById("kategoriInput");
+        let val = el.value;
+        el.innerHTML = '<option value="">-- Pilih Kategori --</option>';
+        ["Makanan", "Minuman", "Rokok", "Snack", "Kebutuhan Rumah", "Lainnya"].forEach(k => {
+            el.innerHTML += `<option value="${k}">${k}</option>`;
         });
+        kats.forEach(k => {
+             if (!["Makanan", "Minuman", "Rokok", "Snack", "Kebutuhan Rumah", "Lainnya"].includes(k)) {
+                 el.innerHTML += `<option value="${k}">${k}</option>`;
+             }
+        });
+        el.value = val;
+      }
+
+      function renderPilihBarang() {
+          let sel = document.getElementById("pilihBarang");
+          sel.innerHTML = '<option value="">-- Pilih Barang --</option>';
+          dbBarang.forEach(b => {
+              sel.innerHTML += `<option value="${b.barcode}">${b.nama} (Stok: ${b.stok}) - ${formatRupiah(b.hargaJual)}</option>`;
+          });
+      }
 
       // Init
-      renderStruk();
       simpanDb();
     </script>
   </body>
