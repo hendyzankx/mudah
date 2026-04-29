@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <!-- Link ke Manifest agar bisa diinstall di HP -->
     <link rel="manifest" href="manifest.json" />
-    <title>Kasir Pro Offline</title>
+    <title>Kasir Pro Offline (Bluetooth Support)</title>
 
     <!-- Warna tema browser (Address bar) -->
     <meta name="theme-color" content="#2563eb" />
@@ -179,6 +179,12 @@
       .btn-secondary {
         background: #94a3b8 !important;
       }
+      /* Tombol Print Baru */
+      .btn-print-bluetooth {
+        background: #2563eb !important;
+        border: 2px solid #60a5fa !important;
+        margin-bottom: 10px !important;
+      }
 
       .setting-row {
         margin-bottom: 15px;
@@ -325,7 +331,7 @@
         color: var(--hijau);
       }
 
-      /* ===== STYLE STRUK CETAK ===== */
+      /* ===== STYLE STRUK CETAK (PREVIEW BROWSER) ===== */
       #cetakStruk {
         display: none;
         font-family: "Courier Prime", monospace;
@@ -455,8 +461,8 @@
   <body>
     <div class="app">
       <div class="header no-print">
-        <h1>💰 KASIR PRO OFFLINE</h1>
-        <small style="opacity: 0.9">Aplikasi Kasir Cepat & Handal</small>
+        <h1>💰 KASIR PRO BLUETOOTH</h1>
+        <small style="opacity: 0.9">Cetak Struk via Thermal Printer</small>
       </div>
 
       <div class="tabs no-print">
@@ -534,7 +540,9 @@
               <div class="angka">Rp <span id="kembalian">0</span></div>
             </div>
             
-            <button class="btn-selesai" onclick="selesaiTransaksi()">SELESAI & CETAK</button>
+            <!-- Tombol Cetak via Bluetooth -->
+            <button class="btn-print-bluetooth" onclick="cetakBluetooth()">🖨️ Cetak Bluetooth</button>
+            <button class="btn-selesai" onclick="selesaiTransaksi()">SELESAI & RESET</button>
             <button class="btn-secondary" onclick="resetStruk()">Batal / Reset</button>
           </div>
         </div>
@@ -656,6 +664,13 @@
               <label>Footer Struk</label>
               <textarea id="setFooterStruk" rows="2"></textarea>
             </div>
+            <div class="setting-row">
+              <label>Lebar Kertas Bluetooth (mm)</label>
+              <select id="setLebarKertas">
+                <option value="58">58mm (Kecil)</option>
+                <option value="80">80mm (Besar)</option>
+              </select>
+            </div>
             <button onclick="simpanPengaturan()" class="btn-save">Simpan Perubahan</button>
           </div>
 
@@ -675,7 +690,7 @@
           </div>
         </div>
 
-        <!-- CETAK STRUK -->
+        <!-- CETAK STRUK (PREVIEW) -->
         <div id="cetakStruk">
           <div class="paper">
             <div class="header-store">
@@ -733,14 +748,17 @@
       if (!dbPengaturan.alamatToko) dbPengaturan.alamatToko = "Jl. Raya No. 1";
       if (!dbPengaturan.teleponToko) dbPengaturan.teleponToko = "-";
       if (!dbPengaturan.footerStruk) dbPengaturan.footerStruk = "Barang yang dibeli tidak dapat ditukar.";
+      if (!dbPengaturan.lebarKertas) dbPengaturan.lebarKertas = "58"; // Default 58mm
 
       let struk = [];
       let html5QrcodeScanner = null;
       let modeScan = "kasir";
       let isScanning = false;
       let debounceTimer = null;
-      let isEditingBarang = false; // Flag untuk edit mode
-      let originalBarcode = ""; // Simpan barcode asli saat edit
+      let isEditingBarang = false; 
+      let originalBarcode = ""; 
+      let portBluetooth = null; // Menyimpan koneksi serial port
+      let writerBluetooth = null; // Menyimpan writer stream
 
       // Data Dummy Awal (Hanya jika kosong)
       if (dbBarang.length === 0) {
@@ -813,9 +831,8 @@
           tambahKeStruk(decodedText);
           setTimeout(() => { isScanning = false; hapusStatusScan(); }, 1000);
         } else {
-          // Mode Barang
           document.getElementById("barcode").value = decodedText;
-          cekKetersediaanBarcode(); // Cek apakah barang sudah ada
+          cekKetersediaanBarcode(); 
           stopScanKamera();
           document.getElementById("nama").focus();
           setTimeout(() => { isScanning = false; hapusStatusScan(); }, 1000);
@@ -937,7 +954,6 @@
             qty: qty
           });
         }
-        // Suara beep sederhana
         try {
             let ctx = new (window.AudioContext || window.webkitAudioContext)();
             let osc = ctx.createOscillator();
@@ -1010,7 +1026,125 @@
         document.getElementById("scanInput").focus();
       }
 
-      // === PROSES SELESAI & CETAK ===
+      // === FITUR BARU: CETAK BLUETOOTH (WEB SERIAL API) ===
+      
+      // Helper: Mengubah angka menjadi bytearray format ESC/POS
+      function textToBytes(text, encoding = 'utf-8') {
+          const encoder = new TextEncoder();
+          return encoder.encode(text);
+      }
+
+      // Helper: Membuat kolom rapi (Space padding)
+      function padText(kiri, kanan, totalLength) {
+          let space = totalLength - kiri.length - kanan.length;
+          if (space < 1) space = 1;
+          return kiri + " ".repeat(space) + kanan + "\n";
+      }
+
+      async function cetakBluetooth() {
+        if (struk.length === 0) return alert("Keranjang kosong!");
+        
+        let totalJual = struk.reduce((a, b) => a + (b.hargaJual * b.qty), 0);
+        let bayar = parseInt(document.getElementById("bayar").value) || 0;
+        if (bayar < totalJual) return alert("Uang pembayaran kurang!");
+
+        try {
+            // 1. Koneksi ke Port
+            if (!portBluetooth) {
+                // Minta user memilih port (Bluetooth Serial)
+                portBluetooth = await navigator.serial.requestPort();
+                await portBluetooth.open({ baudRate: 9600 });
+            }
+            writerBluetooth = portBluetooth.writable.getWriter();
+
+            // 2. Siapkan Data ESC/POS
+            let encoder = new TextEncoder();
+            let commands = [];
+            
+            // Kertas Lebar
+            let lebar = (dbPengaturan.lebarKertas === "80") ? 32 : 20; // Jumlah karakter per baris (approx)
+
+            // Inisialisasi Printer
+            commands.push(0x1B, 0x40); // ESC @ (Init)
+            commands.push(0x1B, 0x61, 0x01); // ESC a 1 (Center Align)
+
+            // Header Toko
+            commands.push(encoder.encode(dbPengaturan.namaToko.toUpperCase() + "\n"));
+            commands.push(encoder.encode(dbPengaturan.alamatToko + "\n"));
+            commands.push(encoder.encode("Telp: " + dbPengaturan.teleponToko + "\n"));
+            
+            // Garis
+            commands.push(encoder.encode("================================\n"));
+
+            // Info Transaksi
+            let tgl = new Date().toLocaleString("id-ID");
+            let noStruk = Date.now().toString().slice(-6);
+            commands.push(encoder.encode("TGL: " + tgl + "\n"));
+            commands.push(encoder.encode("NO : #" + noStruk + "\n"));
+            commands.push(encoder.encode("--------------------------------\n"));
+
+            // List Item
+            // Reset Align Left
+            commands.push(0x1B, 0x61, 0x00); 
+
+            struk.forEach(item => {
+                // Format: Nama (truncated)
+                let nama = item.nama.length > (lebar - 10) ? item.nama.substring(0, lebar - 10) : item.nama;
+                
+                // Baris 1: Nama Barang
+                commands.push(encoder.encode(item.nama + "\n"));
+                
+                // Baris 2: Qty x Harga     Subtotal
+                let qtyTxt = item.qty + " x " + item.hargaJual.toLocaleString();
+                let subTxt = (item.qty * item.hargaJual).toLocaleString();
+                
+                // Rumus spasi sederhana
+                let sisa = lebar - qtyTxt.length - subTxt.length;
+                let space = " ".repeat(sisa > 0 ? sisa : 1);
+                
+                commands.push(encoder.encode(" " + qtyTxt + space + subTxt + "\n"));
+            });
+
+            commands.push(encoder.encode("--------------------------------\n"));
+
+            // Total
+            commands.push(0x1B, 0x45, 0x01); // Bold ON
+            let totalTxt = "TOTAL   : " + formatRupiah(totalJual);
+            commands.push(encoder.encode(totalTxt + "\n"));
+            commands.push(0x1B, 0x45, 0x00); // Bold OFF
+
+            // Bayar & Kembali
+            let bayarTxt = "BAYAR   : " + formatRupiah(bayar);
+            let kembaliTxt = "KEMBALI : " + formatRupiah(bayar - totalJual);
+            commands.push(encoder.encode(bayarTxt + "\n"));
+            commands.push(encoder.encode(kembaliTxt + "\n"));
+            
+            commands.push(encoder.encode("================================\n"));
+
+            // Footer
+            commands.push(0x1B, 0x61, 0x01); // Center
+            commands.push(encoder.encode("TERIMA KASIH\n"));
+            commands.push(encoder.encode(dbPengaturan.footerStruk + "\n\n\n")); // Feed 3 baris
+
+            // Potong Kertas (Cut) - Perintah umum ESC/POS
+            commands.push(0x1D, 0x56, 0x42, 0x00);
+
+            // 3. Tulis ke Printer
+            const dataBuffer = new Uint8Array(commands.reduce((acc, val) => acc.concat(Array.isArray(val) ? val : [val]), []));
+            await writerBluetooth.write(dataBuffer);
+            
+            // 4. Selesai
+            writerBluetooth.releaseLock();
+            tampilkanToast("Sukses", "Data terkirim ke printer.");
+
+        } catch (error) {
+            console.error(error);
+            alert("Gagal mencetak: " + error.message);
+            if(writerBluetooth) writerBluetooth.releaseLock();
+        }
+      }
+
+      // === PROSES SELESAI & SIMPAN TRANSAKSI ===
       function selesaiTransaksi() {
         if (struk.length === 0) return alert("Struk kosong!");
         
@@ -1045,9 +1179,11 @@
 
         siapkanCetak(totalJual, bayar);
         simpanDb();
-        window.print();
         
-        tampilkanToast("Transaksi Sukses", "Kembalian: Rp " + (bayar - totalJual).toLocaleString());
+        // Tampilkan toast sukses
+        tampilkanToast("Transaksi Sukses", "Data tersimpan & Struk disiapkan.");
+        
+        // Reset Struk
         resetStruk();
       }
 
@@ -1092,7 +1228,6 @@
                 document.getElementById("hargaJual").value = barang.hargaJual;
                 document.getElementById("stok").focus();
             } else {
-                // Sedang edit
                 info.style.display = "none";
             }
         } else {
@@ -1115,14 +1250,11 @@
         let idx = dbBarang.findIndex(b => b.barcode === barcode);
 
         if (isEditingBarang) {
-            // UPDATE DATA
             if (idx !== -1) {
                 dbBarang[idx].nama = nama;
                 dbBarang[idx].kategori = kategori;
                 dbBarang[idx].hargaBeli = beli;
                 dbBarang[idx].hargaJual = jual;
-                // Hanya update stok jika user mengubahnya secara manual
-                // Karena user mungkin hanya edit harga, bukan stok
                 dbBarang[idx].stok = stokInput; 
                 alert("Data barang berhasil diperbarui.");
             } else {
@@ -1131,21 +1263,17 @@
             batalEditBarang();
 
         } else {
-            // TAMBAH BARU / TAMBAH STOK
             if (idx >= 0) {
-                // Tambah Stok (Jika barang sudah ada dan bukan mode edit)
                 dbBarang[idx].stok += stokInput;
-                dbBarang[idx].nama = nama; // Update info lain juga siapa tau
+                dbBarang[idx].nama = nama; 
                 dbBarang[idx].kategori = kategori;
                 dbBarang[idx].hargaBeli = beli;
                 dbBarang[idx].hargaJual = jual;
                 alert(`Stok bertambah ${stokInput}. Total: ${dbBarang[idx].stok}`);
             } else {
-                // Barang Baru
                 dbBarang.push({ barcode, nama, kategori, hargaBeli: beli, hargaJual: jual, stok: stokInput });
                 alert("Barang baru tersimpan.");
             }
-            // Reset Form
             document.getElementById("barcode").value = "";
             document.getElementById("nama").value = "";
             document.getElementById("kategoriInput").value = "";
@@ -1169,7 +1297,7 @@
         document.getElementById("hargaBeli").value = b.hargaBeli;
         document.getElementById("hargaJual").value = b.hargaJual;
         document.getElementById("stok").value = b.stok;
-        document.getElementById("infoStok").style.display = "none"; // Sembunyikan info stok agar tidak bingung
+        document.getElementById("infoStok").style.display = "none"; 
         
         document.getElementById("btnBatalEdit").classList.remove("hide");
         document.getElementById("barcode").focus();
@@ -1193,8 +1321,7 @@
       function renderBarang() {
         let tbody = document.querySelector("#tabelBarang tbody");
         tbody.innerHTML = "";
-        // Filter Kategori sederhana
-        let list = dbBarang; // Bisa ditambahkan logika filter di sini jika mau
+        let list = dbBarang; 
         
         list.forEach((b, i) => {
             let badgeColor = 'badge-lainnya';
@@ -1277,6 +1404,7 @@
         document.getElementById("setAlamatToko").value = dbPengaturan.alamatToko;
         document.getElementById("setTeleponToko").value = dbPengaturan.teleponToko;
         document.getElementById("setFooterStruk").value = dbPengaturan.footerStruk;
+        document.getElementById("setLebarKertas").value = dbPengaturan.lebarKertas || "58";
       }
 
       function simpanPengaturan() {
@@ -1284,6 +1412,7 @@
         dbPengaturan.alamatToko = document.getElementById("setAlamatToko").value;
         dbPengaturan.teleponToko = document.getElementById("setTeleponToko").value;
         dbPengaturan.footerStruk = document.getElementById("setFooterStruk").value;
+        dbPengaturan.lebarKertas = document.getElementById("setLebarKertas").value;
         simpanDb();
         tampilkanToast("Pengaturan", "Data toko berhasil disimpan.");
       }
