@@ -805,6 +805,8 @@
     }
 
     // === PROSES SELESAI (FIXED & FINAL) ===
+
+    // === PROSES SELESAI (FIXED & GOOGLE SHEET STOCK) ===
     function handleSelesai() {
       let btn = document.getElementById("btnSelesai");
       
@@ -815,7 +817,7 @@
       
       if (bayar < totalJual) return tampilkanToast("Error", `Uang kurang! Total: ${formatRupiah(totalJual)}`);
 
-      // VALIDASI STOK (PENTING)
+      // 1. VALIDASI STOK
       let errorStok = false;
       let pesanError = "";
       
@@ -842,29 +844,56 @@
       btn.disabled = true;
       btn.innerText = "⏳ Memproses...";
 
-      setTimeout(() => {
-          // Kurangi Stok
+      setTimeout(async () => {
+          // 2. KURANGI STOK LOKAL
           struk.forEach(s => {
               let b = dbBarang.find(x => x.barcode === s.barcode);
               if(b) b.stok -= s.qty;
           });
 
           let totalModal = struk.reduce((a, b) => a + (b.hargaBeli * b.qty), 0);
-          let dataTransaksi = {
-              waktu: new Date().toLocaleString("id-ID"),
+          let waktuSekarang = new Date().toLocaleString("id-ID");
+          let idTransaksi = "TRX-" + Date.now(); // ID Unik transaksi
+
+          // Data Ringkasan (Sheet: Transaksi)
+          let dataRingkasan = {
+              waktu: waktuSekarang,
+              id: idTransaksi,
               totalJual: totalJual,
               totalModal: totalModal,
               laba: totalJual - totalModal,
-              items: struk.map(s => `${s.nama} x${s.qty}`).join(", ")
+              item: struk.map(s => `${s.nama} x${s.qty}`).join(", ")
           };
 
-          dbTransaksi.unshift(dataTransaksi);
+          dbTransaksi.unshift(dataRingkasan);
+
+          // 3. KIRIM KE GOOGLE SHEET (2 Bagian: Ringkasan + Detail Stok)
+          
+          // Kirim Data Ringkasan
           kirimKeGoogleSheet("Transaksi", [
-              dataTransaksi.waktu, totalJual, totalModal, dataTransaksi.laba, dataTransaksi.items
+              idTransaksi,
+              dataRingkasan.waktu, 
+              totalJual, 
+              totalModal, 
+              dataRingkasan.laba, 
+              dataRingkasan.item
           ]);
+
+          // Kirim Detail Stok Per Barang (Looping setiap item)
+          for (let s of struk) {
+              kirimKeGoogleSheet("StokKeluar", [
+                  idTransaksi,
+                  s.barcode,
+                  s.nama,
+                  s.qty,
+                  s.hargaBeli,
+                  s.hargaJual,
+                  waktuSekarang
+              ]);
+          }
           
           simpanDb();
-          siapkanCetak(totalJual, bayar); // Siapkan data untuk print view
+          siapkanCetak(totalJual, bayar);
           
           // RESET
           struk = [];
@@ -872,13 +901,15 @@
           document.getElementById("kembalian").innerText = "0";
           renderStruk();
           
-          tampilkanToast("SUKSES", "Transaksi Selesai!");
+          tampilkanToast("SUKSES", "Transaksi Selesai & Stok Terkirim!");
           btn.disabled = false;
           btn.innerText = "✅ SELESAI & RESET";
           setTimeout(() => document.getElementById("scanInput").focus(), 300);
 
       }, 800);
     }
+
+
 
     function siapkanCetak(total, bayar) {
       document.getElementById("printStoreName").innerText = dbPengaturan.namaToko.toUpperCase();
