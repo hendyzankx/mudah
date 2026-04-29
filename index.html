@@ -3,11 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <!-- Link ke Manifest agar bisa diinstall di HP -->
+    
+    <!-- PERBAIKAN HP (iOS & Android) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <link rel="manifest" href="manifest.json" />
-    <title>Kasir Pro Offline (Bluetooth Support)</title>
-
-    <!-- Warna tema browser (Address bar) -->
+    <title>Kasir Pro Ultimate</title>
     <meta name="theme-color" content="#2563eb" />
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -34,7 +36,7 @@
       body {
         background: var(--abu);
         padding: 10px;
-        padding-bottom: 90px; /* Space lebih aman untuk keyboard HP */
+        padding-bottom: 90px;
       }
       .app {
         max-width: 1200px;
@@ -51,10 +53,7 @@
         padding: 20px;
         text-align: center;
       }
-      .header h1 {
-        font-size: 22px;
-        font-weight: 700;
-      }
+      .header h1 { font-size: 22px; font-weight: 700; }
       .tabs {
         display: flex;
         background: #e2e8f0;
@@ -75,19 +74,14 @@
         color: var(--biru);
         border-bottom: 3px solid var(--biru);
       }
-      .konten {
-        padding: 20px;
-      }
+      .konten { padding: 20px; }
       .grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 20px;
       }
-      @media (max-width: 768px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
-      }
+      @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+      
       .card {
         background: #f8fafc;
         padding: 16px;
@@ -95,14 +89,9 @@
         border: 1px solid #e2e8f0;
         margin-bottom: 20px;
       }
-      .card h3 {
-        margin-bottom: 12px;
-        font-size: 16px;
-        color: #334155;
-      }
-      input,
-      select,
-      textarea {
+      .card h3 { margin-bottom: 12px; font-size: 16px; color: #334155; }
+      
+      input, select, textarea {
         width: 100%;
         padding: 12px;
         margin: 6px 0;
@@ -113,15 +102,12 @@
         outline: none;
         transition: border-color 0.2s;
       }
-      input:focus,
-      select:focus,
-      textarea:focus {
+      input:focus, select:focus, textarea:focus {
         border-color: var(--biru);
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
-      button,
-      .btn-action {
+      button, .btn-action {
         width: 100%;
         padding: 12px;
         margin: 6px 0;
@@ -138,20 +124,10 @@
         gap: 8px;
         line-height: 1.5;
       }
-      button:active,
-      .btn-action:active {
-        transform: scale(0.98);
-      }
-      .btn-kamera {
-        background: var(--oren) !important;
-      }
-      .btn-hapus {
-        background: var(--merah) !important;
-        padding: 6px 12px !important;
-        width: auto !important;
-        font-size: 12px !important;
-      }
-
+      button:active, .btn-action:active { transform: scale(0.98); }
+      
+      .btn-kamera { background: var(--oren) !important; }
+      .btn-hapus { background: var(--merah) !important; padding: 6px 12px !important; width: auto !important; font-size: 12px !important; }
       .btn-qty-kecil {
         background: var(--biru) !important;
         padding: 4px 10px !important;
@@ -161,109 +137,28 @@
         margin: 0 2px !important;
         min-width: 30px;
       }
-      .btn-qty-minus {
-        background: #f59e0b !important;
-      }
-      .btn-edit {
-        background: #0284c7 !important;
-        padding: 6px 12px !important;
-        width: auto !important;
-        font-size: 13px !important;
-      }
-      .btn-selesai {
-        background: var(--hijau) !important;
-        font-size: 18px !important;
-        padding: 16px !important;
-        margin-top: 10px !important;
-      }
-      .btn-secondary {
-        background: #94a3b8 !important;
-      }
-      /* Tombol Print Baru */
-      .btn-print-bluetooth {
-        background: #2563eb !important;
-        border: 2px solid #60a5fa !important;
-        margin-bottom: 10px !important;
-      }
+      .btn-qty-minus { background: #f59e0b !important; }
+      .btn-edit { background: #0284c7 !important; padding: 6px 12px !important; width: auto !important; font-size: 13px !important; }
+      .btn-selesai { background: var(--hijau) !important; font-size: 18px !important; padding: 16px !important; margin-top: 10px !important; }
+      .btn-secondary { background: #94a3b8 !important; }
+      .btn-print-bluetooth { background: #2563eb !important; border: 2px solid #60a5fa !important; margin-bottom: 10px !important; }
+      .btn-save { background: var(--hijau) !important; }
 
-      .setting-row {
-        margin-bottom: 15px;
-      }
-      .setting-row label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-        font-size: 13px;
-        color: #475569;
-      }
-      .btn-save {
-        background: var(--hijau) !important;
-      }
+      .setting-row { margin-bottom: 15px; }
+      .setting-row label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: #475569; }
 
-      #scanInput {
-        font-size: 18px;
-        background: #fffbeb;
-        border: 2px solid #fbbf24;
-      }
-      #scanInput.cooldown {
-        background: #fef2f2;
-        border: 2px solid var(--merah);
-        color: #991b1b;
-      }
-      .status-scan {
-        font-size: 13px;
-        height: 20px;
-        color: var(--oren);
-        font-weight: 600;
-        margin-top: -4px;
-        margin-bottom: 4px;
-        text-align: center;
-      }
+      #scanInput { font-size: 18px; background: #fffbeb; border: 2px solid #fbbf24; }
+      #scanInput.cooldown { background: #fef2f2; border: 2px solid var(--merah); color: #991b1b; }
+      .status-scan { font-size: 13px; height: 20px; color: var(--oren); font-weight: 600; margin-top: -4px; margin-bottom: 4px; text-align: center; }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 12px;
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-        font-size: 13px;
-      }
-      th,
-      td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #e2e8f0;
-      }
-      th {
-        background: #f1f5f9;
-        font-weight: 600;
-        font-size: 12px;
-        text-transform: uppercase;
-        color: #64748b;
-      }
-      td:last-child {
-        white-space: nowrap;
-        width: 110px;
-        text-align: right;
-      }
-      .total-box {
-        background: var(--biru);
-        color: white;
-        padding: 16px;
-        border-radius: 12px;
-        margin: 16px 0;
-        text-align: center;
-      }
-      .total-box .label {
-        font-size: 14px;
-        opacity: 0.9;
-      }
-      .total-box .angka {
-        font-size: 24px;
-        font-weight: 700;
-      }
-
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; background: white; border-radius: 8px; overflow: hidden; font-size: 13px; }
+      th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+      th { background: #f1f5f9; font-weight: 600; font-size: 12px; text-transform: uppercase; color: #64748b; }
+      td:last-child { white-space: nowrap; width: 110px; text-align: right; }
+      
+      .total-box { background: var(--biru); color: white; padding: 16px; border-radius: 12px; margin: 16px 0; text-align: center; }
+      .total-box .label { font-size: 14px; opacity: 0.9; }
+      .total-box .angka { font-size: 24px; font-weight: 700; }
       .total-box.hijau { background: var(--hijau); }
       .total-box.emas { background: var(--emas); }
       .total-box.abu-gelap { background: #475569; }
@@ -278,42 +173,15 @@
         margin: 6px 0;
         display: none;
       }
-
-      #reader, #readerBarang {
-        width: 100% !important;
-        border-radius: 12px;
-        margin-top: 10px;
-        overflow: hidden;
-        background: #000;
-      }
-      #reader video, #readerBarang video {
-        object-fit: cover;
-        border-radius: 8px;
-      }
+      #reader, #readerBarang { width: 100% !important; border-radius: 12px; margin-top: 10px; overflow: hidden; background: #000; }
+      #reader video, #readerBarang video { object-fit: cover; border-radius: 8px; }
       .hide { display: none !important; }
       
-      .uang-cepat {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 12px;
-      }
-      .uang-cepat button {
-        background: #e2e8f0 !important;
-        color: #334550 !important;
-        font-size: 13px !important;
-        padding: 10px !important;
-      }
+      .uang-cepat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+      .uang-cepat button { background: #e2e8f0 !important; color: #334550 !important; font-size: 13px !important; padding: 10px !important; }
 
-      .ringkasan-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-bottom: 16px;
-      }
-      @media (max-width: 600px) {
-        .ringkasan-grid { grid-template-columns: 1fr; }
-      }
+      .ringkasan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+      @media (max-width: 600px) { .ringkasan-grid { grid-template-columns: 1fr; } }
 
       .laba-struk {
         background: #fefce8;
@@ -326,82 +194,6 @@
         text-align: center;
         margin-top: 8px;
       }
-      .laba-struk .angka-laba {
-        font-size: 18px;
-        color: var(--hijau);
-      }
-
-      /* ===== STYLE STRUK CETAK (PREVIEW BROWSER) ===== */
-      #cetakStruk {
-        display: none;
-        font-family: "Courier Prime", monospace;
-        padding: 0;
-        background: white;
-        color: black;
-        width: 100%;
-        max-width: 80mm;
-        margin: 0 auto;
-      }
-      #cetakStruk .paper {
-        padding: 2mm;
-        border: 1px dashed #ccc;
-      }
-      #cetakStruk .header-store {
-        text-align: center;
-        margin-bottom: 2mm;
-        border-bottom: 1px dashed #000;
-        padding-bottom: 2mm;
-      }
-      #cetakStruk .store-name {
-        font-size: 16px;
-        font-weight: bold;
-        text-transform: uppercase;
-        margin-bottom: 1mm;
-      }
-      #cetakStruk .store-address, #cetakStruk .store-contact {
-        font-size: 10px;
-        line-height: 1.2;
-      }
-      #cetakStruk .meta-info {
-        display: flex;
-        justify-content: space-between;
-        font-size: 10px;
-        margin: 2mm 0;
-      }
-      #cetakStruk table.items {
-        width: 100%;
-        font-size: 12px;
-        border-collapse: collapse;
-        margin-bottom: 2mm;
-      }
-      #cetakStruk table.items th {
-        text-align: left;
-        border-bottom: 1px dashed #000;
-        font-size: 10px;
-      }
-      #cetakStruk table.items td {
-        padding: 1px 0;
-        vertical-align: top;
-      }
-      #cetakStruk .col-name { width: 55%; }
-      #cetakStruk .col-qty { width: 15%; text-align: center; }
-      #cetakStruk .col-price { width: 30%; text-align: right; }
-      #cetakStruk .summary-row {
-        display: flex;
-        justify-content: space-between;
-        font-size: 11px;
-        margin-bottom: 1mm;
-      }
-      #cetakStruk .summary-row.total {
-        font-size: 13px;
-        font-weight: bold;
-        border-top: 1px dashed #000;
-        padding-top: 1mm;
-        margin-top: 2mm;
-      }
-      #cetakStruk .divider { border-top: 1px dashed #000; margin: 2mm 0; }
-      #cetakStruk .footer { text-align: center; font-size: 10px; margin-top: 2mm; }
-      #cetakStruk .thank-you { font-weight: bold; margin-top: 1mm; text-transform: uppercase; font-size: 11px; }
 
       /* Dropdown */
       .pencarian-wrap { position: relative; }
@@ -418,7 +210,6 @@
       .dd-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
       .dd-item:hover, .dd-item.diangkat { background: #f0fdf4; }
       .dd-nama { font-weight: 600; color: #1e293b; }
-      .dd-kategori { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
       .dd-info { font-size: 12px; color: #64748b; text-align: right; }
       .qty-inline { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
       .qty-inline input { flex: 1; margin: 0; }
@@ -449,6 +240,25 @@
       }
       .toast.show { opacity: 1; transform: translateY(0); }
 
+      /* Cetak Struk (Preview) */
+      #cetakStruk { display: none; font-family: "Courier Prime", monospace; padding: 0; background: white; color: black; width: 100%; max-width: 80mm; margin: 0 auto; }
+      #cetakStruk .paper { padding: 2mm; border: 1px dashed #ccc; }
+      #cetakStruk .header-store { text-align: center; margin-bottom: 2mm; border-bottom: 1px dashed #000; padding-bottom: 2mm; }
+      #cetakStruk .store-name { font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 1mm; }
+      #cetakStruk .store-address, #cetakStruk .store-contact { font-size: 10px; line-height: 1.2; }
+      #cetakStruk .meta-info { display: flex; justify-content: space-between; font-size: 10px; margin: 2mm 0; }
+      #cetakStruk table.items { width: 100%; font-size: 12px; border-collapse: collapse; margin-bottom: 2mm; }
+      #cetakStruk table.items th { text-align: left; border-bottom: 1px dashed #000; font-size: 10px; }
+      #cetakStruk table.items td { padding: 1px 0; vertical-align: top; }
+      #cetakStruk .col-name { width: 55%; }
+      #cetakStruk .col-qty { width: 15%; text-align: center; }
+      #cetakStruk .col-price { width: 30%; text-align: right; }
+      #cetakStruk .summary-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 1mm; }
+      #cetakStruk .summary-row.total { font-size: 13px; font-weight: bold; border-top: 1px dashed #000; padding-top: 1mm; margin-top: 2mm; }
+      #cetakStruk .divider { border-top: 1px dashed #000; margin: 2mm 0; }
+      #cetakStruk .footer { text-align: center; font-size: 10px; margin-top: 2mm; }
+      #cetakStruk .thank-you { font-weight: bold; margin-top: 1mm; text-transform: uppercase; font-size: 11px; }
+
       @media print {
         .no-print, .tabs, .header, .toast-container, #scanInput, .card { display: none !important; }
         body { background: white; padding: 0; margin: 0; }
@@ -461,8 +271,8 @@
   <body>
     <div class="app">
       <div class="header no-print">
-        <h1>💰 KASIR PRO BLUETOOTH</h1>
-        <small style="opacity: 0.9">Cetak Struk via Thermal Printer</small>
+        <h1>💰 KASIR PRO ULTIMATE</h1>
+        <small style="opacity: 0.9">Bluetooth • Google Sheet • Offline</small>
       </div>
 
       <div class="tabs no-print">
@@ -540,7 +350,6 @@
               <div class="angka">Rp <span id="kembalian">0</span></div>
             </div>
             
-            <!-- Tombol Cetak via Bluetooth -->
             <button class="btn-print-bluetooth" onclick="cetakBluetooth()">🖨️ Cetak Bluetooth</button>
             <button class="btn-selesai" onclick="selesaiTransaksi()">SELESAI & RESET</button>
             <button class="btn-secondary" onclick="resetStruk()">Batal / Reset</button>
@@ -671,6 +480,18 @@
                 <option value="80">80mm (Besar)</option>
               </select>
             </div>
+            
+            <div style="border-top: 1px dashed #ccc; margin: 15px 0;"></div>
+            
+            <h3>☁️ Integrasi Google Sheet</h3>
+            <div class="setting-row">
+              <label>URL Google Sheet (API)</label>
+              <textarea id="setGoogleSheetUrl" rows="3" placeholder="https://script.google.com/macros/s/..." style="font-size:11px; color:#666;"></textarea>
+              <small style="color:#888; display:block; margin-top:4px;">
+                Masukkan URL Web App dari Google Apps Script di sini untuk sinkronisasi otomatis Transaksi & Barang.
+              </small>
+            </div>
+
             <button onclick="simpanPengaturan()" class="btn-save">Simpan Perubahan</button>
           </div>
 
@@ -748,7 +569,8 @@
       if (!dbPengaturan.alamatToko) dbPengaturan.alamatToko = "Jl. Raya No. 1";
       if (!dbPengaturan.teleponToko) dbPengaturan.teleponToko = "-";
       if (!dbPengaturan.footerStruk) dbPengaturan.footerStruk = "Barang yang dibeli tidak dapat ditukar.";
-      if (!dbPengaturan.lebarKertas) dbPengaturan.lebarKertas = "58"; // Default 58mm
+      if (!dbPengaturan.lebarKertas) dbPengaturan.lebarKertas = "58";
+      if (!dbPengaturan.googleSheetUrl) dbPengaturan.googleSheetUrl = "";
 
       let struk = [];
       let html5QrcodeScanner = null;
@@ -757,8 +579,8 @@
       let debounceTimer = null;
       let isEditingBarang = false; 
       let originalBarcode = ""; 
-      let portBluetooth = null; // Menyimpan koneksi serial port
-      let writerBluetooth = null; // Menyimpan writer stream
+      let portBluetooth = null; 
+      let writerBluetooth = null;
 
       // Data Dummy Awal (Hanya jika kosong)
       if (dbBarang.length === 0) {
@@ -796,6 +618,34 @@
           toast.classList.remove("show");
           setTimeout(() => toast.remove(), 300);
         }, 3000);
+      }
+
+      // === FUNGSI GOOGLE SHEET ===
+      async function kirimKeGoogleSheet(namaSheet, dataBaris) {
+          let url = dbPengaturan.googleSheetUrl;
+          
+          if (!url || url === "") {
+              console.log("Google Sheet URL belum disetting.");
+              return; 
+          }
+
+          try {
+              // Menggunakan mode no-cors agar tidak masalah dengan CORS Google Script
+              await fetch(url, {
+                  method: "POST",
+                  mode: "no-cors", 
+                  headers: {
+                      "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                      sheetName: namaSheet,
+                      row: dataBaris
+                  })
+              });
+              console.log(`Data terkirim ke Sheet [${namaSheet}]`);
+          } catch (error) {
+              console.error("Gagal kirim ke Google Sheet:", error);
+          }
       }
 
       // === MANAJEMEN TAB ===
@@ -1026,21 +876,7 @@
         document.getElementById("scanInput").focus();
       }
 
-      // === FITUR BARU: CETAK BLUETOOTH (WEB SERIAL API) ===
-      
-      // Helper: Mengubah angka menjadi bytearray format ESC/POS
-      function textToBytes(text, encoding = 'utf-8') {
-          const encoder = new TextEncoder();
-          return encoder.encode(text);
-      }
-
-      // Helper: Membuat kolom rapi (Space padding)
-      function padText(kiri, kanan, totalLength) {
-          let space = totalLength - kiri.length - kanan.length;
-          if (space < 1) space = 1;
-          return kiri + " ".repeat(space) + kanan + "\n";
-      }
-
+      // === FITUR BLUETOOTH PRINTER ===
       async function cetakBluetooth() {
         if (struk.length === 0) return alert("Keranjang kosong!");
         
@@ -1049,71 +885,49 @@
         if (bayar < totalJual) return alert("Uang pembayaran kurang!");
 
         try {
-            // 1. Koneksi ke Port
             if (!portBluetooth) {
-                // Minta user memilih port (Bluetooth Serial)
                 portBluetooth = await navigator.serial.requestPort();
                 await portBluetooth.open({ baudRate: 9600 });
             }
             writerBluetooth = portBluetooth.writable.getWriter();
 
-            // 2. Siapkan Data ESC/POS
             let encoder = new TextEncoder();
             let commands = [];
             
-            // Kertas Lebar
-            let lebar = (dbPengaturan.lebarKertas === "80") ? 32 : 20; // Jumlah karakter per baris (approx)
+            let lebar = (dbPengaturan.lebarKertas === "80") ? 32 : 20; 
 
-            // Inisialisasi Printer
-            commands.push(0x1B, 0x40); // ESC @ (Init)
-            commands.push(0x1B, 0x61, 0x01); // ESC a 1 (Center Align)
+            commands.push(0x1B, 0x40); 
+            commands.push(0x1B, 0x61, 0x01); 
 
-            // Header Toko
             commands.push(encoder.encode(dbPengaturan.namaToko.toUpperCase() + "\n"));
             commands.push(encoder.encode(dbPengaturan.alamatToko + "\n"));
             commands.push(encoder.encode("Telp: " + dbPengaturan.teleponToko + "\n"));
             
-            // Garis
             commands.push(encoder.encode("================================\n"));
 
-            // Info Transaksi
             let tgl = new Date().toLocaleString("id-ID");
             let noStruk = Date.now().toString().slice(-6);
             commands.push(encoder.encode("TGL: " + tgl + "\n"));
             commands.push(encoder.encode("NO : #" + noStruk + "\n"));
             commands.push(encoder.encode("--------------------------------\n"));
 
-            // List Item
-            // Reset Align Left
             commands.push(0x1B, 0x61, 0x00); 
 
             struk.forEach(item => {
-                // Format: Nama (truncated)
-                let nama = item.nama.length > (lebar - 10) ? item.nama.substring(0, lebar - 10) : item.nama;
-                
-                // Baris 1: Nama Barang
                 commands.push(encoder.encode(item.nama + "\n"));
-                
-                // Baris 2: Qty x Harga     Subtotal
                 let qtyTxt = item.qty + " x " + item.hargaJual.toLocaleString();
                 let subTxt = (item.qty * item.hargaJual).toLocaleString();
-                
-                // Rumus spasi sederhana
                 let sisa = lebar - qtyTxt.length - subTxt.length;
                 let space = " ".repeat(sisa > 0 ? sisa : 1);
-                
                 commands.push(encoder.encode(" " + qtyTxt + space + subTxt + "\n"));
             });
 
             commands.push(encoder.encode("--------------------------------\n"));
 
-            // Total
-            commands.push(0x1B, 0x45, 0x01); // Bold ON
-            let totalTxt = "TOTAL   : " + formatRupiah(totalJual);
-            commands.push(encoder.encode(totalTxt + "\n"));
-            commands.push(0x1B, 0x45, 0x00); // Bold OFF
+            commands.push(0x1B, 0x45, 0x01); 
+            commands.push(encoder.encode("TOTAL   : " + formatRupiah(totalJual) + "\n"));
+            commands.push(0x1B, 0x45, 0x00); 
 
-            // Bayar & Kembali
             let bayarTxt = "BAYAR   : " + formatRupiah(bayar);
             let kembaliTxt = "KEMBALI : " + formatRupiah(bayar - totalJual);
             commands.push(encoder.encode(bayarTxt + "\n"));
@@ -1121,19 +935,15 @@
             
             commands.push(encoder.encode("================================\n"));
 
-            // Footer
-            commands.push(0x1B, 0x61, 0x01); // Center
+            commands.push(0x1B, 0x61, 0x01); 
             commands.push(encoder.encode("TERIMA KASIH\n"));
-            commands.push(encoder.encode(dbPengaturan.footerStruk + "\n\n\n")); // Feed 3 baris
+            commands.push(encoder.encode(dbPengaturan.footerStruk + "\n\n\n")); 
 
-            // Potong Kertas (Cut) - Perintah umum ESC/POS
             commands.push(0x1D, 0x56, 0x42, 0x00);
 
-            // 3. Tulis ke Printer
             const dataBuffer = new Uint8Array(commands.reduce((acc, val) => acc.concat(Array.isArray(val) ? val : [val]), []));
             await writerBluetooth.write(dataBuffer);
             
-            // 4. Selesai
             writerBluetooth.releaseLock();
             tampilkanToast("Sukses", "Data terkirim ke printer.");
 
@@ -1154,7 +964,6 @@
         
         if (bayar < totalJual) return alert("Uang pembayaran kurang!");
 
-        // Cek stok real-time terakhir
         for (let s of struk) {
             let b = dbBarang.find(x => x.barcode === s.barcode);
             if (!b || b.stok < s.qty) {
@@ -1162,28 +971,37 @@
             }
         }
 
-        // Kurangi Stok
+        // 1. Kurangi Stok
         struk.forEach(s => {
             let b = dbBarang.find(x => x.barcode === s.barcode);
             if(b) b.stok -= s.qty;
         });
 
-        // Simpan Transaksi
-        dbTransaksi.unshift({
+        // 2. Siapkan Data Transaksi
+        let dataTransaksi = {
             waktu: new Date().toLocaleString("id-ID"),
             totalJual: totalJual,
             totalModal: totalModal,
             laba: totalJual - totalModal,
             items: struk.map(s => `${s.nama} x${s.qty}`).join(", ")
-        });
+        };
+
+        // 3. Simpan ke Local Storage
+        dbTransaksi.unshift(dataTransaksi);
+        
+        // 4. KIRIM KE GOOGLE SHEET (Transaksi)
+        kirimKeGoogleSheet("Transaksi", [
+            dataTransaksi.waktu, 
+            dataTransaksi.totalJual, 
+            dataTransaksi.totalModal, 
+            dataTransaksi.laba, 
+            dataTransaksi.items
+        ]);
 
         siapkanCetak(totalJual, bayar);
         simpanDb();
         
-        // Tampilkan toast sukses
-        tampilkanToast("Transaksi Sukses", "Data tersimpan & Struk disiapkan.");
-        
-        // Reset Struk
+        tampilkanToast("Transaksi Sukses", "Data tersimpan & disinkronkan.");
         resetStruk();
       }
 
@@ -1248,6 +1066,7 @@
         if (jual <= 0) return alert("Harga jual harus > 0");
 
         let idx = dbBarang.findIndex(b => b.barcode === barcode);
+        let isNew = (idx === -1);
 
         if (isEditingBarang) {
             if (idx !== -1) {
@@ -1255,7 +1074,7 @@
                 dbBarang[idx].kategori = kategori;
                 dbBarang[idx].hargaBeli = beli;
                 dbBarang[idx].hargaJual = jual;
-                dbBarang[idx].stok = stokInput; 
+                dbBarang[idx].stok = stokInput;
                 alert("Data barang berhasil diperbarui.");
             } else {
                 alert("Data barang asli tidak ditemukan (mungkin barcode diubah)");
@@ -1264,6 +1083,7 @@
 
         } else {
             if (idx >= 0) {
+                // Update stok + data
                 dbBarang[idx].stok += stokInput;
                 dbBarang[idx].nama = nama; 
                 dbBarang[idx].kategori = kategori;
@@ -1271,9 +1091,11 @@
                 dbBarang[idx].hargaJual = jual;
                 alert(`Stok bertambah ${stokInput}. Total: ${dbBarang[idx].stok}`);
             } else {
+                // Barang Baru
                 dbBarang.push({ barcode, nama, kategori, hargaBeli: beli, hargaJual: jual, stok: stokInput });
                 alert("Barang baru tersimpan.");
             }
+            // Reset Form
             document.getElementById("barcode").value = "";
             document.getElementById("nama").value = "";
             document.getElementById("kategoriInput").value = "";
@@ -1282,6 +1104,21 @@
             document.getElementById("stok").value = "";
             document.getElementById("infoStok").style.display = "none";
         }
+
+        // KIRIM KE GOOGLE SHEET (Barang)
+        // Kita kirim data terakhir barang yang di-edit/input agar sinkron
+        let barangFinal = dbBarang.find(b => b.barcode === barcode);
+        if (barangFinal) {
+            kirimKeGoogleSheet("Barang", [
+                barangFinal.barcode, 
+                barangFinal.nama, 
+                barangFinal.kategori, 
+                barangFinal.hargaBeli, 
+                barangFinal.hargaJual, 
+                barangFinal.stok
+            ]);
+        }
+
         simpanDb();
       }
 
@@ -1405,6 +1242,11 @@
         document.getElementById("setTeleponToko").value = dbPengaturan.teleponToko;
         document.getElementById("setFooterStruk").value = dbPengaturan.footerStruk;
         document.getElementById("setLebarKertas").value = dbPengaturan.lebarKertas || "58";
+        
+        // Load URL Google Sheet
+        if (dbPengaturan.googleSheetUrl) {
+            document.getElementById("setGoogleSheetUrl").value = dbPengaturan.googleSheetUrl;
+        }
       }
 
       function simpanPengaturan() {
@@ -1413,8 +1255,10 @@
         dbPengaturan.teleponToko = document.getElementById("setTeleponToko").value;
         dbPengaturan.footerStruk = document.getElementById("setFooterStruk").value;
         dbPengaturan.lebarKertas = document.getElementById("setLebarKertas").value;
+        dbPengaturan.googleSheetUrl = document.getElementById("setGoogleSheetUrl").value.trim();
+        
         simpanDb();
-        tampilkanToast("Pengaturan", "Data toko berhasil disimpan.");
+        tampilkanToast("Pengaturan", "Data toko & Cloud berhasil disimpan.");
       }
 
       function backupData() {
