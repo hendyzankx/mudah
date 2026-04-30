@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kasir Modern Pro v2 (Fixed)</title>
+    <title>Kasir Modern Pro v2 (Print Fix)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -174,7 +174,6 @@
             overflow-y: auto;
             position: relative;
             padding: 20px;
-            /* PADDING BOTTOM BESAR AGAR TOMBOL BAYAR TIDAK TERTUTUP */
             padding-bottom: 320px; 
             display: none;
             animation: fadeIn 0.3s;
@@ -239,18 +238,17 @@
         .btn-ci:active { background: var(--primary); color: white; }
         .ci-count { width: 35px; text-align: center; font-weight: 700; }
 
-        /* CHECKOUT PANEL - DIATUR Z-INDEX NYA */
         .checkout-panel {
             background: var(--bg-card);
             padding: 20px;
             border-top-left-radius: 25px;
             border-top-right-radius: 25px;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-            position: fixed; /* Fixed agar menempel di bawah viewport */
+            position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            z-index: 40; /* Lebih tinggi dari konten utama */
+            z-index: 40;
             animation: slideUp 0.3s ease-out;
         }
 
@@ -329,22 +327,50 @@
         }
 
         /* --- PRINT AREA FIX --- */
-        #receipt-print-area { display: none; }
+        #receipt-print-area { 
+            display: none; /* Hidden on screen */
+            background-color: white; /* Ensure white background for print */
+            padding: 20px;
+            font-family: 'Courier New', monospace; 
+            color: #000;
+        }
 
         @media print {
-            body * { visibility: hidden; height: 0; overflow: hidden; }
+            /* Sembunyikan SEMUA elemen body secara default */
+            body * {
+                visibility: hidden !important;
+                display: none !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            /* Tampilkan area struk */
             #receipt-print-area, #receipt-print-area * { 
-                visibility: visible; 
-                height: auto; 
-                overflow: visible;
+                visibility: visible !important; 
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
             }
+
+            /* Posisi struk di kertas */
             #receipt-print-area {
-                position: absolute; 
-                left: 0; top: 0; width: 100%;
-                font-family: 'Courier New', monospace; font-size: 12px; color: black;
-                background: white;
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
                 padding: 20px;
+                background-color: white !important;
+                color: black !important;
+                font-size: 14px; /* Font size diperbesar agar jelas di PDF */
+                z-index: 9999 !important;
             }
+
+            /* Pastikan teks struk terbaca jelas */
+            #print-store-name { font-size: 18px; font-weight: bold; margin-bottom: 10px; text-align: center; }
+            #print-store-addr { text-align: center; font-size: 12px; margin-bottom: 10px; }
+            #print-items div { margin-bottom: 5px; }
+            
             .no-print { display: none !important; }
         }
 
@@ -557,17 +583,26 @@
         </div>
     </div>
 
-    <!-- RECEIPT PRINT AREA -->
+    <!-- RECEIPT PRINT AREA (UPDATED) -->
     <div id="receipt-print-area">
-        <div style="text-align:center; font-weight:bold; margin-bottom:10px;" id="print-store-name">TOKO MAJU JAYA</div>
-        <div style="text-align:center; font-size:10px; margin-bottom:10px;" id="print-store-addr">Jl. Digital No. 1</div>
-        <div style="border-bottom: 1px dashed black; margin: 5px 0;"></div>
+        <div id="print-store-name">TOKO MAJU JAYA</div>
+        <div id="print-store-addr">Jl. Digital No. 1</div>
+        <div style="border-bottom: 1px dashed black; margin: 10px 0;"></div>
         <div id="print-items"></div>
-        <div style="border-bottom: 1px dashed black; margin: 5px 0;"></div>
-        <div style="text-align:right;">Total: <span id="print-total"></span></div>
-        <div style="text-align:right;">Tunai: <span id="print-cash"></span></div>
-        <div style="text-align:right;">Kembali: <span id="print-change"></span></div>
-        <div style="text-align:center; margin-top:20px;">Terima Kasih</div>
+        <div style="border-bottom: 1px dashed black; margin: 10px 0;"></div>
+        <div style="display:flex; justify-content:space-between; margin-top:5px;">
+            <span>Total:</span>
+            <span id="print-total"></span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:5px;">
+            <span>Tunai:</span>
+            <span id="print-cash"></span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:5px;">
+            <span>Kembali:</span>
+            <span id="print-change"></span>
+        </div>
+        <div style="text-align:center; margin-top:30px;">Terima Kasih</div>
     </div>
 
     <!-- TOAST -->
@@ -781,7 +816,10 @@
                 document.getElementById('print-store-name').innerText = this.data.settings.storeName;
                 document.getElementById('print-store-addr').innerText = this.data.settings.address;
                 document.getElementById('print-items').innerHTML = transaction.items.map(c => 
-                    `<div>${c.name}</div><div style="display:flex;justify-content:space-between;">${c.qty} x ${c.price} <span>${c.qty*c.price}</span></div>`
+                    `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <div>${c.name}</div>
+                        <div>${c.qty} x ${c.price} = ${c.qty*c.price}</div>
+                    </div>`
                 ).join('');
                 document.getElementById('print-total').innerText = total.toLocaleString('id-ID');
                 document.getElementById('print-cash').innerText = cash.toLocaleString('id-ID');
@@ -801,7 +839,7 @@
                 this.renderCart();
                 this.nav('pos');
 
-                // Print
+                // Trigger Print
                 setTimeout(() => window.print(), 500);
                 this.showToast("Transaksi Berhasil");
             },
@@ -835,7 +873,10 @@
                 document.getElementById('print-store-name').innerText = this.data.settings.storeName;
                 document.getElementById('print-store-addr').innerText = this.data.settings.address;
                 document.getElementById('print-items').innerHTML = t.items.map(c => 
-                    `<div>${c.name}</div><div style="display:flex;justify-content:space-between;">${c.qty} x ${c.price} <span>${c.qty*c.price}</span></div>`
+                    `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <div>${c.name}</div>
+                        <div>${c.qty} x ${c.price} = ${c.qty*c.price}</div>
+                    </div>`
                 ).join('');
                 document.getElementById('print-total').innerText = t.total.toLocaleString('id-ID');
                 document.getElementById('print-cash').innerText = t.cash.toLocaleString('id-ID');
