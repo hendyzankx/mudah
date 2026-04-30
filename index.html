@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kasir Modern Pro v2</title>
-    <!-- Icon Library -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -24,7 +23,7 @@
             --shadow-card: 0 4px 12px rgba(0,0,0,0.05);
             --radius-main: 16px;
             --radius-small: 12px;
-            --nav-height: 70px;
+            --header-height: 140px; /* Increased for top nav */
         }
 
         /* Dark Mode Variables */
@@ -54,18 +53,20 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* --- HEADER --- */
+        /* --- TOP HEADER & NAVIGATION --- */
         header {
             background: var(--bg-card);
-            padding: 20px;
-            padding-bottom: 10px;
+            padding: 15px 20px 0 20px; /* Bottom padding handled by nav */
             box-shadow: var(--shadow-card);
             z-index: 50;
             border-bottom-left-radius: 25px;
             border-bottom-right-radius: 25px;
+            flex-shrink: 0; /* Prevent shrinking */
+            display: flex;
+            flex-direction: column;
         }
 
-        .header-top {
+        .header-brand {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -80,41 +81,97 @@
             letter-spacing: -0.5px;
         }
 
-        .header-subtitle {
+        .clock-badge {
             font-size: 0.8rem;
+            background: var(--input-bg);
+            padding: 5px 10px;
+            border-radius: 12px;
             color: var(--text-muted);
-            margin-top: -5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        /* Category Tabs */
+        /* Top Navigation Bar */
+        .top-nav-bar {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 5px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+            scrollbar-width: none;
+        }
+        .top-nav-bar::-webkit-scrollbar { display: none; }
+
+        .nav-item-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+            min-width: 70px;
+            flex: 1;
+        }
+
+        .nav-item-top i { font-size: 1.2rem; margin-bottom: 5px; transition: 0.3s; }
+        .nav-item-top.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .nav-item-top.active i { transform: translateY(-2px); }
+
+        .nav-badge-top {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.55rem;
+            padding: 2px 5px;
+            border-radius: 10px;
+        }
+        .badge-wrapper { position: relative; }
+
+        /* --- CONTROLS (Categories/Search) --- */
+        .controls-area {
+            background: var(--bg-body); /* Match body bg to blend */
+            padding: 15px 20px 5px 20px;
+            flex-shrink: 0;
+        }
+
         .category-tabs {
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            padding-bottom: 5px;
-            scrollbar-width: none; /* Firefox */
+            padding-bottom: 10px;
+            scrollbar-width: none;
         }
         .cat-tab {
             padding: 8px 16px;
-            background: var(--input-bg);
+            background: var(--bg-card);
             border-radius: 20px;
             font-size: 0.85rem;
             white-space: nowrap;
             color: var(--text-muted);
             cursor: pointer;
-            border: 1px solid transparent;
+            border: 1px solid var(--border-color);
             transition: 0.2s;
+            box-shadow: var(--shadow-card);
         }
         .cat-tab.active {
             background: var(--primary);
             color: white;
+            border-color: var(--primary);
             box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
         }
 
-        /* Search Bar */
         .search-wrapper {
             position: relative;
-            margin-top: 15px;
             display: none; /* Controlled by JS */
         }
         
@@ -122,15 +179,15 @@
             width: 100%;
             padding: 14px 20px 14px 50px;
             border: none;
-            background: var(--input-bg);
+            background: var(--bg-card);
             border-radius: 50px;
             font-size: 0.95rem;
             color: var(--text-main);
             transition: 0.3s;
+            box-shadow: var(--shadow-card);
         }
 
         .search-input:focus {
-            background: var(--bg-card);
             box-shadow: 0 0 0 2px var(--primary-light);
         }
 
@@ -148,7 +205,7 @@
             overflow-y: auto;
             position: relative;
             padding: 20px;
-            padding-bottom: 90px;
+            padding-bottom: 90px; /* Space for FABs */
             display: none;
             animation: fadeIn 0.3s ease-out;
         }
@@ -251,7 +308,7 @@
             border-top-right-radius: 25px;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
             position: absolute;
-            bottom: var(--nav-height);
+            bottom: 0; /* Stick to bottom of viewport */
             left: 0;
             width: 100%;
             z-index: 20;
@@ -377,56 +434,6 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* --- BOTTOM NAV --- */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: var(--nav-height);
-            background: var(--bg-card);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
-            z-index: 40;
-            border-top-left-radius: 25px;
-            border-top-right-radius: 25px;
-            padding-bottom: 10px;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.7rem;
-            background: none;
-            border: none;
-            width: 20%;
-            height: 100%;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .nav-item i { font-size: 1.3rem; margin-bottom: 4px; transition: 0.3s; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item.active i { transform: translateY(-5px); }
-
-        .nav-badge {
-            position: absolute;
-            top: 15px;
-            margin-left: 15px;
-            background: var(--danger);
-            color: white;
-            font-size: 0.6rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            border: 2px solid var(--bg-card);
-        }
-
         /* --- MODALS --- */
         .modal {
             position: fixed;
@@ -494,10 +501,10 @@
         }
         #receipt-print-area { display: none; }
 
-        /* --- FAB --- */
+        /* --- FABS --- */
         .btn-add {
             position: fixed;
-            bottom: calc(var(--nav-height) + 20px);
+            bottom: 20px;
             right: 20px;
             width: 60px;
             height: 60px;
@@ -515,7 +522,7 @@
 
         .fab-scan {
             position: fixed;
-            bottom: 90px;
+            bottom: 20px;
             right: 20px;
             width: 56px; height: 56px;
             background: var(--text-main);
@@ -530,33 +537,57 @@
 </head>
 <body>
 
-    <!-- HEADER -->
+    <!-- HEADER (CONTAINS TOP NAVIGATION) -->
     <header class="no-print">
-        <div class="header-top">
-            <div>
-                <h1 class="app-title">Kasir<span style="color:var(--text-main)">Pro</span></h1>
-                <div class="header-subtitle">POS System v2.0</div>
-            </div>
-            <div style="font-size:0.8rem; text-align:right;">
-                <div id="clock" style="font-weight:700;">00:00</div>
-                <div style="color:var(--text-muted);" id="date-display">Senin, 1 Jan</div>
+        <div class="header-brand">
+            <h1 class="app-title">Kasir<span style="color:var(--text-main)">Pro</span></h1>
+            <div class="clock-badge">
+                <i class="far fa-clock"></i>
+                <span id="clock">00:00</span>
             </div>
         </div>
 
-        <!-- Categories & Search (Only on POS) -->
-        <div id="pos-controls">
-            <div class="category-tabs">
-                <div class="cat-tab active" onclick="app.filterCat('all', this)">Semua</div>
-                <div class="cat-tab" onclick="app.filterCat('makanan', this)">Makanan</div>
-                <div class="cat-tab" onclick="app.filterCat('minuman', this)">Minuman</div>
-                <div class="cat-tab" onclick="app.filterCat('snack', this)">Snack</div>
-            </div>
-            <div class="search-wrapper" id="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Cari nama barang..." onkeyup="app.filterPos()">
-            </div>
-        </div>
+        <!-- TOP NAVIGATION BAR (MOVED HERE) -->
+        <nav class="top-nav-bar no-print">
+            <button class="nav-item-top active" onclick="app.nav('pos')">
+                <i class="fas fa-th-large"></i>
+                <span>Produk</span>
+            </button>
+            <button class="nav-item-top" onclick="app.nav('cart')">
+                <div class="badge-wrapper">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-badge" class="nav-badge-top" style="display:none;">0</span>
+                </div>
+                <span>Keranjang</span>
+            </button>
+            <button class="nav-item-top" onclick="app.nav('history')">
+                <i class="fas fa-history"></i>
+                <span>Riwayat</span>
+            </button>
+            <button class="nav-item-top" onclick="app.nav('stock')">
+                <i class="fas fa-boxes"></i>
+                <span>Stok</span>
+            </button>
+            <button class="nav-item-top" onclick="app.nav('settings')">
+                <i class="fas fa-cog"></i>
+                <span>Setelan</span>
+            </button>
+        </nav>
     </header>
+
+    <!-- SUB-CONTROLS (Categories/Search) -->
+    <div id="pos-controls" class="controls-area no-print">
+        <div class="category-tabs">
+            <div class="cat-tab active" onclick="app.filterCat('all', this)">Semua</div>
+            <div class="cat-tab" onclick="app.filterCat('makanan', this)">Makanan</div>
+            <div class="cat-tab" onclick="app.filterCat('minuman', this)">Minuman</div>
+            <div class="cat-tab" onclick="app.filterCat('snack', this)">Snack</div>
+        </div>
+        <div class="search-wrapper" id="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Cari nama barang..." onkeyup="app.filterPos()">
+        </div>
+    </div>
 
     <!-- 1. POS PAGE -->
     <main id="page-pos" class="active">
@@ -614,7 +645,7 @@
         </button>
     </main>
 
-    <!-- 4. HISTORY PAGE (NEW) -->
+    <!-- 4. HISTORY PAGE -->
     <main id="page-history">
         <div style="margin-bottom: 20px;">
             <h2 style="margin:0; font-size:1.2rem;">Riwayat Transaksi</h2>
@@ -660,33 +691,6 @@
         </div>
     </main>
 
-    <!-- NAVIGATION -->
-    <nav class="nav-bar no-print">
-        <button class="nav-item active" onclick="app.nav('pos')">
-            <i class="fas fa-th-large"></i>
-            <span>Produk</span>
-        </button>
-        <button class="nav-item" onclick="app.nav('cart')">
-            <div style="position: relative;">
-                <i class="fas fa-shopping-cart"></i>
-                <span id="cart-badge" class="nav-badge" style="display:none;">0</span>
-            </div>
-            <span>Keranjang</span>
-        </button>
-        <button class="nav-item" onclick="app.nav('history')">
-            <i class="fas fa-history"></i>
-            <span>Riwayat</span>
-        </button>
-        <button class="nav-item" onclick="app.nav('stock')">
-            <i class="fas fa-boxes"></i>
-            <span>Stok</span>
-        </button>
-        <button class="nav-item" onclick="app.nav('settings')">
-            <i class="fas fa-cog"></i>
-            <span>Setelan</span>
-        </button>
-    </nav>
-
     <!-- MODAL PRODUCT -->
     <div id="modal-product" class="modal">
         <div class="modal-content">
@@ -715,7 +719,6 @@
                         </select>
                     </div>
                 </div>
-                <!-- Smart Stock Update -->
                 <div class="form-group" id="stock-mode-group">
                     <label class="form-label">Mode Stok</label>
                     <select id="p-stock-mode" class="form-select" onchange="app.toggleStockInput()">
@@ -794,20 +797,15 @@
                 this.renderHistory();
                 this.startClock();
                 
-                // Inputs init
                 document.getElementById('set-store-name').value = this.data.settings.storeName;
                 document.getElementById('set-address').value = this.data.settings.address;
                 document.getElementById('theme-toggle').checked = (this.data.settings.theme === 'dark');
-                
-                // Show search initially if on POS
-                document.getElementById('search-container').style.display = 'block';
             },
 
             startClock: function() {
                 setInterval(() => {
                     const now = new Date();
                     document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
-                    document.getElementById('date-display').innerText = now.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'short'});
                 }, 1000);
             },
 
@@ -816,9 +814,10 @@
                 document.querySelectorAll('main').forEach(el => el.classList.remove('active'));
                 document.getElementById('page-' + pageId).classList.add('active');
                 
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                // Update Top Nav Active State
+                document.querySelectorAll('.nav-item-top').forEach(el => el.classList.remove('active'));
                 const navIndex = ['pos', 'cart', 'history', 'stock', 'settings'].indexOf(pageId);
-                if(navIndex >= 0) document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
+                if(navIndex >= 0) document.querySelectorAll('.nav-item-top')[navIndex].classList.add('active');
 
                 const posControls = document.getElementById('pos-controls');
                 const searchContainer = document.getElementById('search-container');
@@ -1030,19 +1029,17 @@
                 }
                 const change = cash - total;
 
-                // Save Transaction
                 const transaction = {
                     id: Date.now(),
                     date: new Date().toISOString(),
-                    items: [...this.data.cart], // copy
+                    items: [...this.data.cart],
                     total: total,
                     cash: cash,
                     change: change
                 };
-                this.data.history.unshift(transaction); // Add to top
-                if(this.data.history.length > 50) this.data.history.pop(); // Limit history
+                this.data.history.unshift(transaction);
+                if(this.data.history.length > 50) this.data.history.pop();
 
-                // Print Prep
                 document.getElementById('print-items').innerHTML = transaction.items.map(c => 
                     `<div>${c.name}</div><div style="display:flex;justify-content:space-between;">${c.qty} x ${c.price} <span>${c.qty*c.price}</span></div>`
                 ).join('');
@@ -1053,7 +1050,6 @@
                 document.getElementById('print-cash').innerText = cash.toLocaleString('id-ID');
                 document.getElementById('print-change').innerText = change.toLocaleString('id-ID');
 
-                // Update Stock
                 this.data.cart.forEach(c => {
                     const idx = this.data.products.findIndex(p => p.id === c.id);
                     if(idx >= 0) this.data.products[idx].stock -= c.qty;
@@ -1065,7 +1061,7 @@
                 this.updateCartBadge();
                 document.getElementById('pay-input').value = "";
                 this.renderCart();
-                this.nav('pos'); // Go back to POS
+                this.nav('pos');
 
                 setTimeout(() => window.print(), 500);
                 this.showToast("Transaksi Berhasil");
@@ -1146,7 +1142,7 @@
                 document.getElementById('p-id').value = "";
                 document.getElementById('modal-title-text').innerText = "Tambah Barang";
                 document.getElementById('btn-delete').style.display = "none";
-                document.getElementById('stock-mode-group').style.display = 'none'; // Hide stock mode for new item
+                document.getElementById('stock-mode-group').style.display = 'none'; 
                 document.getElementById('modal-product').classList.add('open');
             },
 
@@ -1162,7 +1158,7 @@
                 
                 document.getElementById('modal-title-text').innerText = "Edit Barang";
                 document.getElementById('btn-delete').style.display = "block";
-                document.getElementById('stock-mode-group').style.display = 'block'; // Show stock mode for edit
+                document.getElementById('stock-mode-group').style.display = 'block'; 
                 document.getElementById('modal-product').classList.add('open');
             },
 
@@ -1174,7 +1170,6 @@
                 const barcode = document.getElementById('p-barcode').value;
 
                 if(id) {
-                    // Edit Mode
                     const idx = this.data.products.findIndex(x => x.id == id);
                     const stockMode = document.getElementById('p-stock-mode').value;
                     let newStock = parseInt(document.getElementById('p-stock').value);
@@ -1185,7 +1180,6 @@
 
                     this.data.products[idx] = { ...this.data.products[idx], name, price, category, stock: newStock, barcode };
                 } else {
-                    // Add Mode
                     const stock = parseInt(document.getElementById('p-stock').value);
                     this.data.products.push({ id: Date.now(), name, price, category, stock, barcode });
                 }
