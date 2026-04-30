@@ -2,15 +2,14 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kasir Pro (Clean Final)</title>
+    <!-- VIEWPORT PENTING AGAR TAMPILAN RAPI DI HP -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kasir Pro Mobile</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <!-- CSS BERSIH & RAPI -->
     <style>
         :root {
             --primary: #4f46e5;
-            --primary-dark: #4338ca;
             --bg-body: #f3f4f6;
             --bg-card: #ffffff;
             --text-main: #111827;
@@ -20,11 +19,11 @@
             --danger: #ef4444;
             --success: #10b981;
             --sidebar-width: 260px;
-            --sidebar-collapsed: 70px;
+            --sidebar-mobile: 70px;
             --nav-height: 60px;
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --radius-md: 8px;
+            --radius-md: 12px;
             --radius-lg: 16px;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         [data-theme="dark"] {
@@ -37,148 +36,157 @@
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0; padding: 0;
-            height: 100vh;
+            height: 100vh; /* Tinggi penuh layar HP */
+            height: 100dvh; /* Tinggi dinamis untuk mobile browser */
             display: flex;
             overflow: hidden;
+            touch-action: manipulation; /* Percepat reaksi sentuhan */
         }
 
-        /* --- SIDEBAR (KIRI) --- */
+        /* --- SIDEBAR (MOBILE FRIENDLY) --- */
         .sidebar {
-            width: var(--sidebar-collapsed);
+            width: var(--sidebar-mobile); /* Default mobile: collapsed */
             background: var(--bg-card);
-            border-right: 1px solid var(--border-color);
+            border-right:1px solid var(--border-color);
             display: flex; flex-direction: column;
             transition: width 0.3s ease;
             z-index: 50;
-            position: relative;
+            flex-shrink: 0;
         }
-        .sidebar.open { width: var(--sidebar-width); box-shadow: var(--shadow-md); }
         
-        .sidebar-header {
-            height: var(--nav-height);
-            display: flex; align-items: center; justify-content: center;
-            border-bottom: 1px solid var(--border-color);
-            overflow: hidden; white-space: nowrap;
+        /* Desktop: Lebar penuh, Mobile: Tetap kecil kecuali dibuka */
+        @media (min-width: 768px) {
+            .sidebar { width: var(--sidebar-width); }
+            .sidebar.collapsed { width: var(--sidebar-mobile); }
         }
+        @media (max-width: 767px) {
+            .sidebar { width: var(--sidebar-mobile); }
+            .sidebar.open { width: var(--sidebar-width); position: absolute; height: 100%; box-shadow: 10px 0 20px rgba(0,0,0,0.2); }
+        }
+
+        .sidebar-header { height: var(--nav-height); display: flex; align-items: center; justify-content: center; border-bottom:1px solid var(--border-color); overflow: hidden; white-space: nowrap; }
         .brand-text { font-weight: 800; font-size: 1.25rem; color: var(--primary); margin-left: 10px; display: none; }
+        .sidebar:not(.collapsed) .brand-text { display: block; }
         .sidebar.open .brand-text { display: block; }
 
         .menu-list { list-style: none; padding: 1rem 0; margin: 0; flex: 1; overflow-y: auto; }
         .menu-item {
-            display: flex; align-items: center; padding: 0.75rem 1.25rem;
+            display: flex; align-items: center; padding: 0.85rem 1rem;
             color: var(--text-muted); cursor: pointer; transition: 0.2s;
             text-decoration: none; overflow: hidden; white-space: nowrap;
             border-left: 3px solid transparent;
         }
-        .menu-item i { width: 24px; text-align: center; font-size: 1.2rem; }
-        .menu-label { margin-left: 1rem; font-weight: 500; opacity: 0; transition: 0.2s; }
+        .menu-item i { width: 28px; text-align: center; font-size: 1.3rem; }
+        .menu-label { margin-left: 1rem; font-weight: 600; font-size: 0.95rem; opacity: 0; transition: 0.2s; }
+        .sidebar:not(.collapsed) .menu-label { opacity: 1; }
         .sidebar.open .menu-label { opacity: 1; }
-        .menu-item:hover { background: var(--input-bg); color: var(--text-main); }
+
+        .menu-item:active { background: var(--input-bg); color: var(--text-main); }
         .menu-item.active { background: rgba(79, 70, 229, 0.1); color: var(--primary); border-left-color: var(--primary); }
 
-        .sidebar-footer { padding: 1rem; border-top: 1px solid var(--border-color); }
+        .sidebar-footer { padding: 1rem; border-top:1px solid var(--border-color); }
         .toggle-btn {
-            width: 100%; padding: 0.5rem; border-radius: var(--radius-md);
+            width: 100%; padding: 0.6rem; border-radius: var(--radius-md);
             background: var(--input-bg); border: 1px solid var(--border-color);
             color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
         .toggle-btn i { transition: 0.3s; }
         .sidebar.open .toggle-btn i { transform: rotate(180deg); }
 
-        /* --- CONTENT AREA --- */
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        /* --- MAIN CONTENT --- */
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; min-width: 0; }
+        
         .top-bar {
             height: var(--nav-height);
             background: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
+            border-bottom:1px solid var(--border-color);
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 1.5rem; flex-shrink: 0;
+            padding: 0 1rem; flex-shrink: 0;
         }
         .page-title { font-weight: 700; font-size: 1.1rem; }
         
         .content-scroll {
-            flex: 1; overflow-y: auto;
-            padding: 1.5rem;
-            padding-bottom: calc(var(--nav-height) + 1.5rem); /* Space for bottom nav */
+            flex: 1; overflow-y: auto; /* Scroll vertikal */
+            padding: 1rem;
+            padding-bottom: calc(var(--nav-height) + 2rem); /* Ruang untuk menu bawah */
             display: none; animation: fadeIn 0.3s ease;
         }
         .content-scroll.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- BOTTOM NAVIGATION --- */
+        /* --- BOTTOM NAV (MOBILE) --- */
         .bottom-nav {
-            position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px;
+            position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%);
+            width: 94%; max-width: 400px;
             background: var(--bg-card);
             border-radius: 1rem;
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
             display: flex; justify-content: space-around;
-            padding: 0.5rem; z-index: 40;
+            padding: 0.6rem; z-index: 40;
         }
         .b-nav-item {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 0.5rem; color: var(--text-muted); cursor: pointer; border-radius: 0.5rem;
-            font-size: 0.7rem; transition: 0.2s;
+            padding: 0.4rem; color: var(--text-muted); cursor: pointer; border-radius: 0.5rem; font-size: 0.7rem; transition: 0.2s;
         }
-        .b-nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
+        .b-nav-item i { font-size: 1.3rem; margin-bottom: 2px; }
         .b-nav-item.active { color: var(--primary); background: rgba(79, 70, 229, 0.05); }
 
-        /* --- COMPONENTS --- */
+        /* --- COMPONENTS TOUCH OPTIMIZED --- */
         .btn {
             display: inline-flex; align-items: center; justify-content: center;
-            padding: 0.6rem 1rem; border-radius: var(--radius-md); border: none;
-            font-weight: 600; cursor: pointer; transition: 0.2s; gap: 0.5rem; font-size: 0.9rem;
+            padding: 0.75rem 1rem; border-radius: var(--radius-md); border: none;
+            font-weight: 600; cursor: pointer; transition: 0.1s; gap: 0.5rem; font-size: 0.95rem;
         }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:active { transform: scale(0.98); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-ghost { background: transparent; color: var(--text-muted); }
         
         .card {
             background: var(--bg-card); border-radius: var(--radius-lg);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); border: 1px solid var(--border-color);
             padding: 1rem; margin-bottom: 0.75rem;
         }
 
         .input-field {
-            width: 100%; padding: 0.75rem; border: 1px solid var(--border-color);
+            width: 100%; padding: 0.9rem; border: 1px solid var(--border-color);
             background: var(--input-bg); border-radius: var(--radius-md);
             font-size: 1rem; color: var(--text-main); transition: border-color 0.2s;
+            -webkit-appearance: none; /* Hilangkan style iOS default */
         }
         .input-field:focus { border-color: var(--primary); }
 
         .filter-scroll { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.75rem; margin-bottom: 1rem; scrollbar-width: none; }
         .chip {
-            padding: 0.4rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color);
             border-radius: 2rem; font-size: 0.85rem; color: var(--text-muted); cursor: pointer;
             white-space: nowrap; transition: 0.2s;
         }
         .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* --- GRIDS & PRODUCTS --- */
+        /* --- GRID & PRODUCTS --- */
         .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
-        
         .product-card {
             background: var(--bg-card); border-radius: var(--radius-lg);
             padding: 0.75rem; cursor: pointer; border: 1px solid var(--border-color);
-            transition: 0.2s; position: relative;
+            transition: 0.1s; position: relative;
         }
-        .product-card:active { transform: scale(0.98); }
+        .product-card:active { background: #f9fafb; }
         .p-img {
-            width: 100%; height: 90px; background: #eef2ff; border-radius: var(--radius-md);
+            width: 100%; height: 100px; background: #eef2ff; border-radius: var(--radius-md);
             display: flex; align-items: center; justify-content: center; color: var(--primary);
-            font-size: 1.8rem; margin-bottom: 0.5rem;
+            font-size: 2rem; margin-bottom: 0.5rem;
         }
         .p-info h3 { margin: 0 0 0.25rem 0; font-size: 0.95rem; line-height: 1.3; }
-        .p-price { color: var(--primary); font-weight: 700; font-size: 1rem; }
-        .p-stock { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+        .p-price { color: var(--primary); font-weight: 700; font-size: 1.1rem; }
+        .p-stock { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 
         /* --- CHECKOUT DRAWER --- */
         .checkout-drawer {
@@ -192,43 +200,43 @@
 
         .money-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 1rem 0; }
         .btn-money {
-            padding: 0.6rem; background: var(--input-bg); border: 1px solid var(--border-color);
-            border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600; color: var(--text-main);
+            padding: 0.8rem; background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--text-main);
         }
         .btn-money:active { background: #c7d2fe; color: var(--primary); }
 
         /* --- STATS --- */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
         .stat-card { background: var(--primary); color: white; padding: 1rem; border-radius: var(--radius-lg); text-align: center; }
         .stat-card.secondary { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); }
         .stat-val { font-size: 1.25rem; font-weight: 800; margin: 0.25rem 0; }
 
         /* --- MODAL --- */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
             z-index: 100; display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: 0.3s;
         }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
         .modal-box {
-            background: var(--bg-card); width: 90%; max-width: 450px;
+            background: var(--bg-card); width: 92%; max-width: 420px;
             border-radius: 1.25rem; padding: 1.5rem; transform: scale(0.9); transition: 0.3s;
             max-height: 90vh; overflow-y: auto;
         }
         .modal-overlay.open .modal-box { transform: scale(1); }
 
-        /* --- UTILS --- */
+        /* --- FAB & TOAST --- */
         .fab {
-            position: fixed; bottom: 5.5rem; right: 1.5rem; width: 3.25rem; height: 3.25rem;
+            position: fixed; bottom: 5.5rem; right: 1.5rem; width: 3.5rem; height: 3.5rem;
             background: var(--primary); color: white; border-radius: 1rem;
             display: flex; align-items: center; justify-content: center;
             box-shadow: var(--shadow-md); border: none; cursor: pointer; z-index: 30;
         }
-        
         .toast-container { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 200; width: 90%; max-width: 350px; pointer-events: none; }
         .toast {
-            background: #1f2937; color: white; padding: 0.75rem 1rem; border-radius: 0.75rem;
+            background: #1f2937; color: white; padding: 0.85rem 1rem; border-radius: 0.75rem;
             margin-bottom: 0.5rem; box-shadow: var(--shadow-md); display: flex; align-items: center; gap: 0.75rem;
-            animation: slideDown 0.3s ease; pointer-events: auto;
+            animation: slideDown 0.3s ease; pointer-events: auto; font-size: 0.9rem;
         }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .toast.success i { color: var(--success); }
@@ -255,7 +263,7 @@
 <body>
 
     <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar collapsed" id="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-store" style="font-size:1.5rem; color:var(--primary);"></i>
             <span class="brand-text">Kasir<span style="color:var(--text-main)">Pro</span></span>
@@ -281,12 +289,12 @@
 
         <div class="sidebar-footer">
             <button class="toggle-btn" onclick="App.toggleSidebar()">
-                <i class="fas fa-chevron-left"></i>
+                <i class="fas fa-chevron-right"></i>
             </button>
         </div>
     </aside>
 
-    <!-- MAIN WRAPPER -->
+    <!-- MAIN CONTENT WRAPPER -->
     <div class="main-wrapper">
         <!-- TOP BAR -->
         <div class="top-bar no-print">
@@ -364,7 +372,7 @@
             </div>
         </div>
 
-        <!-- BOTTOM NAV -->
+        <!-- BOTTOM NAVIGATION (FLOATING) -->
         <nav class="bottom-nav no-print">
             <div class="b-nav-item active" onclick="App.nav('pos')"><i class="fas fa-cash-register"></i><span>Kasir</span></div>
             <div class="b-nav-item" onclick="App.nav('cart')">
@@ -376,7 +384,7 @@
 
     </div>
 
-    <!-- CHECKOUT DRAWER -->
+    <!-- CHECKOUT DRAWER (OVERLAY) -->
     <div class="checkout-drawer no-print" id="checkout-panel">
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1rem;">
             <div>
@@ -393,7 +401,7 @@
             <button class="btn-money" style="color:var(--danger)" onclick="document.getElementById('pay-input').value=''; App.calcChange()"><i class="fas fa-times"></i></button>
         </div>
         <div style="position:relative; margin-bottom:1rem;">
-            <input type="text" id="pay-input" class="input-field" placeholder="Jumlah Uang (Rp)" onkeyup="App.handlePaymentInput(this)">
+            <input type="number" id="pay-input" class="input-field" placeholder="Jumlah Uang (Rp)" inputmode="numeric" onkeyup="App.handlePaymentInput(this)">
             <div style="position:absolute; right:1rem; top:50%; transform:translateY(-50%); font-size:0.85rem;" id="change-display"></div>
         </div>
         <button class="btn btn-primary" style="width:100%; height:3rem; font-size:1.1rem;" onclick="App.processCheckout()">
@@ -507,47 +515,58 @@
             },
 
             // --- NAVIGATION ---
-            toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); },
-            
-            toggleCheckout(show) {
-                const el = document.getElementById('checkout-panel');
-                el.classList.toggle('open', show);
+            toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                if(window.innerWidth < 768) {
+                    sidebar.classList.toggle('open'); // Mobile: Slide out
+                } else {
+                    sidebar.classList.toggle('collapsed'); // Desktop: Collapse
+                }
             },
 
             nav(pageId) {
+                // Hide all pages
                 document.querySelectorAll('.content-scroll').forEach(el => el.classList.remove('active'));
                 document.getElementById('page-' + pageId).classList.add('active');
                 
+                // Update Sidebar Active State
                 document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-                const sIdx = ['pos','cart','analytics','products','settings'].indexOf(pageId);
-                if(sIdx >= 0) document.querySelectorAll('.menu-item')[sIdx].classList.add('active');
+                const sidebarIdx = ['pos','cart','analytics','products','settings'].indexOf(pageId);
+                if(sidebarIdx >= 0) document.querySelectorAll('.menu-item')[sidebarIdx].classList.add('active');
 
+                // Update Bottom Nav Active State
                 document.querySelectorAll('.b-nav-item').forEach(el => el.classList.remove('active'));
                 if(['pos','cart','analytics'].includes(pageId)) {
-                    const bIdx = ['pos','cart','analytics'].indexOf(pageId);
-                    document.querySelectorAll('.b-nav-item')[bIdx].classList.add('active');
+                    const bottomIdx = ['pos','cart','analytics'].indexOf(pageId);
+                    document.querySelectorAll('.b-nav-item')[bottomIdx].classList.add('active');
                 }
 
+                // Page Title Update
                 const titles = { pos: "Kasir", cart: "Pesanan", analytics: "Laporan", products: "Inventaris", settings: "Pengaturan" };
                 document.getElementById('page-title-display').innerText = titles[pageId];
 
+                // Show/Hide Checkout Drawer
+                const drawer = document.getElementById('checkout-panel');
                 if (pageId === 'cart') {
-                    this.toggleCheckout(true);
+                    drawer.classList.add('open'); // Show drawer
                     this.renderCart();
                 } else {
-                    this.toggleCheckout(false);
+                    drawer.classList.remove('open'); // Hide drawer
                 }
 
                 if (pageId === 'analytics') this.renderStats();
                 if (pageId === 'products') this.renderInventory();
-
-                if(window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
+                
+                // Mobile: Auto close sidebar after selection
+                if(window.innerWidth < 768) {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
             },
 
-            // --- CORE ---
-            save() { localStorage.setItem('kasir_pro_clean', JSON.stringify(this.data)); },
+            // --- CORE SYSTEM ---
+            save() { localStorage.setItem('kasir_pro_mobile_final', JSON.stringify(this.data)); },
             load() {
-                const saved = localStorage.getItem('kasir_pro_clean');
+                const saved = localStorage.getItem('kasir_pro_mobile_final');
                 if (saved) { this.data = JSON.parse(saved); }
                 else {
                     this.data.products = [
@@ -605,26 +624,32 @@
             addToCart(id) {
                 const prod = this.data.products.find(x => x.id === id);
                 const inCart = this.data.cart.find(x => x.id === id);
-                if(inCart) { if(inCart.qty < prod.stock) inCart.qty++; else this.toast("Stok habis", 'error'); }
+                const currQty = inCart ? inCart.qty : 0;
+                if (currQty >= prod.stock) return this.toast("Stok tidak mencukupi!", 'error');
+                if (inCart) inCart.qty++;
                 else this.data.cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1, maxStock: prod.stock });
                 this.updateBadge();
-                this.toast("Masuk keranjang");
+                this.toast("Ditambahkan");
             },
             updateBadge() {
                 const total = this.data.cart.reduce((a,b) => a + b.qty, 0);
                 const badge = document.getElementById('cart-badge');
-                badge.innerText = total; badge.style.display = total > 0 ? 'block' : 'none';
+                badge.innerText = total;
+                badge.style.display = total > 0 ? 'block' : 'none';
             },
             renderCart() {
                 const cont = document.getElementById('cart-container');
-                cont.innerHTML = ""; let grandTotal = 0;
+                cont.innerHTML = "";
+                let grandTotal = 0;
                 if (this.data.cart.length === 0) {
                     cont.innerHTML = `<div style="text-align:center; padding:3rem; color:var(--text-muted);"><i class="fas fa-shopping-basket" style="font-size:3rem; margin-bottom:1rem; opacity:0.3;"></i><br>Keranjang Kosong</div>`;
-                    document.getElementById('cart-total-display').innerText = "Rp 0"; document.getElementById('cart-total-display').dataset.val = 0;
+                    document.getElementById('cart-total-display').innerText = "Rp 0";
+                    document.getElementById('cart-total-display').dataset.val = 0;
                     return;
                 }
                 this.data.cart.forEach((item, idx) => {
-                    grandTotal += item.price * item.qty;
+                    const total = item.price * item.qty;
+                    grandTotal += total;
                     const el = document.createElement('div');
                     el.className = 'card';
                     el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.alignItems = 'center';
@@ -647,23 +672,34 @@
             },
             modQty(idx, delta) {
                 const item = this.data.cart[idx];
-                if (delta > 0) { if(item.qty < item.maxStock) item.qty++; else this.toast("Maks stok", 'error'); }
-                else { item.qty--; if(item.qty <= 0) this.data.cart.splice(idx, 1); }
-                this.renderCart(); this.updateBadge();
+                if (delta > 0) {
+                    if (item.qty < item.maxStock) item.qty++;
+                    else this.toast("Stok maksimal", 'error');
+                } else {
+                    item.qty--;
+                    if (item.qty <= 0) this.data.cart.splice(idx, 1);
+                }
+                this.renderCart();
+                this.updateBadge();
             },
             setMoney(amount) {
                 const total = parseFloat(document.getElementById('cart-total-display').dataset.val || 0);
-                document.getElementById('pay-input').value = (amount === 'exact') ? total : amount;
+                const val = amount === 'exact' ? total : amount;
+                document.getElementById('pay-input').value = val;
                 this.handlePaymentInput(document.getElementById('pay-input'));
             },
             handlePaymentInput(el) {
                 const total = parseFloat(document.getElementById('cart-total-display').dataset.val || 0);
-                const cash = parseFloat(el.value.replace(/\D/g,''));
-                el.value = isNaN(cash) ? "" : cash;
+                const cash = parseFloat(el.value);
                 const change = cash - total;
                 const display = document.getElementById('change-display');
-                if (change >= 0) { display.innerText = "Kembali: " + this.format(change); display.style.color = "var(--success)"; }
-                else { display.innerText = "Kurang: " + this.format(Math.abs(change)); display.style.color = "var(--danger)"; }
+                if (change >= 0) {
+                    display.innerText = "Kembali: " + this.format(change);
+                    display.style.color = "var(--success)";
+                } else {
+                    display.innerText = "Kurang: " + this.format(Math.abs(change));
+                    display.style.color = "var(--danger)";
+                }
             },
             processCheckout() {
                 if (this.data.cart.length === 0) return;
@@ -673,18 +709,31 @@
                 const change = cash - total;
                 const txId = Date.now();
 
-                this.data.transactions.unshift({ id: txId, date: new Date().toISOString(), items: JSON.parse(JSON.stringify(this.data.cart)), total: total, cash: cash, change: change });
-                this.data.cart.forEach(c => { const p = this.data.products.find(x => x.id === c.id); if(p) p.stock -= c.qty; });
+                this.data.transactions.unshift({
+                    id: txId, date: new Date().toISOString(),
+                    items: JSON.parse(JSON.stringify(this.data.cart)),
+                    total: total, cash: cash, change: change
+                });
+                this.data.cart.forEach(c => {
+                    const p = this.data.products.find(x => x.id === c.id);
+                    if(p) p.stock -= c.qty;
+                });
 
-                // PRINT SETUP
                 document.getElementById('print-name').innerText = this.data.config.name;
                 document.getElementById('print-addr').innerText = this.data.config.address;
-                document.getElementById('print-items').innerHTML = this.data.cart.map(c => `<div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;"><span>${c.name} x${c.qty}</span><span>${c.price * c.qty}</span></div>`).join('');
+                document.getElementById('print-items').innerHTML = this.data.cart.map(c => 
+                    `<div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;"><span>${c.name} x${c.qty}</span><span>${c.price * c.qty}</span></div>`
+                ).join('');
                 document.getElementById('print-total').innerText = total.toLocaleString('id-ID');
                 document.getElementById('print-cash').innerText = cash.toLocaleString('id-ID');
                 document.getElementById('print-change').innerText = change.toLocaleString('id-ID');
 
-                this.data.cart = []; this.updateBadge(); this.save(); this.renderCart(); this.renderProducts(); this.nav('pos');
+                this.data.cart = [];
+                this.updateBadge();
+                this.save();
+                this.renderCart();
+                this.renderProducts();
+                this.nav('pos');
 
                 setTimeout(() => window.print(), 500);
                 this.toast("Sukses");
@@ -692,10 +741,12 @@
 
             // --- INVENTORY & STATS ---
             renderInventory() {
-                const list = document.getElementById('inventory-list'); list.innerHTML = "";
+                const list = document.getElementById('inventory-list');
+                list.innerHTML = "";
                 this.data.products.forEach(p => {
                     const el = document.createElement('div');
-                    el.className = 'card'; el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.alignItems = 'center';
+                    el.className = 'card';
+                    el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.alignItems = 'center';
                     el.innerHTML = `
                         <div onclick="App.editProduct(${p.id})" style="cursor:pointer;">
                             <div style="font-weight:700;">${p.name}</div>
@@ -712,8 +763,8 @@
                 const omzet = todayTx.reduce((a,b) => a + b.total, 0);
                 document.getElementById('stat-today').innerText = this.format(omzet);
                 document.getElementById('stat-tx-today').innerText = todayTx.length + " Transaksi";
-
-                const list = document.getElementById('history-list'); list.innerHTML = "";
+                const list = document.getElementById('history-list');
+                list.innerHTML = "";
                 this.data.transactions.slice(0, 20).forEach(t => {
                     const d = new Date(t.date);
                     const el = document.createElement('div');
@@ -730,7 +781,9 @@
                 if(!t) return;
                 document.getElementById('print-name').innerText = this.data.config.name;
                 document.getElementById('print-addr').innerText = this.data.config.address;
-                document.getElementById('print-items').innerHTML = t.items.map(c => `<div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;"><span>${c.name} x${c.qty}</span><span>${c.price * c.qty}</span></div>`).join('');
+                document.getElementById('print-items').innerHTML = t.items.map(c => 
+                    `<div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;"><span>${c.name} x${c.qty}</span><span>${c.price * c.qty}</span></div>`
+                ).join('');
                 document.getElementById('print-total').innerText = t.total.toLocaleString('id-ID');
                 document.getElementById('print-cash').innerText = t.cash.toLocaleString('id-ID');
                 document.getElementById('print-change').innerText = t.change.toLocaleString('id-ID');
@@ -774,13 +827,21 @@
                     const stock = parseInt(document.getElementById('inp-stock').value);
                     this.data.products.push({ id: Date.now(), name, price, category: cat, stock, barcode });
                 }
-                this.save(); this.renderProducts(); this.renderInventory(); this.closeModal('modal-product'); this.toast("Disimpan");
+                this.save();
+                this.renderProducts();
+                this.renderInventory();
+                this.closeModal('modal-product');
+                this.toast("Disimpan");
             },
             deleteProduct() {
                 if(!confirm("Hapus produk ini?")) return;
                 const id = document.getElementById('inp-id').value;
                 this.data.products = this.data.products.filter(p => p.id != id);
-                this.save(); this.renderProducts(); this.renderInventory(); this.closeModal('modal-product'); this.toast("Dihapus");
+                this.save();
+                this.renderProducts();
+                this.renderInventory();
+                this.closeModal('modal-product');
+                this.toast("Dihapus");
             },
             exportCSV() {
                 let csv = "ID,Nama,Kategori,Harga,Stok,Barcode\n";
@@ -793,18 +854,16 @@
             saveConfig() {
                 this.data.config.name = document.getElementById('conf-name').value;
                 this.data.config.address = document.getElementById('conf-address').value;
-                this.save(); this.toast("Tersimpan");
+                this.save();
+                this.toast("Tersimpan");
             },
             hardReset() {
                 if(confirm("YAKIN? SEMUA DATA AKAN HILANG!")) {
-                    localStorage.removeItem('kasir_pro_clean');
+                    localStorage.removeItem('kasir_pro_mobile_final');
                     location.reload();
                 }
             },
-            closeModal(id) {
-                document.getElementById(id).classList.remove('open');
-                if(id === 'modal-scan' && this.data.scanner) this.data.scanner.stop().catch(()=>{});
-            },
+            closeModal(id) { document.getElementById(id).classList.remove('open'); if(id === 'modal-scan' && this.data.scanner) this.data.scanner.stop().catch(()=>{}); },
             openScanner(target='pos') {
                 this.data.scanTarget = target;
                 document.getElementById('modal-scan').classList.add('open');
