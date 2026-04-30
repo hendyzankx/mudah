@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kasir Pro (Modern Menu)</title>
+    <title>Kasir Pro (Clean Final)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- CSS BERSIH & RAPI -->
     <style>
-        /* --- VARIABLES --- */
         :root {
-            --primary: #4f46e5; /* Indigo Modern */
+            --primary: #4f46e5;
             --primary-dark: #4338ca;
             --bg-body: #f3f4f6;
             --bg-card: #ffffff;
@@ -20,12 +21,10 @@
             --success: #10b981;
             --sidebar-width: 260px;
             --sidebar-collapsed: 70px;
-            --nav-height: 65px;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --nav-height: 60px;
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --radius-md: 0.5rem;
-            --radius-lg: 1rem;
+            --radius-md: 8px;
+            --radius-lg: 16px;
         }
 
         [data-theme="dark"] {
@@ -37,10 +36,9 @@
             --input-bg: #374151;
         }
 
-        /* --- RESET --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0; padding: 0;
@@ -49,32 +47,25 @@
             overflow: hidden;
         }
 
-        /* --- SIDEBAR (LEFT MENU) --- */
+        /* --- SIDEBAR (KIRI) --- */
         .sidebar {
             width: var(--sidebar-collapsed);
             background: var(--bg-card);
             border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             transition: width 0.3s ease;
             z-index: 50;
             position: relative;
         }
-        .sidebar.open { width: var(--sidebar-width); box-shadow: var(--shadow-lg); }
+        .sidebar.open { width: var(--sidebar-width); box-shadow: var(--shadow-md); }
         
         .sidebar-header {
             height: var(--nav-height);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             border-bottom: 1px solid var(--border-color);
-            overflow: hidden;
-            white-space: nowrap;
+            overflow: hidden; white-space: nowrap;
         }
-        .brand-text {
-            font-weight: 800; font-size: 1.25rem; color: var(--primary);
-            margin-left: 10px; display: none;
-        }
+        .brand-text { font-weight: 800; font-size: 1.25rem; color: var(--primary); margin-left: 10px; display: none; }
         .sidebar.open .brand-text { display: block; }
 
         .menu-list { list-style: none; padding: 1rem 0; margin: 0; flex: 1; overflow-y: auto; }
@@ -87,12 +78,8 @@
         .menu-item i { width: 24px; text-align: center; font-size: 1.2rem; }
         .menu-label { margin-left: 1rem; font-weight: 500; opacity: 0; transition: 0.2s; }
         .sidebar.open .menu-label { opacity: 1; }
-        
         .menu-item:hover { background: var(--input-bg); color: var(--text-main); }
-        .menu-item.active {
-            background: rgba(79, 70, 229, 0.1); color: var(--primary);
-            border-left-color: var(--primary);
-        }
+        .menu-item.active { background: rgba(79, 70, 229, 0.1); color: var(--primary); border-left-color: var(--primary); }
 
         .sidebar-footer { padding: 1rem; border-top: 1px solid var(--border-color); }
         .toggle-btn {
@@ -103,53 +90,36 @@
         .toggle-btn i { transition: 0.3s; }
         .sidebar.open .toggle-btn i { transform: rotate(180deg); }
 
-        /* --- MAIN CONTENT AREA --- */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-
+        /* --- CONTENT AREA --- */
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         .top-bar {
             height: var(--nav-height);
             background: var(--bg-card);
             border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1.5rem;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 1.5rem; flex-shrink: 0;
         }
         .page-title { font-weight: 700; font-size: 1.1rem; }
-        .top-bar-right { display: flex; align-items: center; gap: 1rem; }
-        .clock-display { font-size: 0.85rem; color: var(--text-muted); background: var(--input-bg); padding: 4px 10px; border-radius: 20px; }
-
+        
         .content-scroll {
-            flex: 1;
-            overflow-y: auto;
+            flex: 1; overflow-y: auto;
             padding: 1.5rem;
-            padding-bottom: calc(var(--nav-height) + 1rem); /* Space for bottom nav */
-            display: none;
-            animation: fadeIn 0.3s ease;
+            padding-bottom: calc(var(--nav-height) + 1.5rem); /* Space for bottom nav */
+            display: none; animation: fadeIn 0.3s ease;
         }
         .content-scroll.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- BOTTOM NAVIGATION (Floating) --- */
+        /* --- BOTTOM NAVIGATION --- */
         .bottom-nav {
-            position: fixed;
-            bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 400px;
             background: var(--bg-card);
             border-radius: 1rem;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            padding: 0.5rem;
-            z-index: 40;
+            display: flex; justify-content: space-around;
+            padding: 0.5rem; z-index: 40;
         }
         .b-nav-item {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -158,21 +128,21 @@
         }
         .b-nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
         .b-nav-item.active { color: var(--primary); background: rgba(79, 70, 229, 0.05); }
-        
+
         /* --- COMPONENTS --- */
         .btn {
             display: inline-flex; align-items: center; justify-content: center;
             padding: 0.6rem 1rem; border-radius: var(--radius-md); border: none;
             font-weight: 600; cursor: pointer; transition: 0.2s; gap: 0.5rem; font-size: 0.9rem;
         }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3); }
+        .btn-primary { background: var(--primary); color: white; }
         .btn-primary:active { transform: scale(0.98); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-ghost { background: transparent; color: var(--text-muted); }
         
         .card {
             background: var(--bg-card); border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border-color);
             padding: 1rem; margin-bottom: 0.75rem;
         }
 
@@ -191,11 +161,10 @@
         }
         .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* --- GRIDS --- */
+        /* --- GRIDS & PRODUCTS --- */
         .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
-
-        /* --- PRODUCTS --- */
+        
         .product-card {
             background: var(--bg-card); border-radius: var(--radius-lg);
             padding: 0.75rem; cursor: pointer; border: 1px solid var(--border-color);
@@ -209,17 +178,17 @@
         }
         .p-info h3 { margin: 0 0 0.25rem 0; font-size: 0.95rem; line-height: 1.3; }
         .p-price { color: var(--primary); font-weight: 700; font-size: 1rem; }
-        .p-stock { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+        .p-stock { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
 
-        /* --- CART DRAWER --- */
+        /* --- CHECKOUT DRAWER --- */
         .checkout-drawer {
             background: var(--bg-card); padding: 1.25rem;
             border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
             position: fixed; bottom: 0; left: 0; width: 100%; z-index: 40;
-            animation: slideUp 0.3s ease-out;
+            transition: transform 0.3s ease-out; transform: translateY(100%);
         }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .checkout-drawer.open { transform: translateY(0); }
 
         .money-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 1rem 0; }
         .btn-money {
@@ -232,7 +201,6 @@
         .stat-card { background: var(--primary); color: white; padding: 1rem; border-radius: var(--radius-lg); text-align: center; }
         .stat-card.secondary { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); }
         .stat-val { font-size: 1.25rem; font-weight: 800; margin: 0.25rem 0; }
-        .stat-label { font-size: 0.75rem; opacity: 0.9; }
 
         /* --- MODAL --- */
         .modal-overlay {
@@ -248,13 +216,14 @@
         }
         .modal-overlay.open .modal-box { transform: scale(1); }
 
-        /* --- FAB & TOAST --- */
+        /* --- UTILS --- */
         .fab {
             position: fixed; bottom: 5.5rem; right: 1.5rem; width: 3.25rem; height: 3.25rem;
             background: var(--primary); color: white; border-radius: 1rem;
             display: flex; align-items: center; justify-content: center;
             box-shadow: var(--shadow-md); border: none; cursor: pointer; z-index: 30;
         }
+        
         .toast-container { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 200; width: 90%; max-width: 350px; pointer-events: none; }
         .toast {
             background: #1f2937; color: white; padding: 0.75rem 1rem; border-radius: 0.75rem;
@@ -265,7 +234,7 @@
         .toast.success i { color: var(--success); }
         .toast.error i { color: var(--danger); }
 
-        /* --- PRINT --- */
+        /* --- PRINT CSS --- */
         #print-area {
             position: absolute; left: -9999px; top: 0; background: white;
             color: black; padding: 20px; font-family: 'Courier New', monospace;
@@ -285,7 +254,7 @@
 </head>
 <body>
 
-    <!-- SIDEBAR MENU -->
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-store" style="font-size:1.5rem; color:var(--primary);"></i>
@@ -294,24 +263,19 @@
         
         <ul class="menu-list">
             <li class="menu-item active" onclick="App.nav('pos')">
-                <i class="fas fa-cash-register"></i>
-                <span class="menu-label">Kasir</span>
+                <i class="fas fa-cash-register"></i><span class="menu-label">Kasir</span>
             </li>
             <li class="menu-item" onclick="App.nav('cart')">
-                <i class="fas fa-shopping-basket"></i>
-                <span class="menu-label">Pesanan</span>
+                <i class="fas fa-shopping-basket"></i><span class="menu-label">Pesanan</span>
             </li>
             <li class="menu-item" onclick="App.nav('analytics')">
-                <i class="fas fa-chart-pie"></i>
-                <span class="menu-label">Laporan</span>
+                <i class="fas fa-chart-pie"></i><span class="menu-label">Laporan</span>
             </li>
             <li class="menu-item" onclick="App.nav('products')">
-                <i class="fas fa-box-open"></i>
-                <span class="menu-label">Produk</span>
+                <i class="fas fa-box-open"></i><span class="menu-label">Produk</span>
             </li>
             <li class="menu-item" onclick="App.nav('settings')">
-                <i class="fas fa-cog"></i>
-                <span class="menu-label">Pengaturan</span>
+                <i class="fas fa-cog"></i><span class="menu-label">Pengaturan</span>
             </li>
         </ul>
 
@@ -322,14 +286,12 @@
         </div>
     </aside>
 
-    <!-- MAIN CONTENT WRAPPER -->
-    <div class="main-content">
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
         <!-- TOP BAR -->
         <div class="top-bar no-print">
             <div class="page-title" id="page-title-display">Kasir</div>
-            <div class="top-bar-right">
-                <div class="clock-display" id="clock-time">00:00</div>
-            </div>
+            <div id="clock-time" style="font-size:0.85rem; color:var(--text-muted);">00:00</div>
         </div>
 
         <!-- 1. POS PAGE -->
@@ -340,7 +302,7 @@
                 <div class="chip" onclick="App.filterCat('minuman', this)">Minuman</div>
                 <div class="chip" onclick="App.filterCat('snack', this)">Snack</div>
             </div>
-            <div style="margin-bottom: 1rem; position: relative;">
+            <div style="margin-bottom:1rem;">
                 <input type="text" class="input-field" placeholder="Cari produk..." onkeyup="App.searchProducts(this.value)">
             </div>
             <div id="product-list" class="grid-2"></div>
@@ -358,15 +320,15 @@
             <h2 style="margin-top:0;">Laporan Penjualan</h2>
             <div class="stat-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Omzet Hari Ini</div>
+                    <div style="font-size:0.75rem; opacity:0.9;">Omzet Hari Ini</div>
                     <div class="stat-val" id="stat-today">Rp 0</div>
                 </div>
                 <div class="stat-card secondary">
-                    <div class="stat-label">Transaksi</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">Transaksi</div>
                     <div class="stat-val" id="stat-tx-today">0</div>
                 </div>
             </div>
-            <h3 style="margin-bottom: 0.75rem;">Riwayat Transaksi</h3>
+            <h3 style="margin-bottom:0.75rem;">Riwayat Transaksi</h3>
             <div id="history-list"></div>
         </div>
 
@@ -402,7 +364,7 @@
             </div>
         </div>
 
-        <!-- BOTTOM NAVIGATION (FLOATING) -->
+        <!-- BOTTOM NAV -->
         <nav class="bottom-nav no-print">
             <div class="b-nav-item active" onclick="App.nav('pos')"><i class="fas fa-cash-register"></i><span>Kasir</span></div>
             <div class="b-nav-item" onclick="App.nav('cart')">
@@ -414,7 +376,7 @@
 
     </div>
 
-    <!-- CHECKOUT DRAWER (OVERLAY) -->
+    <!-- CHECKOUT DRAWER -->
     <div class="checkout-drawer no-print" id="checkout-panel">
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1rem;">
             <div>
@@ -437,7 +399,7 @@
         <button class="btn btn-primary" style="width:100%; height:3rem; font-size:1.1rem;" onclick="App.processCheckout()">
             Bayar Sekarang <i class="fas fa-arrow-right"></i>
         </button>
-        <div style="text-align:center; margin-top:0.5rem; font-size:0.8rem; color:var(--text-muted); cursor:pointer;" onclick="document.getElementById('checkout-panel').style.transform='translateY(100%)'">
+        <div style="text-align:center; margin-top:0.5rem; font-size:0.8rem; color:var(--text-muted); cursor:pointer;" onclick="App.toggleCheckout(false)">
             Tutup Panel <i class="fas fa-chevron-down"></i>
         </div>
     </div>
@@ -544,54 +506,48 @@
                 setInterval(() => this.updateClock(), 60000);
             },
 
-            // --- MENU NAVIGATION ---
-            toggleSidebar() {
-                document.getElementById('sidebar').classList.toggle('open');
+            // --- NAVIGATION ---
+            toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); },
+            
+            toggleCheckout(show) {
+                const el = document.getElementById('checkout-panel');
+                el.classList.toggle('open', show);
             },
 
             nav(pageId) {
-                // Hide all pages
                 document.querySelectorAll('.content-scroll').forEach(el => el.classList.remove('active'));
                 document.getElementById('page-' + pageId).classList.add('active');
                 
-                // Update Sidebar Active State
                 document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-                const sidebarIdx = ['pos','cart','analytics','products','settings'].indexOf(pageId);
-                if(sidebarIdx >= 0) document.querySelectorAll('.menu-item')[sidebarIdx].classList.add('active');
+                const sIdx = ['pos','cart','analytics','products','settings'].indexOf(pageId);
+                if(sIdx >= 0) document.querySelectorAll('.menu-item')[sIdx].classList.add('active');
 
-                // Update Bottom Nav Active State
                 document.querySelectorAll('.b-nav-item').forEach(el => el.classList.remove('active'));
                 if(['pos','cart','analytics'].includes(pageId)) {
-                    const bottomIdx = ['pos','cart','analytics'].indexOf(pageId);
-                    document.querySelectorAll('.b-nav-item')[bottomIdx].classList.add('active');
+                    const bIdx = ['pos','cart','analytics'].indexOf(pageId);
+                    document.querySelectorAll('.b-nav-item')[bIdx].classList.add('active');
                 }
 
-                // Page Title Update
                 const titles = { pos: "Kasir", cart: "Pesanan", analytics: "Laporan", products: "Inventaris", settings: "Pengaturan" };
                 document.getElementById('page-title-display').innerText = titles[pageId];
 
-                // Show/Hide Checkout Drawer
-                const drawer = document.getElementById('checkout-panel');
                 if (pageId === 'cart') {
-                    drawer.style.transform = 'translateY(0)'; // Show drawer
+                    this.toggleCheckout(true);
                     this.renderCart();
                 } else {
-                    drawer.style.transform = 'translateY(100%)'; // Hide drawer
+                    this.toggleCheckout(false);
                 }
 
                 if (pageId === 'analytics') this.renderStats();
                 if (pageId === 'products') this.renderInventory();
-                
-                // Mobile: Close sidebar automatically after selection on mobile view
-                if(window.innerWidth < 768) {
-                    document.getElementById('sidebar').classList.remove('open');
-                }
+
+                if(window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
             },
 
-            // --- CORE SYSTEM ---
-            save() { localStorage.setItem('kasir_pro_menu_modern', JSON.stringify(this.data)); },
+            // --- CORE ---
+            save() { localStorage.setItem('kasir_pro_clean', JSON.stringify(this.data)); },
             load() {
-                const saved = localStorage.getItem('kasir_pro_menu_modern');
+                const saved = localStorage.getItem('kasir_pro_clean');
                 if (saved) { this.data = JSON.parse(saved); }
                 else {
                     this.data.products = [
@@ -614,10 +570,7 @@
                 setTimeout(() => el.remove(), 3000);
             },
             format(num) { return 'Rp ' + parseInt(num || 0).toLocaleString('id-ID'); },
-            updateClock() {
-                const now = new Date();
-                document.getElementById('clock-time').innerText = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-            },
+            updateClock() { document.getElementById('clock-time').innerText = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}); },
 
             // --- POS ---
             filterCat(cat, el) {
@@ -631,10 +584,7 @@
                 const list = document.getElementById('product-list');
                 list.innerHTML = "";
                 let items = this.data.products.filter(p => p.name.toLowerCase().includes(q.toLowerCase()) && (this.data.catFilter === 'all' || p.category === this.data.catFilter));
-                if(items.length === 0) {
-                    list.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem; color:var(--text-muted);">Produk tidak ditemukan</div>`;
-                    return;
-                }
+                if(items.length === 0) { list.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem; color:var(--text-muted);">Produk tidak ditemukan</div>`; return; }
                 items.forEach(p => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
@@ -655,32 +605,26 @@
             addToCart(id) {
                 const prod = this.data.products.find(x => x.id === id);
                 const inCart = this.data.cart.find(x => x.id === id);
-                const currQty = inCart ? inCart.qty : 0;
-                if (currQty >= prod.stock) return this.toast("Stok tidak mencukupi!", 'error');
-                if (inCart) inCart.qty++;
+                if(inCart) { if(inCart.qty < prod.stock) inCart.qty++; else this.toast("Stok habis", 'error'); }
                 else this.data.cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1, maxStock: prod.stock });
                 this.updateBadge();
-                this.toast("Ditambahkan");
+                this.toast("Masuk keranjang");
             },
             updateBadge() {
                 const total = this.data.cart.reduce((a,b) => a + b.qty, 0);
                 const badge = document.getElementById('cart-badge');
-                badge.innerText = total;
-                badge.style.display = total > 0 ? 'block' : 'none';
+                badge.innerText = total; badge.style.display = total > 0 ? 'block' : 'none';
             },
             renderCart() {
                 const cont = document.getElementById('cart-container');
-                cont.innerHTML = "";
-                let grandTotal = 0;
+                cont.innerHTML = ""; let grandTotal = 0;
                 if (this.data.cart.length === 0) {
                     cont.innerHTML = `<div style="text-align:center; padding:3rem; color:var(--text-muted);"><i class="fas fa-shopping-basket" style="font-size:3rem; margin-bottom:1rem; opacity:0.3;"></i><br>Keranjang Kosong</div>`;
-                    document.getElementById('cart-total-display').innerText = "Rp 0";
-                    document.getElementById('cart-total-display').dataset.val = 0;
+                    document.getElementById('cart-total-display').innerText = "Rp 0"; document.getElementById('cart-total-display').dataset.val = 0;
                     return;
                 }
                 this.data.cart.forEach((item, idx) => {
-                    const total = item.price * item.qty;
-                    grandTotal += total;
+                    grandTotal += item.price * item.qty;
                     const el = document.createElement('div');
                     el.className = 'card';
                     el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.alignItems = 'center';
@@ -703,20 +647,13 @@
             },
             modQty(idx, delta) {
                 const item = this.data.cart[idx];
-                if (delta > 0) {
-                    if (item.qty < item.maxStock) item.qty++;
-                    else this.toast("Stok maksimal", 'error');
-                } else {
-                    item.qty--;
-                    if (item.qty <= 0) this.data.cart.splice(idx, 1);
-                }
-                this.renderCart();
-                this.updateBadge();
+                if (delta > 0) { if(item.qty < item.maxStock) item.qty++; else this.toast("Maks stok", 'error'); }
+                else { item.qty--; if(item.qty <= 0) this.data.cart.splice(idx, 1); }
+                this.renderCart(); this.updateBadge();
             },
             setMoney(amount) {
                 const total = parseFloat(document.getElementById('cart-total-display').dataset.val || 0);
-                const val = amount === 'exact' ? total : amount;
-                document.getElementById('pay-input').value = val;
+                document.getElementById('pay-input').value = (amount === 'exact') ? total : amount;
                 this.handlePaymentInput(document.getElementById('pay-input'));
             },
             handlePaymentInput(el) {
@@ -725,13 +662,8 @@
                 el.value = isNaN(cash) ? "" : cash;
                 const change = cash - total;
                 const display = document.getElementById('change-display');
-                if (change >= 0) {
-                    display.innerText = "Kembali: " + this.format(change);
-                    display.style.color = "var(--success)";
-                } else {
-                    display.innerText = "Kurang: " + this.format(Math.abs(change));
-                    display.style.color = "var(--danger)";
-                }
+                if (change >= 0) { display.innerText = "Kembali: " + this.format(change); display.style.color = "var(--success)"; }
+                else { display.innerText = "Kurang: " + this.format(Math.abs(change)); display.style.color = "var(--danger)"; }
             },
             processCheckout() {
                 if (this.data.cart.length === 0) return;
@@ -741,32 +673,18 @@
                 const change = cash - total;
                 const txId = Date.now();
 
-                this.data.transactions.unshift({
-                    id: txId, date: new Date().toISOString(),
-                    items: JSON.parse(JSON.stringify(this.data.cart)),
-                    total: total, cash: cash, change: change
-                });
-                this.data.cart.forEach(c => {
-                    const p = this.data.products.find(x => x.id === c.id);
-                    if(p) p.stock -= c.qty;
-                });
+                this.data.transactions.unshift({ id: txId, date: new Date().toISOString(), items: JSON.parse(JSON.stringify(this.data.cart)), total: total, cash: cash, change: change });
+                this.data.cart.forEach(c => { const p = this.data.products.find(x => x.id === c.id); if(p) p.stock -= c.qty; });
 
-                // Print Setup
+                // PRINT SETUP
                 document.getElementById('print-name').innerText = this.data.config.name;
                 document.getElementById('print-addr').innerText = this.data.config.address;
-                document.getElementById('print-items').innerHTML = this.data.cart.map(c => 
-                    `<div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;"><span>${c.name} x${c.qty}</span><span>${c.price * c.qty}</span></div>`
-                ).join('');
+                document.getElementById('print-items').innerHTML = this.data.cart.map(c => `<div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;"><span>${c.name} x${c.qty}</span><span>${c.price * c.qty}</span></div>`).join('');
                 document.getElementById('print-total').innerText = total.toLocaleString('id-ID');
                 document.getElementById('print-cash').innerText = cash.toLocaleString('id-ID');
                 document.getElementById('print-change').innerText = change.toLocaleString('id-ID');
 
-                this.data.cart = [];
-                this.updateBadge();
-                this.save();
-                this.renderCart();
-                this.renderProducts();
-                this.nav('pos');
+                this.data.cart = []; this.updateBadge(); this.save(); this.renderCart(); this.renderProducts(); this.nav('pos');
 
                 setTimeout(() => window.print(), 500);
                 this.toast("Sukses");
@@ -774,12 +692,10 @@
 
             // --- INVENTORY & STATS ---
             renderInventory() {
-                const list = document.getElementById('inventory-list');
-                list.innerHTML = "";
+                const list = document.getElementById('inventory-list'); list.innerHTML = "";
                 this.data.products.forEach(p => {
                     const el = document.createElement('div');
-                    el.className = 'card';
-                    el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.alignItems = 'center';
+                    el.className = 'card'; el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.alignItems = 'center';
                     el.innerHTML = `
                         <div onclick="App.editProduct(${p.id})" style="cursor:pointer;">
                             <div style="font-weight:700;">${p.name}</div>
@@ -796,21 +712,15 @@
                 const omzet = todayTx.reduce((a,b) => a + b.total, 0);
                 document.getElementById('stat-today').innerText = this.format(omzet);
                 document.getElementById('stat-tx-today').innerText = todayTx.length + " Transaksi";
-                const list = document.getElementById('history-list');
-                list.innerHTML = "";
+
+                const list = document.getElementById('history-list'); list.innerHTML = "";
                 this.data.transactions.slice(0, 20).forEach(t => {
                     const d = new Date(t.date);
                     const el = document.createElement('div');
                     el.className = 'card';
                     el.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem; color:var(--text-muted);">
-                            <span>#${t.id.toString().slice(-6)}</span>
-                            <span>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes()}</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-weight:700; font-size:1.1rem; color:var(--text-main);">${this.format(t.total)}</span>
-                            <button class="btn btn-ghost" style="padding:0.5rem; font-size:0.8rem;" onclick="App.reprint(${t.id})"><i class="fas fa-print"></i></button>
-                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem; color:var(--text-muted);"><span>#${t.id.toString().slice(-6)}</span><span>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes()}</span></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:700; font-size:1.1rem; color:var(--text-main);">${this.format(t.total)}</span><button class="btn btn-ghost" style="padding:0.5rem; font-size:0.8rem;" onclick="App.reprint(${t.id})"><i class="fas fa-print"></i></button></div>
                     `;
                     list.appendChild(el);
                 });
@@ -820,9 +730,7 @@
                 if(!t) return;
                 document.getElementById('print-name').innerText = this.data.config.name;
                 document.getElementById('print-addr').innerText = this.data.config.address;
-                document.getElementById('print-items').innerHTML = t.items.map(c => 
-                    `<div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;"><span>${c.name} x${c.qty}</span><span>${c.price * c.qty}</span></div>`
-                ).join('');
+                document.getElementById('print-items').innerHTML = t.items.map(c => `<div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;"><span>${c.name} x${c.qty}</span><span>${c.price * c.qty}</span></div>`).join('');
                 document.getElementById('print-total').innerText = t.total.toLocaleString('id-ID');
                 document.getElementById('print-cash').innerText = t.cash.toLocaleString('id-ID');
                 document.getElementById('print-change').innerText = t.change.toLocaleString('id-ID');
@@ -866,27 +774,17 @@
                     const stock = parseInt(document.getElementById('inp-stock').value);
                     this.data.products.push({ id: Date.now(), name, price, category: cat, stock, barcode });
                 }
-                this.save();
-                this.renderProducts();
-                this.renderInventory();
-                this.closeModal('modal-product');
-                this.toast("Disimpan");
+                this.save(); this.renderProducts(); this.renderInventory(); this.closeModal('modal-product'); this.toast("Disimpan");
             },
             deleteProduct() {
                 if(!confirm("Hapus produk ini?")) return;
                 const id = document.getElementById('inp-id').value;
                 this.data.products = this.data.products.filter(p => p.id != id);
-                this.save();
-                this.renderProducts();
-                this.renderInventory();
-                this.closeModal('modal-product');
-                this.toast("Dihapus");
+                this.save(); this.renderProducts(); this.renderInventory(); this.closeModal('modal-product'); this.toast("Dihapus");
             },
             exportCSV() {
                 let csv = "ID,Nama,Kategori,Harga,Stok,Barcode\n";
-                this.data.products.forEach(p => {
-                    csv += `${p.id},"${p.name}",${p.category},${p.price},${p.stock},${p.barcode}\n`;
-                });
+                this.data.products.forEach(p => { csv += `${p.id},"${p.name}",${p.category},${p.price},${p.stock},${p.barcode}\n`; });
                 const a = document.createElement('a');
                 a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
                 a.download = 'inventaris.csv';
@@ -895,16 +793,18 @@
             saveConfig() {
                 this.data.config.name = document.getElementById('conf-name').value;
                 this.data.config.address = document.getElementById('conf-address').value;
-                this.save();
-                this.toast("Tersimpan");
+                this.save(); this.toast("Tersimpan");
             },
             hardReset() {
                 if(confirm("YAKIN? SEMUA DATA AKAN HILANG!")) {
-                    localStorage.removeItem('kasir_pro_menu_modern');
+                    localStorage.removeItem('kasir_pro_clean');
                     location.reload();
                 }
             },
-            closeModal(id) { document.getElementById(id).classList.remove('open'); if(id === 'modal-scan' && this.data.scanner) this.data.scanner.stop().catch(()=>{}); },
+            closeModal(id) {
+                document.getElementById(id).classList.remove('open');
+                if(id === 'modal-scan' && this.data.scanner) this.data.scanner.stop().catch(()=>{});
+            },
             openScanner(target='pos') {
                 this.data.scanTarget = target;
                 document.getElementById('modal-scan').classList.add('open');
@@ -920,12 +820,12 @@
                         } else { document.getElementById('inp-barcode').value = code; }
                     }, () => {}
                 ).catch(err => {
-                    document.getElementById('scanner-view').innerHTML = `<div style="color:white; text-align:center; padding:2rem;">Kamera Error.<br>Pastikan izin kamera aktif.</div>`;
+                    document.getElementById('scanner-view').innerHTML = `<div style="color:white; text-align:center; padding:2rem;">Kamera Error.</div>`;
                 });
             }
         };
         window.onload = () => App.init();
-        window.App = App;
+        window.app = App;
     </script>
 </body>
 </html>
