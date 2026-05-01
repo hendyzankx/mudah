@@ -175,7 +175,7 @@
         .btn-danger { background: white; color: var(--danger); border: 1px solid var(--danger); margin-top: 10px; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
 
-        /* --- REPORT --- */
+        /* --- REPORT & HISTORY --- */
         .report-summary {
             background: linear-gradient(135deg, var(--primary), #1e40af); color: white;
             padding: 20px; border-radius: 16px; margin-bottom: 20px;
@@ -183,6 +183,12 @@
         .report-card {
             background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px;
             border-left: 4px solid var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .report-card:active { background: #f8fafc; }
+        .history-item-row {
+            display: flex; justify-content: space-between; font-size: 0.8rem; padding: 4px 0; border-bottom: 1px solid #f1f5f9;
         }
 
         /* --- RECEIPT (Thermal 58mm) --- */
@@ -287,7 +293,7 @@
                 <div style="margin:30px 0; border-top:1px solid var(--border);"></div>
 
                 <div class="card" style="cursor:pointer;" onclick="App.openReportModal()">
-                    <div><i class="fas fa-chart-line" style="color:var(--primary); width:20px;"></i> Laporan Penjualan</div>
+                    <div><i class="fas fa-chart-line" style="color:var(--primary); width:20px;"></i> Laporan & Riwayat</div>
                     <i class="fas fa-chevron-right" style="color:#ccc;"></i>
                 </div>
 
@@ -395,11 +401,11 @@
         </div>
     </div>
 
-    <!-- MODAL: REPORT -->
+    <!-- MODAL: REPORTS & HISTORY -->
     <div id="modal-report" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Laporan Penjualan</h3>
+                <h3>Laporan & Riwayat</h3>
                 <button onclick="App.closeModal('modal-report')" style="background:none; border:none; font-size:1.5rem;">&times;</button>
             </div>
             <div class="modal-body">
@@ -409,10 +415,32 @@
                     <div style="margin-top:10px; font-size:0.8rem; opacity:0.9;">Total Profit</div>
                     <div id="rep-profit" style="font-size:1.1rem; font-weight:600;">Rp 0</div>
                 </div>
+                <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--text-light);">Ketuk transaksi untuk detail</h4>
                 <div id="rep-list"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn" style="background:#f1f5f9; color:#333;" onclick="App.closeModal('modal-report')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: TRANSACTION DETAIL -->
+    <div id="modal-trx-detail" class="modal modal-center">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detail Transaksi</h3>
+                <button onclick="App.closeModal('modal-trx-detail')" style="background:none; border:none; font-size:1.5rem;">&times;</button>
+            </div>
+            <div class="modal-body" id="trx-detail-content">
+                <!-- Content injected -->
+            </div>
+            <div class="modal-footer" style="display:grid; gap:10px; grid-template-columns:1fr 1fr;">
+                <button class="btn btn-primary" onclick="App.reprintReceipt()">
+                    <i class="fas fa-print"></i> Cetak Ulang
+                </button>
+                <button class="btn btn-danger" onclick="App.voidTransaction()">
+                    <i class="fas fa-trash"></i> Batal (Void)
+                </button>
             </div>
         </div>
     </div>
@@ -431,10 +459,11 @@
             scanner: null,
             isScanning: false,
             scanMode: null,
+            currentTrx: null, // Holds currently viewed transaction for reprint/void
 
             // --- INIT & UTILS ---
             init: function() {
-                const stored = localStorage.getItem('kasir_ultimate');
+                const stored = localStorage.getItem('kasir_ultimate_v2');
                 if(stored) this.data = JSON.parse(stored);
                 else this.seedData();
 
@@ -443,7 +472,7 @@
             },
 
             saveData: function() {
-                localStorage.setItem('kasir_ultimate', JSON.stringify(this.data));
+                localStorage.setItem('kasir_ultimate_v2', JSON.stringify(this.data));
             },
 
             seedData: function() {
@@ -660,12 +689,14 @@
                     date: new Date().toLocaleString('id-ID'),
                     items: [...this.data.cart],
                     total: total,
-                    profit: profit
+                    profit: profit,
+                    pay: pay,
+                    change: pay - total
                 };
                 this.data.transactions.unshift(trx);
 
                 // Generate Receipt
-                this.generateReceipt(trx, pay);
+                this.generateReceipt(trx);
 
                 // Save & Reset
                 this.saveData();
@@ -679,7 +710,7 @@
                 setTimeout(() => window.print(), 500);
             },
 
-            generateReceipt: function(trx, pay) {
+            generateReceipt: function(trx) {
                 const area = document.getElementById('receipt-area');
                 area.innerHTML = `
                     <div style="text-align:center; font-weight:bold; margin-bottom:10px; text-transform:uppercase;">${this.data.settings.storeName}</div>
@@ -700,8 +731,8 @@
                     <div style="border-top:1px dashed black; margin:5px 0;"></div>
                     <table style="width:100%; font-size:11px;">
                         <tr><td style="padding-top:2px;">TOTAL</td><td style="text-align:right; font-weight:bold;">${this.formatRupiah(trx.total)}</td></tr>
-                        <tr><td>TUNAI</td><td style="text-align:right;">${this.formatRupiah(pay)}</td></tr>
-                        <tr><td style="padding-bottom:2px;">KEMBALI</td><td style="text-align:right; font-weight:bold;">${this.formatRupiah(pay - trx.total)}</td></tr>
+                        <tr><td>TUNAI</td><td style="text-align:right;">${this.formatRupiah(trx.pay)}</td></tr>
+                        <tr><td style="padding-bottom:2px;">KEMBALI</td><td style="text-align:right; font-weight:bold;">${this.formatRupiah(trx.change)}</td></tr>
                     </table>
                     <div style="text-align:center; margin-top:15px; font-size:10px;">Terima Kasih</div>
                 `;
@@ -836,17 +867,19 @@
                 }
             },
 
-            // --- REPORTS ---
+            // --- REPORTS & HISTORY (NEW) ---
             openReportModal: function() {
                 const list = document.getElementById('rep-list');
                 list.innerHTML = '';
                 
                 let omset = 0, profit = 0;
-                this.data.transactions.forEach(t => {
+                this.data.transactions.forEach((t, index) => {
                     omset += t.total;
                     profit += t.profit;
+                    
                     const item = document.createElement('div');
                     item.className = 'report-card';
+                    item.onclick = () => App.openTrxDetail(index);
                     item.innerHTML = `
                         <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#666;">
                             <span>${t.id}</span>
@@ -865,6 +898,60 @@
                 document.getElementById('modal-report').classList.add('open');
             },
 
+            openTrxDetail: function(index) {
+                this.currentTrx = this.data.transactions[index];
+                const t = this.currentTrx;
+                
+                const html = `
+                    <div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:15px;">
+                        <div style="font-weight:bold; font-size:1.1rem; margin-bottom:5px;">${t.id}</div>
+                        <div style="font-size:0.8rem; color:var(--text-light);">${t.date}</div>
+                        <div style="margin-top:5px; font-weight:bold; color:var(--primary);">${this.formatRupiah(t.total)}</div>
+                    </div>
+                    <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--text-light);">Item Belanja</h4>
+                    ${t.items.map(i => `
+                        <div class="history-item-row">
+                            <div>${i.name}</div>
+                            <div>${i.qty} x ${this.formatRupiah(i.price)}</div>
+                        </div>
+                    `).join('')}
+                    <div style="border-top:1px solid #eee; margin-top:10px; padding-top:10px; text-align:right; font-weight:bold;">
+                        Tunai: ${this.formatRupiah(t.pay)}<br>
+                        Kembali: ${this.formatRupiah(t.change)}
+                    </div>
+                `;
+                
+                document.getElementById('trx-detail-content').innerHTML = html;
+                // Close report modal to show detail
+                this.closeModal('modal-report');
+                document.getElementById('modal-trx-detail').classList.add('open');
+            },
+
+            reprintReceipt: function() {
+                if(!this.currentTrx) return;
+                this.generateReceipt(this.currentTrx);
+                setTimeout(() => window.print(), 500);
+            },
+
+            voidTransaction: function() {
+                if(!this.currentTrx) return;
+                if(confirm("Yakin ingin membatalkan transaksi ini? Stok akan dikembalikan.")) {
+                    // Restore Stock
+                    this.currentTrx.items.forEach(item => {
+                        const p = this.data.products.find(x => x.id === item.id);
+                        if(p) p.stock += item.qty;
+                    });
+
+                    // Remove from list
+                    this.data.transactions = this.data.transactions.filter(t => t.id !== this.currentTrx.id);
+                    this.saveData();
+                    
+                    this.closeModal('modal-trx-detail');
+                    this.openReportModal(); // Refresh report list
+                    App.showToast("Transaksi dibatalkan");
+                }
+            },
+
             // --- UTILS ---
             closeModal: function(id) {
                 document.getElementById(id).classList.remove('open');
@@ -880,7 +967,7 @@
 
             resetData: function() {
                 if(confirm("PERINGATAN: Semua data akan dihapus permanen. Lanjutkan?")) {
-                    localStorage.removeItem('kasir_ultimate');
+                    localStorage.removeItem('kasir_ultimate_v2');
                     location.reload();
                 }
             },
