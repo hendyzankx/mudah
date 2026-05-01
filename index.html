@@ -2,11 +2,13 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <!-- OPTIMAL MOBILE VIEWPORT -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Kasir Pro Ultimate</title>
-    <!-- Icons -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Kasir Mobile Pro</title>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Scanner (Fixed Version) -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
 
     <style>
@@ -15,40 +17,43 @@
             --primary-dark: #1e40af;
             --success: #16a34a;
             --danger: #dc2626;
-            --warning: #ca8a04;
             --text: #0f172a;
             --text-light: #64748b;
-            --bg: #f8fafc;
+            --bg: #f1f5f9;
             --surface: #ffffff;
             --border: #e2e8f0;
-            --radius: 10px;
+            --radius: 12px;
+            /* Area aman untuk notch HP */
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
+            --safe-top: env(safe-area-inset-top, 20px);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: hidden; /* Mencegah scroll body */
         }
 
         /* --- HEADER & NAV --- */
         header {
             background: var(--surface);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
             z-index: 50;
             flex-shrink: 0;
+            padding-top: var(--safe-top);
         }
 
         .top-nav {
             display: flex;
             justify-content: space-around;
-            padding: 0 5px;
+            border-bottom: 1px solid var(--border);
         }
 
         .nav-item {
@@ -56,167 +61,156 @@
             text-align: center;
             padding: 12px 0;
             color: var(--text-light);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
             border-bottom: 3px solid transparent;
-            transition: 0.2s;
         }
-        .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 4px; }
+        .nav-item i { display: block; font-size: 1.3rem; margin-bottom: 2px; }
         .nav-item.active { color: var(--primary); border-bottom-color: var(--primary); background: #eff6ff; }
 
-        .header-search { padding: 10px 15px; background: var(--surface); }
-        .search-wrapper { position: relative; }
-        .search-wrapper input {
-            width: 100%; padding: 10px 10px 10px 36px;
-            border: 1px solid var(--border); border-radius: 8px;
-            background: #f1f5f9;
-            font-size: 0.95rem;
+        .search-area { padding: 10px 15px; background: var(--surface); }
+        .search-box { position: relative; }
+        .search-box input {
+            width: 100%; padding: 12px 12px 12px 40px;
+            border: 1px solid var(--border); border-radius: 50px;
+            background: #f8fafc; font-size: 16px; /* 16px mencegah zoom auto iOS */
         }
-        .search-wrapper input:focus { background: #fff; border-color: var(--primary); }
-        .search-wrapper i { position: absolute; left: 12px; top: 12px; color: var(--text-light); }
+        .search-box input:focus { background: #fff; border-color: var(--primary); }
+        .search-box i { position: absolute; left: 14px; top: 13px; color: var(--text-light); }
 
         /* --- MAIN LAYOUT --- */
         main { flex: 1; position: relative; overflow: hidden; }
         .page {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; background: var(--bg);
-            transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(100%); transition: transform 0.3s ease-out;
             visibility: hidden;
         }
         .page.active { transform: translateX(0); visibility: visible; }
 
-        .scroll-area { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 100px; }
+        .content-scroll { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 120px; -webkit-overflow-scrolling: touch; }
         
         /* --- COMPONENTS --- */
         .card {
-            background: var(--surface); padding: 12px; border-radius: var(--radius);
-            margin-bottom: 10px; border: 1px solid var(--border);
+            background: var(--surface); padding: 14px; border-radius: var(--radius);
+            margin-bottom: 12px; border: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
         }
-        .card-title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+        .card-info { flex: 1; padding-right: 10px; overflow: hidden; }
+        .card-name { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card-meta { font-size: 0.8rem; color: var(--text-light); display: flex; gap: 8px; align-items: center; margin-top: 4px; }
-        .stock-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
-        .st-ok { background: #dcfce7; color: #166534; }
-        .st-low { background: #fee2e2; color: #991b1b; }
+        .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+        .bg-ok { background: #dcfce7; color: #166534; }
+        .bg-low { background: #fee2e2; color: #991b1b; }
         
-        .btn-icon {
-            width: 34px; height: 34px; border-radius: 6px; border: none;
+        .btn-circle {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.1s;
+            background: var(--primary); color: white; font-size: 1.1rem;
+            flex-shrink: 0; box-shadow: 0 2px 5px rgba(37,99,235,0.3);
         }
-        .btn-add { background: var(--primary); color: white; }
-        .btn-add:active { transform: scale(0.9); }
+        .btn-circle:active { transform: scale(0.9); }
 
-        /* --- FLOATING & BOTTOM BAR --- */
+        /* --- FLOATING & BOTTOM --- */
         .fab {
-            position: fixed; bottom: 90px; right: 20px;
-            width: 54px; height: 54px; background: #0f172a; color: white;
-            border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: fixed; bottom: 100px; right: 20px;
+            width: 58px; height: 58px; background: #0f172a; color: white;
+            border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             display: flex; align-items: center; justify-content: center;
-            border: none; font-size: 1.2rem; z-index: 30; cursor: pointer;
+            border: none; font-size: 1.3rem; z-index: 30;
         }
 
-        .mini-cart {
+        .bottom-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: var(--surface); padding: 12px 15px;
+            background: var(--surface); padding: 12px 16px;
             border-top: 1px solid var(--border); z-index: 40;
-            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: calc(12px + var(--safe-bottom));
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
         }
-        .mc-left { display: flex; align-items: center; gap: 12px; }
-        .mc-badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
-        .mc-total { font-weight: 800; font-size: 1.1rem; color: var(--primary); }
-        .mc-btn { background: var(--primary); color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; }
+        .bb-content { display: flex; justify-content: space-between; align-items: center; }
+        .bb-btn { background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 1rem; border: none; }
 
         /* --- MODALS --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 100;
+            background: rgba(0,0,0,0.6); z-index: 100;
             display: none; align-items: flex-end;
         }
         .modal.open { display: flex; }
         .modal-center { align-items: center; justify-content: center; }
 
-        .modal-content {
+        .modal-card {
             background: var(--surface); width: 100%;
-            border-top-left-radius: 20px; border-top-right-radius: 20px;
-            height: 90vh; display: flex; flex-direction: column;
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            height: 92vh; display: flex; flex-direction: column;
             animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .modal-center .modal-content {
+        .modal-center .modal-card {
             height: auto; width: 90%; max-width: 380px;
-            border-radius: 16px; animation: fadeIn 0.2s;
+            border-radius: 20px; animation: popIn 0.2s;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
-        .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
-        .modal-footer { padding: 20px; border-top: 1px solid var(--border); background: var(--surface); padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+        .modal-head { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
+        .modal-foot { padding: 20px; border-top: 1px solid var(--border); background: var(--surface); padding-bottom: calc(20px + var(--safe-bottom)); }
 
-        /* --- FORMS & CART ITEMS --- */
-        .form-group { margin-bottom: 15px; }
+        /* --- FORMS --- */
+        .form-group { margin-bottom: 16px; }
         .form-label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: var(--text-light); }
-        .form-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
-        
-        .cart-row {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed var(--border);
+        .form-input { 
+            width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 10px; 
+            font-size: 16px; background: #f8fafc; -webkit-appearance: none; 
         }
-        .qty-box { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 4px; border-radius: 8px; }
-        .qty-btn { width: 32px; height: 32px; border: none; background: white; border-radius: 6px; color: var(--text); font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .qty-val { font-weight: 700; min-width: 24px; text-align: center; }
+        .form-input:focus { background: #fff; border-color: var(--primary); }
 
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; }
+        /* --- CART ITEMS --- */
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+        .qty-wrap { display: flex; align-items: center; gap: 12px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+        .btn-qty { width: 36px; height: 36px; border: none; background: white; border-radius: 8px; color: var(--text); font-weight: 800; font-size: 1.1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+        .btn-main { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-danger { background: white; color: var(--danger); border: 1px solid var(--danger); margin-top: 10px; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+        .btn-danger { background: white; color: var(--danger); border: 1px solid var(--danger); margin-top: 12px; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* --- REPORT & HISTORY --- */
-        .report-summary {
-            background: linear-gradient(135deg, var(--primary), #1e40af); color: white;
-            padding: 20px; border-radius: 16px; margin-bottom: 20px;
-        }
-        .report-card {
-            background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px;
-            border-left: 4px solid var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .report-card:active { background: #f8fafc; }
-        .history-item-row {
-            display: flex; justify-content: space-between; font-size: 0.8rem; padding: 4px 0; border-bottom: 1px solid #f1f5f9;
-        }
+        /* --- REPORT --- */
+        .report-sum { background: linear-gradient(135deg, var(--primary), #1e40af); color: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; }
+        .trx-card { background: white; padding: 14px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; }
 
-        /* --- RECEIPT (Thermal 58mm) --- */
+        /* --- PRINT --- */
         #receipt-area { display: none; }
         @media print {
             body * { visibility: hidden; }
             #receipt-area, #receipt-area * { visibility: visible; }
-            #receipt-area { 
-                position: absolute; left: 0; top: 0; width: 58mm; 
-                font-family: 'Courier New', Courier, monospace; font-size: 11px; 
-                color: black; background: white;
-            }
+            #receipt-area { position: absolute; left: 0; top: 0; width: 58mm; font-family: monospace; font-size: 12px; color: black; }
         }
-        
-        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
-        .hidden { display: none !important; }
 
+        /* --- UTILS --- */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-sm { font-size: 0.8rem; color: var(--text-light); }
+        .hidden { display: none !important; }
+        .empty { padding: 40px 20px; text-align: center; color: var(--text-light); }
+        
         /* --- TOAST --- */
-        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; }
-        .toast { background: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: fadeD 0.3s; display: flex; align-items: center; gap: 8px; }
+        #toast-box { position: fixed; top: calc(var(--safe-top) + 20px); left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 350px; }
+        .toast { background: #333; color: white; padding: 12px 20px; border-radius: 50px; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); animation: dropIn 0.3s; display: flex; align-items: center; gap: 10px; }
         .toast.success { background: var(--success); }
         .toast.error { background: var(--danger); }
-        @keyframes fadeD { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes dropIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- CAMERA PERMISSION FIX --- */
+        .camera-fail { padding: 40px 20px; text-align: center; color: white; }
+        .cam-btn { background: white; color: black; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; }
     </style>
 </head>
 <body>
 
-    <!-- NAV HEADER -->
+    <!-- HEADER -->
     <header>
         <nav class="top-nav">
             <div class="nav-item active" id="nav-pos" onclick="App.nav('pos')">
@@ -226,133 +220,118 @@
                 <i class="fas fa-boxes-stacked"></i> Stok
             </div>
             <div class="nav-item" id="nav-settings" onclick="App.nav('settings')">
-                <i class="fas fa-cog"></i> Menu
+                <i class="fas fa-sliders-h"></i> Menu
             </div>
         </nav>
-        <div class="header-search" id="search-wrapper">
-            <div class="search-wrapper">
+        <div class="search-area" id="search-wrapper">
+            <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" id="search-input" placeholder="Cari barang atau scan..." onkeyup="App.handleSearch()">
+                <input type="text" id="inp-search" placeholder="Cari nama barang..." onkeyup="App.filterProducts()">
             </div>
         </div>
     </header>
 
-    <!-- MAIN APP -->
+    <!-- MAIN -->
     <main>
-        <!-- PAGE: POS -->
+        <!-- POS PAGE -->
         <div id="page-pos" class="page active">
-            <div class="scroll-area" id="pos-container">
-                <!-- Rendered Products -->
-            </div>
+            <div class="content-scroll" id="pos-list"></div>
+            <div id="pos-empty" class="empty hidden"><i class="fas fa-search" style="font-size:2rem;"></i><br>Barang tidak ditemukan</div>
             
-            <div id="pos-empty" class="empty-state hidden">
-                <i class="fas fa-search" style="font-size:2rem; margin-bottom:10px;"></i>
-                <p>Barang tidak ditemukan</p>
-            </div>
-
             <button class="fab" onclick="App.openScanner('cart')"><i class="fas fa-barcode"></i></button>
-
-            <div class="mini-cart" id="mc-bar" onclick="App.openCart()">
-                <div class="mc-left">
-                    <div style="position:relative;">
-                        <i class="fas fa-shopping-cart" style="font-size:1.2rem; color:var(--primary);"></i>
-                        <span class="mc-badge" id="mc-count" style="position:absolute; top:-8px; right:-8px; display:none;">0</span>
-                    </div>
+            
+            <div class="bottom-bar" onclick="App.openCart()">
+                <div class="bb-content">
                     <div>
-                        <div style="font-size:0.7rem; color:var(--text-light);">Total Belanja</div>
-                        <div class="mc-total" id="mc-total">Rp 0</div>
+                        <div style="font-size:0.75rem; color:var(--text-light);">Total Belanja</div>
+                        <div style="font-size:1.2rem; font-weight:800; color:var(--primary);" id="mc-total">Rp 0</div>
+                    </div>
+                    <div style="position:relative;">
+                        <span class="badge bg-low" id="mc-count" style="position:absolute; top:-8px; right:-8px; display:none;">0</span>
+                        <button class="bb-btn">Bayar</button>
                     </div>
                 </div>
-                <div class="mc-btn">Bayar</div>
             </div>
         </div>
 
-        <!-- PAGE: STOCK -->
+        <!-- STOCK PAGE -->
         <div id="page-stock" class="page">
-            <div class="scroll-area">
+            <div class="content-scroll">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h2>Stok Barang</h2>
-                    <button class="btn btn-primary" style="width:auto; padding:8px 16px;" onclick="App.openProductModal()">
-                        <i class="fas fa-plus"></i> Tambah
-                    </button>
+                    <button class="btn-main btn-primary" style="width:auto; padding:8px 16px;" onclick="App.openProdModal()">+ Tambah</button>
                 </div>
-                <div id="stock-container"></div>
+                <div id="stock-list"></div>
             </div>
         </div>
 
-        <!-- PAGE: SETTINGS -->
+        <!-- SETTINGS PAGE -->
         <div id="page-settings" class="page">
-            <div class="scroll-area">
+            <div class="content-scroll">
                 <h2>Pengaturan</h2>
                 <div class="form-group">
                     <label class="form-label">Nama Toko</label>
-                    <input type="text" id="set-store" class="form-input">
+                    <input type="text" id="set-name" class="form-input">
                 </div>
-                <button class="btn btn-primary" onclick="App.saveSettings()">Simpan Nama Toko</button>
+                <button class="btn-main btn-primary" onclick="App.saveSettings()">Simpan</button>
                 
                 <div style="margin:30px 0; border-top:1px solid var(--border);"></div>
 
-                <div class="card" style="cursor:pointer;" onclick="App.openReportModal()">
-                    <div><i class="fas fa-chart-line" style="color:var(--primary); width:20px;"></i> Laporan & Riwayat</div>
+                <div class="card" style="cursor:pointer; margin-bottom:15px;" onclick="App.openReportModal()">
+                    <div><i class="fas fa-chart-pie" style="color:var(--primary);"></i> Laporan</div>
                     <i class="fas fa-chevron-right" style="color:#ccc;"></i>
                 </div>
 
                 <div style="margin:30px 0; border-top:1px solid var(--border);"></div>
-                <button class="btn btn-danger" onclick="App.resetData()">
-                    <i class="fas fa-trash-alt"></i> Reset Semua Data
-                </button>
+                <button class="btn-main btn-danger" onclick="App.resetAll()"><i class="fas fa-trash"></i> Reset Data</button>
             </div>
         </div>
     </main>
 
-    <!-- MODAL: CART -->
+    <!-- MODAL CART -->
     <div id="modal-cart" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Keranjang Belanja</h3>
-                <button onclick="App.closeModal('modal-cart')" style="background:none; border:none; font-size:1.5rem; color:var(--text);">&times;</button>
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3>Keranjang</h3>
+                <button onclick="App.closeModal('modal-cart')" style="background:none; border:none; font-size:1.5rem;">&times;</button>
             </div>
-            <div class="modal-body" id="cart-list">
-                <!-- Cart Items rendered here -->
-            </div>
-            <div class="modal-footer">
-                <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:flex-end;">
-                    <span style="color:var(--text-light); font-size:0.9rem;">Total Tagihan</span>
-                    <span id="checkout-total" style="font-size:1.5rem; font-weight:800; color:var(--primary);">Rp 0</span>
+            <div class="modal-body" id="cart-items"></div>
+            <div class="modal-foot">
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                    <span>Total Tagihan</span>
+                    <span style="font-size:1.4rem; font-weight:800; color:var(--primary);" id="checkout-total">Rp 0</span>
                 </div>
-
+                
                 <div class="form-group">
                     <label class="form-label">Uang Diterima</label>
-                    <input type="number" id="pay-input" class="form-input" placeholder="0" style="text-align:right; font-size:1.2rem; font-weight:bold;" onkeyup="App.calcChange()">
+                    <input type="number" id="inp-pay" class="form-input" placeholder="0" style="text-align:right; font-weight:bold; font-size:1.2rem;" onkeyup="App.calcChange()">
                 </div>
 
                 <div class="text-right" style="margin-bottom:15px;">
-                    <span id="change-display" style="font-weight:700; color:var(--text);">Kembalian: Rp 0</span>
+                    <span id="change-text" style="font-weight:700;">Kembalian: Rp 0</span>
                 </div>
 
-                <button id="btn-pay" class="btn btn-primary" onclick="App.processCheckout()" disabled>
+                <button id="btn-do-pay" class="btn-main btn-primary" onclick="App.doPay()" disabled>
                     <i class="fas fa-print"></i> Bayar & Cetak
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: PRODUCT FORM -->
+    <!-- MODAL PRODUCT -->
     <div id="modal-product" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="prod-title">Tambah Produk</h3>
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3 id="prod-title">Produk</h3>
                 <button onclick="App.closeModal('modal-product')" style="background:none; border:none; font-size:1.5rem;">&times;</button>
             </div>
             <div style="padding:20px;">
-                <form onsubmit="event.preventDefault(); App.saveProduct();">
+                <form onsubmit="event.preventDefault(); App.saveProd();">
                     <input type="hidden" id="p-id">
-                    
                     <div class="form-group">
                         <label class="form-label">Nama Barang</label>
                         <input type="text" id="p-name" class="form-input" required>
                     </div>
-                    
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                         <div class="form-group">
                             <label class="form-label">Harga Jual</label>
@@ -363,496 +342,396 @@
                             <input type="number" id="p-stock" class="form-input" required min="0">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Harga Beli (Modal)</label>
                         <input type="number" id="p-buy" class="form-input" min="0">
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Barcode</label>
                         <div style="display:flex; gap:10px;">
                             <input type="text" id="p-barcode" class="form-input">
-                            <button type="button" class="btn btn-primary" style="width:auto;" onclick="App.openScanner('form')">
+                            <button type="button" class="btn-main btn-primary" style="width:auto;" onclick="App.openScanner('form')">
                                 <i class="fas fa-camera"></i>
                             </button>
                         </div>
                     </div>
-
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                    <button type="button" id="btn-del" class="btn btn-danger" style="display:none;" onclick="App.deleteProduct()">Hapus</button>
-                    <button type="button" class="btn" style="background:#f1f5f9; color:#333; margin-top:10px;" onclick="App.closeModal('modal-product')">Batal</button>
+                    <button type="submit" class="btn-main btn-primary">Simpan</button>
+                    <button type="button" id="btn-del" class="btn-main btn-danger hidden" onclick="App.delProd()">Hapus</button>
+                    <button type="button" class="btn-main" style="background:#f1f5f9; color:#333; margin-top:10px;" onclick="App.closeModal('modal-product')">Batal</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: SCANNER -->
+    <!-- MODAL SCANNER -->
     <div id="modal-scanner" class="modal modal-center">
-        <div class="modal-content" style="overflow:hidden; padding:0;">
+        <div class="modal-card" style="overflow:hidden; padding:0;">
             <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
                 <h3 style="margin:0;">Scan Barcode</h3>
                 <button onclick="App.closeScanner()" style="background:none; border:none; font-size:1.2rem;">&times;</button>
             </div>
-            <div id="scanner-region" style="background:#000; min-height:250px; position:relative;"></div>
-            <div style="padding:15px; text-align:center; color:var(--text-light); font-size:0.9rem;">
+            <div id="cam-region" style="background:#000; min-height:250px; position:relative;"></div>
+            <div style="padding:15px; text-align:center; color:var(--text-light);">
                 Arahkan kamera ke kode batang.
             </div>
         </div>
     </div>
 
-    <!-- MODAL: REPORTS & HISTORY -->
+    <!-- MODAL REPORT -->
     <div id="modal-report" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Laporan & Riwayat</h3>
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3>Laporan</h3>
                 <button onclick="App.closeModal('modal-report')" style="background:none; border:none; font-size:1.5rem;">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="report-summary">
-                    <div style="font-size:0.8rem; opacity:0.9;">Total Omset</div>
-                    <div id="rep-omset" style="font-size:1.6rem; font-weight:800;">Rp 0</div>
-                    <div style="margin-top:10px; font-size:0.8rem; opacity:0.9;">Total Profit</div>
+                <div class="report-sum">
+                    <div style="font-size:0.8rem; opacity:0.9;">Omset</div>
+                    <div id="rep-omset" style="font-size:1.8rem; font-weight:800;">Rp 0</div>
+                    <div style="margin-top:10px; font-size:0.8rem; opacity:0.9;">Profit</div>
                     <div id="rep-profit" style="font-size:1.1rem; font-weight:600;">Rp 0</div>
                 </div>
-                <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--text-light);">Ketuk transaksi untuk detail</h4>
                 <div id="rep-list"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn" style="background:#f1f5f9; color:#333;" onclick="App.closeModal('modal-report')">Tutup</button>
+            <div class="modal-foot">
+                <button class="btn-main" style="background:#f1f5f9; color:#333;" onclick="App.closeModal('modal-report')">Tutup</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: TRANSACTION DETAIL -->
-    <div id="modal-trx-detail" class="modal modal-center">
-        <div class="modal-content">
-            <div class="modal-header">
+    <!-- MODAL TRX DETAIL -->
+    <div id="modal-trx" class="modal modal-center">
+        <div class="modal-card">
+            <div class="modal-head">
                 <h3>Detail Transaksi</h3>
-                <button onclick="App.closeModal('modal-trx-detail')" style="background:none; border:none; font-size:1.5rem;">&times;</button>
+                <button onclick="App.closeModal('modal-trx')" style="background:none; border:none; font-size:1.5rem;">&times;</button>
             </div>
-            <div class="modal-body" id="trx-detail-content">
-                <!-- Content injected -->
-            </div>
-            <div class="modal-footer" style="display:grid; gap:10px; grid-template-columns:1fr 1fr;">
-                <button class="btn btn-primary" onclick="App.reprintReceipt()">
-                    <i class="fas fa-print"></i> Cetak Ulang
-                </button>
-                <button class="btn btn-danger" onclick="App.voidTransaction()">
-                    <i class="fas fa-trash"></i> Batal (Void)
-                </button>
+            <div class="modal-body" id="trx-body"></div>
+            <div class="modal-foot" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn-main btn-primary" onclick="App.reprint()">Cetak</button>
+                <button class="btn-main btn-danger" onclick="App.voidTrx()">Batal</button>
             </div>
         </div>
     </div>
 
     <div id="receipt-area"></div>
-    <div id="toast-container"></div>
+    <div id="toast-box"></div>
 
     <script>
         const App = {
-            data: {
-                products: [],
-                cart: [],
-                transactions: [],
-                settings: { storeName: "Toko Maju Jaya" }
-            },
+            data: { products: [], cart: [], transactions: [], settings: {storeName: "Toko"} },
             scanner: null,
             isScanning: false,
             scanMode: null,
-            currentTrx: null, // Holds currently viewed transaction for reprint/void
+            curTrx: null,
 
-            // --- INIT & UTILS ---
             init: function() {
-                const stored = localStorage.getItem('kasir_ultimate_v2');
-                if(stored) this.data = JSON.parse(stored);
-                else this.seedData();
-
-                document.getElementById('set-store').value = this.data.settings.storeName;
+                const s = localStorage.getItem('kasir_mobile_v3');
+                if(s) this.data = JSON.parse(s);
+                else this.seed();
+                document.getElementById('set-name').value = this.data.settings.storeName;
                 this.nav('pos');
             },
 
-            saveData: function() {
-                localStorage.setItem('kasir_ultimate_v2', JSON.stringify(this.data));
-            },
-
-            seedData: function() {
+            save: function() { localStorage.setItem('kasir_mobile_v3', JSON.stringify(this.data)); },
+            seed: function() {
                 this.data.products = [
-                    {id:1, name:"Minyak Goreng 2L", price:35000, stock:20, buyPrice:30000, barcode:"8991"},
-                    {id:2, name:"Gula Pasir 1kg", price:14500, stock:50, buyPrice:12000, barcode:"8992"},
-                    {id:3, name:"Kopi Sachet", price:2000, stock:100, buyPrice:1500, barcode:"8993"}
+                    {id:1, name:"Minyak Goreng", price:35000, stock:20, buyPrice:30000, barcode:"899"},
+                    {id:2, name:"Gula Pasir", price:14500, stock:50, buyPrice:12000, barcode:"900"},
+                    {id:3, name:"Kopi Sachet", price:2000, stock:100, buyPrice:1500, barcode:"111"}
                 ];
-                this.saveData();
+                this.save();
             },
 
-            formatRupiah: (num) => {
-                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+            format: (n) => new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:0 }).format(n),
+            
+            toast: (m, t='success') => {
+                const c = document.getElementById('toast-box');
+                const el = document.createElement('div');
+                el.className = `toast ${t}`;
+                el.innerHTML = `<i class="fas fa-${t=='success'?'check':'exclamation'}-circle"></i> ${m}`;
+                c.appendChild(el);
+                setTimeout(() => el.remove(), 2500);
             },
 
-            showToast: (msg, type='success') => {
-                const c = document.getElementById('toast-container');
-                const t = document.createElement('div');
-                t.className = `toast ${type}`;
-                t.innerHTML = `<i class="fas fa-${type==='success'?'check':'exclamation'}-circle"></i> ${msg}`;
-                c.appendChild(t);
-                setTimeout(() => t.remove(), 2500);
-            },
+            nav: function(p) {
+                document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+                document.getElementById('page-'+p).classList.add('active');
+                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+                document.getElementById('nav-'+p).classList.add('active');
 
-            nav: function(pageId) {
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById('page-'+pageId).classList.add('active');
+                document.getElementById('search-wrapper').style.display = (p=='pos')?'block':'none';
+                document.querySelector('.fab').style.display = (p=='pos')?'flex':'none';
+                document.querySelector('.bottom-bar').style.display = (p=='pos')?'flex':'none';
                 
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                document.getElementById('nav-'+pageId).classList.add('active');
-
-                const showSearch = (pageId === 'pos');
-                document.getElementById('search-wrapper').style.display = showSearch ? 'block' : 'none';
-                document.querySelector('.fab').style.display = showSearch ? 'flex' : 'none';
-                document.getElementById('mc-bar').style.display = showSearch ? 'flex' : 'none';
-
-                if(pageId === 'pos') this.renderPos();
-                if(pageId === 'stock') this.renderStock();
+                if(p=='pos') this.renderPos();
+                if(p=='stock') this.renderStock();
             },
 
-            handleSearch: function() {
+            filterProducts: function() {
                 this.renderPos();
             },
 
-            // --- POS LOGIC ---
             renderPos: function() {
-                const query = document.getElementById('search-input').value.toLowerCase();
-                const container = document.getElementById('pos-container');
-                container.innerHTML = '';
+                const q = document.getElementById('inp-search').value.toLowerCase();
+                const c = document.getElementById('pos-list');
+                c.innerHTML = '';
+                const f = this.data.products.filter(x => x.name.toLowerCase().includes(q) || (x.barcode && x.barcode.includes(q)));
 
-                const filtered = this.data.products.filter(p => 
-                    p.name.toLowerCase().includes(query) || (p.barcode && p.barcode.includes(query))
-                );
-
-                if(filtered.length === 0) {
-                    document.getElementById('pos-empty').classList.remove('hidden');
-                } else {
+                if(f.length===0) document.getElementById('pos-empty').classList.remove('hidden');
+                else {
                     document.getElementById('pos-empty').classList.add('hidden');
-                    filtered.forEach(p => {
-                        const isLow = p.stock <= 5;
+                    f.forEach(p => {
                         const div = document.createElement('div');
                         div.className = 'card';
                         div.innerHTML = `
-                            <div style="flex:1; padding-right:10px;" onclick="App.addToCart(${p.id})">
-                                <div class="card-title">${p.name}</div>
+                            <div class="card-info" onclick="App.add(${p.id})">
+                                <div class="card-name">${p.name}</div>
                                 <div class="card-meta">
-                                    <b>${this.formatRupiah(p.price)}</b>
-                                    <span class="stock-badge ${isLow?'st-low':'st-ok'}">Stok: ${p.stock}</span>
+                                    <b>${this.format(p.price)}</b>
+                                    <span class="badge ${p.stock<=5?'bg-low':'bg-ok'}">Stok: ${p.stock}</span>
                                 </div>
                             </div>
-                            <button class="btn-icon btn-add" onclick="App.addToCart(${p.id})">
-                                <i class="fas fa-plus"></i>
-                            </button>
+                            <button class="btn-circle" onclick="App.add(${p.id})"><i class="fas fa-plus"></i></button>
                         `;
-                        container.appendChild(div);
+                        c.appendChild(div);
                     });
                 }
             },
 
-            addToCart: function(id) {
-                const p = this.data.products.find(x => x.id === id);
-                const c = this.data.cart.find(x => x.id === id);
-                const curQty = c ? c.qty : 0;
+            updateMini: function() {
+                const cnt = this.data.cart.reduce((a,b)=>a+b.qty,0);
+                const tot = this.data.cart.reduce((a,b)=>a+(b.price*b.qty),0);
+                const b = document.getElementById('mc-count');
+                b.innerText = cnt; b.style.display = cnt>0?'block':'none';
+                document.getElementById('mc-total').innerText = this.format(tot);
+                document.getElementById('checkout-total').innerText = this.format(tot);
+                document.getElementById('checkout-total').dataset.raw = tot;
+            },
 
-                if(p.stock <= curQty) return App.showToast("Stok habis!", "error");
-
-                if(c) c.qty++;
-                else this.data.cart.push({ id: p.id, name: p.name, price: p.price, buyPrice: p.buyPrice, qty: 1 });
-
-                this.updateMiniCart();
+            add: function(id) {
+                const p = this.data.products.find(x=>x.id===id);
+                const c = this.data.cart.find(x=>x.id===id);
+                if(c) { if(c.qty >= p.stock) return this.toast("Stok habis","error"); c.qty++; }
+                else this.data.cart.push({id:p.id, name:p.name, price:p.price, buyPrice:p.buyPrice, qty:1});
+                this.updateMini();
                 this.playBeep();
             },
 
-            updateMiniCart: function() {
-                const count = this.data.cart.reduce((a,b) => a + b.qty, 0);
-                const total = this.data.cart.reduce((a,b) => a + (b.price * b.qty), 0);
-
-                const badge = document.getElementById('mc-count');
-                badge.innerText = count;
-                badge.style.display = count > 0 ? 'block' : 'none';
-                document.getElementById('mc-total').innerText = this.formatRupiah(total);
-                document.getElementById('checkout-total').innerText = this.formatRupiah(total);
-                document.getElementById('checkout-total').dataset.raw = total;
-            },
-
-            // --- CART MODAL (FIXED LOGIC) ---
+            // --- CART ---
             openCart: function() {
-                if(this.data.cart.length === 0) return App.showToast("Keranjang kosong", "error");
-                this.renderCartModalContent(); // Initial render
+                if(this.data.cart.length===0) return this.toast("Kosong","error");
+                this.renderCart();
                 document.getElementById('modal-cart').classList.add('open');
-                
-                // Reset payment state
-                document.getElementById('pay-input').value = '';
-                document.getElementById('change-display').innerText = 'Kembalian: Rp 0';
-                document.getElementById('change-display').style.color = 'var(--text)';
-                document.getElementById('btn-pay').disabled = true;
-                document.getElementById('btn-pay').innerHTML = '<i class="fas fa-print"></i> Bayar & Cetak';
+                document.getElementById('inp-pay').value = '';
+                document.getElementById('change-text').innerText = 'Kembalian: Rp 0';
+                document.getElementById('change-text').style.color = 'var(--text)';
+                document.getElementById('btn-do-pay').disabled = true;
             },
 
-            renderCartModalContent: function() {
-                const list = document.getElementById('cart-list');
-                list.innerHTML = '';
-
-                this.data.cart.forEach((item, index) => {
-                    const row = document.createElement('div');
-                    row.className = 'cart-row';
-                    // Using direct string injection with explicit App function calls to prevent event loss
-                    row.innerHTML = `
+            renderCart: function() {
+                const l = document.getElementById('cart-items');
+                l.innerHTML = '';
+                this.data.cart.forEach((item, idx) => {
+                    const r = document.createElement('div');
+                    r.className = 'cart-item';
+                    r.innerHTML = `
                         <div style="flex:1;">
-                            <div style="font-weight:600; margin-bottom:2px;">${item.name}</div>
-                            <div style="font-size:0.8rem; color:var(--text-light);">
-                                ${this.formatRupiah(item.price)} x ${item.qty} = <b>${this.formatRupiah(item.price*item.qty)}</b>
+                            <div style="font-weight:700;">${item.name}</div>
+                            <div style="font-size:0.85rem; color:var(--text-light);">
+                                ${this.format(item.price)} x ${item.qty} = <b>${this.format(item.price*item.qty)}</b>
                             </div>
                         </div>
-                        <div class="qty-box">
-                            <button class="qty-btn" onclick="App.changeQty(${index}, -1)">-</button>
-                            <span class="qty-val">${item.qty}</span>
-                            <button class="qty-btn" onclick="App.changeQty(${index}, 1)">+</button>
+                        <div class="qty-wrap">
+                            <button class="btn-qty" onclick="App.chQty(${idx},-1)">-</button>
+                            <span style="font-weight:800; width:24px; text-align:center;">${item.qty}</span>
+                            <button class="btn-qty" onclick="App.chQty(${idx},1)">+</button>
                         </div>
                     `;
-                    list.appendChild(row);
+                    l.appendChild(r);
                 });
             },
 
-            changeQty: function(index, delta) {
-                const item = this.data.cart[index];
-                const p = this.data.products.find(x => x.id === item.id);
-
-                if(delta > 0 && item.qty >= p.stock) return App.showToast("Stok maksimum", "error");
-                
-                item.qty += delta;
-                if(item.qty <= 0) {
-                    this.data.cart.splice(index, 1);
-                    // Jika kosong, tutup modal
-                    if(this.data.cart.length === 0) {
-                        this.closeModal('modal-cart');
-                        this.updateMiniCart();
-                        return;
-                    }
+            chQty: function(i,d) {
+                const item = this.data.cart[i];
+                const p = this.data.products.find(x=>x.id===item.id);
+                if(d>0 && item.qty >= p.stock) return this.toast("Maksimal stok","error");
+                item.qty += d;
+                if(item.qty<=0) {
+                    this.data.cart.splice(i,1);
+                    if(this.data.cart.length===0) { this.closeModal('modal-cart'); this.updateMini(); return; }
                 }
-
-                this.updateMiniCart();
-                this.renderCartModalContent(); // Re-render UI safely
-                this.calcChange(); // Recalculate change if already typing payment
+                this.updateMini();
+                this.renderCart();
+                this.calcChange();
             },
 
             calcChange: function() {
-                const total = parseFloat(document.getElementById('checkout-total').dataset.raw || 0);
-                const pay = parseFloat(document.getElementById('pay-input').value || 0);
-                const ch = pay - total;
-                
-                const el = document.getElementById('change-display');
-                const btn = document.getElementById('btn-pay');
-
-                el.innerText = `Kembalian: ${this.formatRupiah(ch)}`;
-
-                if(ch >= 0) {
-                    el.style.color = 'var(--success)';
-                    btn.disabled = false;
-                    btn.innerHTML = `<i class="fas fa-print"></i> Bayar ${this.formatRupiah(pay)}`;
-                } else {
-                    el.style.color = 'var(--danger)';
-                    btn.disabled = true;
-                    btn.innerText = `Kurang ${this.formatRupiah(Math.abs(ch))}`;
-                }
+                const tot = parseFloat(document.getElementById('checkout-total').dataset.raw||0);
+                const pay = parseFloat(document.getElementById('inp-pay').value||0);
+                const ch = pay - tot;
+                const el = document.getElementById('change-text');
+                const btn = document.getElementById('btn-do-pay');
+                el.innerText = `Kembalian: ${this.format(ch)}`;
+                if(ch>=0) { el.style.color='var(--success)'; btn.disabled=false; }
+                else { el.style.color='var(--danger)'; btn.disabled=true; }
             },
 
-            processCheckout: function() {
-                const btn = document.getElementById('btn-pay');
-                
-                // Prevent double click
+            doPay: function() {
+                const btn = document.getElementById('btn-do-pay');
                 if(btn.disabled) return;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Memproses...';
+                btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
-                const total = parseFloat(document.getElementById('checkout-total').dataset.raw || 0);
-                const pay = parseFloat(document.getElementById('pay-input').value || 0);
-                if(pay < total) {
-                    btn.disabled = false;
-                    btn.innerHTML = 'Bayar & Cetak';
-                    return;
-                }
-
-                // Logic Transaction
-                let profit = 0;
+                const tot = parseFloat(document.getElementById('checkout-total').dataset.raw||0);
+                const pay = parseFloat(document.getElementById('inp-pay').value||0);
+                let prof = 0;
+                
                 this.data.cart.forEach(c => {
-                    profit += (c.price - c.buyPrice) * c.qty;
-                    const p = this.data.products.find(x => x.id === c.id);
+                    prof += (c.price - c.buyPrice) * c.qty;
+                    const p = this.data.products.find(x=>x.id===c.id);
                     if(p) p.stock -= c.qty;
                 });
 
-                const trx = {
-                    id: 'TRX-' + Date.now().toString().slice(-6),
+                const t = {
+                    id: 'TRX-'+Date.now().toString().slice(-6),
                     date: new Date().toLocaleString('id-ID'),
                     items: [...this.data.cart],
-                    total: total,
-                    profit: profit,
-                    pay: pay,
-                    change: pay - total
+                    total: tot, profit: prof, pay: pay, change: pay-tot
                 };
-                this.data.transactions.unshift(trx);
-
-                // Generate Receipt
-                this.generateReceipt(trx);
-
-                // Save & Reset
-                this.saveData();
+                this.data.transactions.unshift(t);
+                this.receiptGen(t);
+                
+                this.save();
                 this.data.cart = [];
-                this.updateMiniCart();
-                this.renderPos(); // Update stock display
-                
+                this.updateMini();
+                this.renderPos();
                 this.closeModal('modal-cart');
-                App.showToast("Transaksi Berhasil!");
-                
-                setTimeout(() => window.print(), 500);
+                this.toast("Sukses");
+                setTimeout(()=>window.print(), 500);
             },
 
-            generateReceipt: function(trx) {
-                const area = document.getElementById('receipt-area');
-                area.innerHTML = `
-                    <div style="text-align:center; font-weight:bold; margin-bottom:10px; text-transform:uppercase;">${this.data.settings.storeName}</div>
-                    <div style="text-align:center; font-size:10px; margin-bottom:10px; border-bottom:1px dashed black; padding-bottom:5px;">
-                        ${trx.date}<br>No: ${trx.id}
-                    </div>
-                    <table style="width:100%; border-collapse:collapse; font-size:11px;">
-                        ${trx.items.map(i => `
-                            <tr>
-                                <td colspan="2" style="padding:2px 0;">${i.name}</td>
-                            </tr>
-                            <tr>
-                                <td>${i.qty} x ${this.formatRupiah(i.price)}</td>
-                                <td style="text-align:right;">${this.formatRupiah(i.qty*i.price)}</td>
-                            </tr>
-                        `).join('')}
-                    </table>
-                    <div style="border-top:1px dashed black; margin:5px 0;"></div>
-                    <table style="width:100%; font-size:11px;">
-                        <tr><td style="padding-top:2px;">TOTAL</td><td style="text-align:right; font-weight:bold;">${this.formatRupiah(trx.total)}</td></tr>
-                        <tr><td>TUNAI</td><td style="text-align:right;">${this.formatRupiah(trx.pay)}</td></tr>
-                        <tr><td style="padding-bottom:2px;">KEMBALI</td><td style="text-align:right; font-weight:bold;">${this.formatRupiah(trx.change)}</td></tr>
-                    </table>
-                    <div style="text-align:center; margin-top:15px; font-size:10px;">Terima Kasih</div>
+            receiptGen: function(t) {
+                document.getElementById('receipt-area').innerHTML = `
+                    <center><b>${this.data.settings.storeName}</b></center>
+                    ${t.date}<br>No: ${t.id}
+                    <hr>
+                    ${t.items.map(i=>`${i.name}<br>${i.qty} x ${this.format(i.price)}<br>`).join('')}
+                    <hr>
+                    Total: ${this.format(t.total)}<br>Tunai: ${this.format(t.pay)}<br>Kembali: ${this.format(t.change)}
                 `;
             },
 
-            // --- STOCK & PRODUCT ---
+            // --- STOCK ---
             renderStock: function() {
-                const container = document.getElementById('stock-container');
-                container.innerHTML = '';
+                const c = document.getElementById('stock-list');
+                c.innerHTML = '';
                 this.data.products.forEach(p => {
                     const div = document.createElement('div');
                     div.className = 'card';
+                    div.onclick = () => App.openProdModal(p.id);
                     div.style.cursor = 'pointer';
-                    div.onclick = () => App.openProductModal(p.id);
                     div.innerHTML = `
-                        <div>
-                            <div style="font-weight:600;">${p.name}</div>
-                            <div style="font-size:0.8rem; color:var(--text-light); margin-top:4px;">
-                                Stok: <b style="color:${p.stock<=5?'var(--danger)':'var(--primary)'}">${p.stock}</b> | 
-                                Modal: ${this.formatRupiah(p.buyPrice)}
-                            </div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div style="font-weight:700; color:var(--primary); font-size:1.1rem;">${this.formatRupiah(p.price)}</div>
-                            <div style="font-size:0.75rem; color:var(--success);">+${this.formatRupiah(p.price-p.buyPrice)}</div>
+                        <div><b>${p.name}</b><br><span style="font-size:0.8rem; color:gray;">Stok: <span style="color:${p.stock<=5?'red':'blue'}">${p.stock}</span></span></div>
+                        <div class="text-right">
+                            <div style="font-weight:bold; color:var(--primary);">${this.format(p.price)}</div>
+                            <div style="font-size:0.75rem; color:green;">+${this.format(p.price-p.buyPrice)}</div>
                         </div>
                     `;
-                    container.appendChild(div);
+                    c.appendChild(div);
                 });
             },
 
-            openProductModal: function(id = null) {
-                document.getElementById('prod-title').innerText = id ? 'Edit Produk' : 'Tambah Produk';
-                const delBtn = document.getElementById('btn-del');
-                
+            openProdModal: function(id) {
+                document.getElementById('prod-title').innerText = id?'Edit Produk':'Tambah Produk';
+                const d = document.getElementById('btn-del');
                 if(id) {
-                    const p = this.data.products.find(x => x.id === id);
+                    const p = this.data.products.find(x=>x.id===id);
                     document.getElementById('p-id').value = p.id;
                     document.getElementById('p-name').value = p.name;
                     document.getElementById('p-price').value = p.price;
                     document.getElementById('p-stock').value = p.stock;
                     document.getElementById('p-buy').value = p.buyPrice;
-                    document.getElementById('p-barcode').value = p.barcode || '';
-                    delBtn.style.display = 'block';
+                    document.getElementById('p-barcode').value = p.barcode||'';
+                    d.classList.remove('hidden');
                 } else {
                     document.querySelector('form').reset();
                     document.getElementById('p-id').value = '';
-                    delBtn.style.display = 'none';
+                    d.classList.add('hidden');
                 }
                 document.getElementById('modal-product').classList.add('open');
             },
 
-            saveProduct: function() {
+            saveProd: function() {
                 const id = document.getElementById('p-id').value;
                 const p = {
-                    id: id ? parseInt(id) : Date.now(),
+                    id: id?parseInt(id):Date.now(),
                     name: document.getElementById('p-name').value,
                     price: parseInt(document.getElementById('p-price').value),
                     stock: parseInt(document.getElementById('p-stock').value),
-                    buyPrice: parseInt(document.getElementById('p-buy').value) || 0,
+                    buyPrice: parseInt(document.getElementById('p-buy').value)||0,
                     barcode: document.getElementById('p-barcode').value
                 };
-
                 if(id) {
-                    const idx = this.data.products.findIndex(x => x.id == id);
+                    const idx = this.data.products.findIndex(x=>x.id==id);
                     this.data.products[idx] = p;
-                } else {
-                    this.data.products.push(p);
-                }
-
-                this.saveData();
+                } else this.data.products.push(p);
+                this.save();
                 this.closeModal('modal-product');
                 this.renderStock();
-                App.showToast("Produk Disimpan");
+                this.toast("Tersimpan");
             },
 
-            deleteProduct: function() {
-                if(!confirm("Hapus produk ini?")) return;
+            delProd: function() {
+                if(!confirm("Hapus?")) return;
                 const id = document.getElementById('p-id').value;
-                this.data.products = this.data.products.filter(p => p.id != id);
-                this.saveData();
+                this.data.products = this.data.products.filter(x=>x.id!=id);
+                this.save();
                 this.closeModal('modal-product');
                 this.renderStock();
-                App.showToast("Produk Dihapus");
+                this.toast("Dihapus");
             },
 
-            // --- SCANNER FIXED ---
-            openScanner: function(mode) {
-                this.scanMode = mode;
+            // --- SCANNER FIX ---
+            openScanner: function(m) {
+                this.scanMode = m;
                 document.getElementById('modal-scanner').classList.add('open');
-                document.getElementById('scanner-region').innerHTML = ''; // Clear old instance
-                
-                this.scanner = new Html5Qrcode("scanner-region");
+                document.getElementById('cam-region').innerHTML = '';
+                this.scanner = new Html5Qrcode("cam-region");
                 this.isScanning = true;
-
-                const config = { fps: 10, qrbox: { width: 250, height: 150 } };
-                
-                this.scanner.start({ facingMode: "environment" }, config, 
-                    (code) => {
-                        this.handleScan(code);
-                    },
-                    (err) => { /* Ignore frame errors */ }
-                ).catch(err => {
-                    document.getElementById('scanner-region').innerHTML = `<div style="color:white; text-align:center; padding:20px;">Error Kamera: ${err}</div>`;
+                this.scanner.start({facingMode:"environment"}, {fps:10, qrbox:{width:250,height:150}}, 
+                    (c)=>{ this.scanOk(c); }, 
+                    (e)=>{}
+                ).catch(e=>{
+                    document.getElementById('cam-region').innerHTML = `
+                        <div class="camera-fail">
+                            <p>Akses Kamera Gagal / Ditolak</p>
+                            <button class="cam-btn" onclick="App.reqPerm()">Izinkan Kamera</button>
+                        </div>
+                    `;
                 });
             },
 
-            handleScan: function(code) {
+            reqPerm: function() {
+                // Trigger fake file input to prompt permission on some browsers
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.capture = 'environment';
+                input.accept = 'image/*';
+                input.click();
+                // Or just try again
+                this.openScanner(this.scanMode);
+            },
+
+            scanOk: function(c) {
                 if(!this.isScanning) return;
                 this.playBeep();
                 if(navigator.vibrate) navigator.vibrate(200);
-                
-                this.closeScanner(); // Stop camera immediately
-
-                if(this.scanMode === 'cart') {
-                    const p = this.data.products.find(x => x.barcode === code);
-                    if(p) App.addToCart(p.id);
-                    else App.showToast("Barcode tidak ditemukan", "error");
+                this.closeScanner();
+                if(this.scanMode=='cart') {
+                    const p = this.data.products.find(x=>x.barcode===c);
+                    if(p) this.add(p.id); else this.toast("Tidak ada","error");
                 } else {
-                    document.getElementById('p-barcode').value = code;
+                    document.getElementById('p-barcode').value = c;
                     document.getElementById('modal-product').classList.add('open');
                 }
             },
@@ -861,115 +740,86 @@
                 document.getElementById('modal-scanner').classList.remove('open');
                 this.isScanning = false;
                 if(this.scanner && this.scanner.isScanning) {
-                    this.scanner.stop().then(() => {
-                        this.scanner.clear();
-                    }).catch(err => console.error("Stop error", err));
+                    this.scanner.stop().then(()=>this.scanner.clear());
                 }
             },
 
-            // --- REPORTS & HISTORY (NEW) ---
+            // --- REPORTS ---
             openReportModal: function() {
-                const list = document.getElementById('rep-list');
-                list.innerHTML = '';
-                
-                let omset = 0, profit = 0;
-                this.data.transactions.forEach((t, index) => {
-                    omset += t.total;
-                    profit += t.profit;
-                    
-                    const item = document.createElement('div');
-                    item.className = 'report-card';
-                    item.onclick = () => App.openTrxDetail(index);
-                    item.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#666;">
+                const l = document.getElementById('rep-list');
+                l.innerHTML = '';
+                let om=0, pr=0;
+                this.data.transactions.forEach((t,i)=>{
+                    om+=t.total; pr+=t.profit;
+                    const d = document.createElement('div');
+                    d.className = 'trx-card';
+                    d.onclick = () => App.openTrx(i);
+                    d.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#888;">
                             <span>${t.id}</span>
                             <span>${t.date.split(',')[0]}</span>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-top:5px;">
-                            <span style="font-weight:bold; font-size:1rem;">${this.formatRupiah(t.total)}</span>
-                            <span style="color:var(--success); font-size:0.85rem; font-weight:600;">+${this.formatRupiah(t.profit)}</span>
+                            <span style="font-weight:bold;">${this.format(t.total)}</span>
+                            <span style="color:green; font-size:0.85rem;">+${this.format(t.profit)}</span>
                         </div>
                     `;
-                    list.appendChild(item);
+                    l.appendChild(d);
                 });
-
-                document.getElementById('rep-omset').innerText = this.formatRupiah(omset);
-                document.getElementById('rep-profit').innerText = this.formatRupiah(profit);
+                document.getElementById('rep-omset').innerText = this.format(om);
+                document.getElementById('rep-profit').innerText = this.format(pr);
                 document.getElementById('modal-report').classList.add('open');
             },
 
-            openTrxDetail: function(index) {
-                this.currentTrx = this.data.transactions[index];
-                const t = this.currentTrx;
-                
-                const html = `
-                    <div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:15px;">
-                        <div style="font-weight:bold; font-size:1.1rem; margin-bottom:5px;">${t.id}</div>
-                        <div style="font-size:0.8rem; color:var(--text-light);">${t.date}</div>
-                        <div style="margin-top:5px; font-weight:bold; color:var(--primary);">${this.formatRupiah(t.total)}</div>
+            openTrx: function(i) {
+                this.curTrx = this.data.transactions[i];
+                const t = this.curTrx;
+                document.getElementById('trx-body').innerHTML = `
+                    <div style="background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:15px;">
+                        <div style="font-weight:bold;">${t.id}</div>
+                        <div style="font-size:0.8rem; color:gray;">${t.date}</div>
+                        <div style="font-weight:bold; color:var(--primary); margin-top:5px;">${this.format(t.total)}</div>
                     </div>
-                    <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--text-light);">Item Belanja</h4>
-                    ${t.items.map(i => `
-                        <div class="history-item-row">
-                            <div>${i.name}</div>
-                            <div>${i.qty} x ${this.formatRupiah(i.price)}</div>
-                        </div>
-                    `).join('')}
-                    <div style="border-top:1px solid #eee; margin-top:10px; padding-top:10px; text-align:right; font-weight:bold;">
-                        Tunai: ${this.formatRupiah(t.pay)}<br>
-                        Kembali: ${this.formatRupiah(t.change)}
+                    ${t.items.map(x=>`<div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0;"><span>${x.name}</span><span>${x.qty} x ${this.format(x.price)}</span></div>`).join('')}
+                    <div style="margin-top:10px; text-align:right; font-weight:bold;">
+                        Tunai: ${this.format(t.pay)}<br>Kembali: ${this.format(t.change)}
                     </div>
                 `;
-                
-                document.getElementById('trx-detail-content').innerHTML = html;
-                // Close report modal to show detail
                 this.closeModal('modal-report');
-                document.getElementById('modal-trx-detail').classList.add('open');
+                document.getElementById('modal-trx').classList.add('open');
             },
 
-            reprintReceipt: function() {
-                if(!this.currentTrx) return;
-                this.generateReceipt(this.currentTrx);
-                setTimeout(() => window.print(), 500);
+            reprint: function() {
+                if(!this.curTrx) return;
+                this.receiptGen(this.curTrx);
+                setTimeout(()=>window.print(), 500);
             },
 
-            voidTransaction: function() {
-                if(!this.currentTrx) return;
-                if(confirm("Yakin ingin membatalkan transaksi ini? Stok akan dikembalikan.")) {
-                    // Restore Stock
-                    this.currentTrx.items.forEach(item => {
-                        const p = this.data.products.find(x => x.id === item.id);
-                        if(p) p.stock += item.qty;
-                    });
-
-                    // Remove from list
-                    this.data.transactions = this.data.transactions.filter(t => t.id !== this.currentTrx.id);
-                    this.saveData();
-                    
-                    this.closeModal('modal-trx-detail');
-                    this.openReportModal(); // Refresh report list
-                    App.showToast("Transaksi dibatalkan");
-                }
+            voidTrx: function() {
+                if(!confirm("Batalkan transaksi?")) return;
+                this.curTrx.items.forEach(x=>{
+                    const p = this.data.products.find(i=>i.id===x.id);
+                    if(p) p.stock += x.qty;
+                });
+                this.data.transactions = this.data.transactions.filter(t=>t.id!==this.curTrx.id);
+                this.save();
+                this.closeModal('modal-trx');
+                this.openReportModal();
+                this.toast("Dibatalkan");
             },
 
-            // --- UTILS ---
-            closeModal: function(id) {
-                document.getElementById(id).classList.remove('open');
-            },
+            closeModal: function(id) { document.getElementById(id).classList.remove('open'); },
 
             saveSettings: function() {
-                const name = document.getElementById('set-store').value;
-                if(!name) return;
-                this.data.settings.storeName = name;
-                this.saveData();
-                App.showToast("Pengaturan Disimpan");
+                const n = document.getElementById('set-name').value;
+                if(!n) return;
+                this.data.settings.storeName = n;
+                this.save();
+                this.toast("Disimpan");
             },
 
-            resetData: function() {
-                if(confirm("PERINGATAN: Semua data akan dihapus permanen. Lanjutkan?")) {
-                    localStorage.removeItem('kasir_ultimate_v2');
-                    location.reload();
-                }
+            resetAll: function() {
+                if(confirm("Reset semua?")) { localStorage.removeItem('kasir_mobile_v3'); location.reload(); }
             },
 
             playBeep: function() {
@@ -977,14 +827,13 @@
                     const ctx = new (window.AudioContext || window.webkitAudioContext)();
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
-                    osc.type = 'sine';
                     osc.frequency.value = 800;
                     osc.connect(gain);
                     gain.connect(ctx.destination);
                     osc.start();
                     gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.1);
                     osc.stop(ctx.currentTime + 0.1);
-                } catch(e) {}
+                } catch(e){}
             }
         };
 
