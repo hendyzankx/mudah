@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>POS Pro Ultimate - Stable Camera</title>
+    <title>POS Ultimate V5 - Checked & Fixed</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body { -webkit-tap-highlight-color: transparent; }
@@ -15,7 +14,6 @@
         .tab-content.active { display: block; }
         .active-tab { color: #2563eb; border-bottom: 3px solid #2563eb; }
         
-        /* FIX: Overlay Scanner agar selalu di atas modal (z-index tertinggi) */
         #scanner-overlay {
             position: fixed;
             top: 0;
@@ -38,25 +36,56 @@
             border: 4px solid #3b82f6;
         }
         #reader video { object-fit: cover !important; }
+
+        /* Print Style */
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-area, #receipt-area * { visibility: visible; }
+            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 pb-24">
+
+    <!-- HIDDEN RECEIPT AREA -->
+    <div id="receipt-area" class="hidden font-mono text-sm text-black bg-white p-4 w-full">
+        <center>
+            <h2 class="font-bold text-xl">TOKO SMART POS</h2>
+            <p>Struk Pembayaran</p>
+            <p>--------------------------------</p>
+        </center>
+        <div id="receipt-items"></div>
+        <p>--------------------------------</p>
+        <div class="flex justify-between font-bold text-lg">
+            <span>TOTAL</span>
+            <span id="receipt-total">Rp 0</span>
+        </div>
+        <div class="flex justify-between text-sm mt-1">
+            <span>Tunai</span>
+            <span id="receipt-cash">Rp 0</span>
+        </div>
+        <div class="flex justify-between text-sm font-bold mt-1">
+            <span>Kembali</span>
+            <span id="receipt-change">Rp 0</span>
+        </div>
+        <center class="mt-4 text-xs">Terima Kasih</center>
+    </div>
 
     <!-- OVERLAY SCANNER -->
     <div id="scanner-overlay">
         <div id="reader"></div>
         <div class="mt-6 text-center text-white p-4">
             <p class="font-bold text-lg">Pindai Barcode Produk</p>
-            <p class="text-xs opacity-60">Pastikan pencahayaan cukup</p>
+            <p class="text-xs opacity-60">Suara aktif saat berhasil</p>
         </div>
-        <button onclick="stopScanning()" class="mt-4 bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-2xl font-bold backdrop-blur-md">TUTUP</button>
+        <button onclick="stopScanning()" class="mt-4 bg-white/10 text-white px-8 py-3 rounded-2xl font-bold backdrop-blur-md">TUTUP</button>
     </div>
 
     <!-- HEADER -->
     <header class="bg-white p-4 shadow-sm sticky top-0 z-[100] flex justify-between items-center">
         <div>
-            <h1 class="text-xl font-black text-blue-600 italic">SMART POS V4</h1>
-            <p id="clock" class="text-[10px] text-slate-400 font-bold uppercase"></p>
+            <h1 class="text-xl font-black text-blue-600 italic">SMART POS V5</h1>
+            <p id="clock" class="text-[10px] text-slate-400 font-bold uppercase">Loading...</p>
         </div>
         <div class="flex gap-2">
             <button onclick="openAddProduct()" class="bg-green-500 text-white p-3 rounded-2xl shadow-lg active:scale-95 transition-transform">
@@ -71,178 +100,265 @@
     <!-- MAIN CONTENT -->
     <main class="p-4">
         <!-- TAB KASIR -->
-        <div id="tab-kasir" class="tab-content active text-center">
-            <input type="text" id="search-box" onkeyup="renderProducts()" placeholder="Cari nama barang..." class="w-full p-4 rounded-2xl shadow-sm mb-6 border-none outline-none focus:ring-2 focus:ring-blue-500">
-            <div id="product-grid" class="grid grid-cols-2 gap-4"></div>
-            <div id="empty-state" class="hidden py-20 text-slate-400">
-                <p>Belum ada barang. Klik tombol hijau (+) di atas.</p>
+        <div id="tab-kasir" class="tab-content active">
+            <div class="relative mb-4">
+                <input type="text" id="search-box" onkeyup="renderProducts()" placeholder="Cari nama barang atau scan..." class="w-full p-4 pl-10 rounded-2xl shadow-sm border-none outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 absolute left-4 top-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </div>
+            
+            <div id="product-grid" class="grid grid-cols-2 gap-4"></div>
         </div>
 
         <!-- TAB LAPORAN -->
         <div id="tab-laporan" class="tab-content">
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="bg-blue-600 p-4 rounded-[2rem] text-white">
-                    <p class="text-[10px] uppercase font-bold opacity-70">Omzet</p>
-                    <h2 id="report-omzet" class="text-xl font-black italic">Rp 0</h2>
-                </div>
-                <div class="bg-green-500 p-4 rounded-[2rem] text-white">
-                    <p class="text-[10px] uppercase font-bold opacity-70">Profit</p>
-                    <h2 id="report-profit" class="text-xl font-black italic">Rp 0</h2>
-                </div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-black text-lg">Riwayat Transaksi</h2>
+                <button onclick="resetHistory()" class="text-xs text-red-500 font-bold bg-red-50 px-3 py-1 rounded-lg">Reset</button>
             </div>
             <div id="history-list" class="space-y-3"></div>
         </div>
 
         <!-- TAB STOK -->
         <div id="tab-stok" class="tab-content">
+            <h2 class="font-black text-lg mb-4">Manajemen Stok</h2>
             <div id="stock-list" class="space-y-3"></div>
         </div>
     </main>
 
-    <!-- MODAL TAMBAH BARANG -->
+    <!-- FLOATING CART BUTTON -->
+    <div id="floating-cart" class="fixed bottom-24 left-4 right-4 z-40 hidden">
+        <button onclick="openCart()" class="w-full bg-slate-800 text-white p-4 rounded-2xl font-bold shadow-2xl flex justify-between items-center border-b-4 border-slate-900">
+            <span class="flex items-center gap-2">
+                <span class="bg-white/20 p-1 rounded-lg text-xs" id="cart-count">0 Item</span>
+                <span class="text-xs opacity-80">Keranjang</span>
+            </span>
+            <span id="cart-preview-total" class="font-mono">Rp 0</span>
+        </button>
+    </div>
+
+    <!-- MODAL CHECKOUT -->
+    <div id="cart-modal" class="fixed inset-0 bg-black/60 z-[500] hidden flex items-end">
+        <div class="bg-white w-full rounded-t-[2.5rem] p-6 animate-slide-up">
+            <div class="w-12 h-1.5 bg-slate-200 mx-auto mb-6 rounded-full"></div>
+            <h2 class="text-xl font-black mb-4">Ringkasan Belanja</h2>
+            
+            <div id="cart-items" class="max-h-[40vh] overflow-y-auto space-y-3 mb-4"></div>
+            
+            <div class="border-t border-dashed py-2 mb-4">
+                <div class="flex justify-between items-center font-black text-2xl text-blue-600">
+                    <span>TOTAL</span>
+                    <span id="checkout-total">Rp 0</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-2xl mb-4">
+                <label class="text-xs font-bold text-slate-500 block mb-2">Uang Diterima</label>
+                <input type="number" id="cash-input" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-lg" placeholder="0" onkeyup="calculateChange()">
+                <div id="change-display" class="mt-2 text-right font-black text-green-600 text-sm hidden">
+                    Kembalian: <span id="change-val">Rp 0</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="closeCart()" class="bg-slate-100 text-slate-600 py-4 rounded-2xl font-bold">Batal</button>
+                <button id="btn-pay" onclick="processPayment()" disabled class="bg-slate-300 text-white py-4 rounded-2xl font-bold transition-colors">Bayar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH/EDIT BARANG -->
     <div id="modal-barang" class="fixed inset-0 bg-black/60 z-[500] hidden flex items-center p-4">
         <div class="bg-white w-full rounded-[2.5rem] p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div class="w-12 h-1 bg-slate-200 mx-auto mb-6 rounded-full"></div>
-            <h2 class="text-xl font-black mb-6">Informasi Produk</h2>
+            <h2 id="modal-title" class="text-xl font-black mb-6">Info Produk</h2>
             <div class="space-y-4">
                 <div class="flex gap-2">
+                    <input type="text" id="f-id" class="hidden">
                     <input type="text" id="f-barcode" placeholder="Barcode" class="flex-1 p-4 bg-slate-100 rounded-2xl font-mono text-sm border-none outline-none">
-                    <button onclick="startScanning('form')" class="bg-blue-600 text-white px-5 rounded-2xl font-black shadow-lg shadow-blue-200 active:scale-90 transition-transform">SCAN</button>
+                    <button onclick="startScanning('form')" class="bg-blue-600 text-white px-5 rounded-2xl font-black active:scale-90 transition-transform">SCAN</button>
                 </div>
                 <input type="text" id="f-nama" placeholder="Nama Barang" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
                 <div class="grid grid-cols-2 gap-2">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Harga Modal</label>
-                        <input type="number" id="f-modal" placeholder="0" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Stok Awal</label>
-                        <input type="number" id="f-stok" placeholder="0" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
-                    </div>
+                    <input type="number" id="f-modal" placeholder="Harga Modal" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
+                    <input type="number" id="f-stok" placeholder="Stok" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-blue-600 ml-2 uppercase">Harga Jual Pcs</label>
-                        <input type="number" id="f-jual-pcs" placeholder="0" class="w-full p-4 bg-blue-50 rounded-2xl border-none outline-none text-blue-600 font-bold">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-amber-600 ml-2 uppercase">Harga Jual Dus</label>
-                        <input type="number" id="f-jual-dus" placeholder="0" class="w-full p-4 bg-amber-50 rounded-2xl border-none outline-none text-amber-600 font-bold">
-                    </div>
+                    <input type="number" id="f-jual-pcs" placeholder="Harga Pcs" class="w-full p-4 bg-blue-50 rounded-2xl border-none outline-none font-bold text-blue-600">
+                    <input type="number" id="f-jual-dus" placeholder="Harga Dus" class="w-full p-4 bg-amber-50 rounded-2xl border-none outline-none font-bold text-amber-600">
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Isi Per Dus (Contoh: 40)</label>
-                    <input type="number" id="f-isi" placeholder="1" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
-                </div>
+                <input type="number" id="f-isi" placeholder="Isi per Dus" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
                 <div class="grid grid-cols-2 gap-3 pt-6">
                     <button onclick="closeAddProduct()" class="py-4 text-slate-400 font-bold uppercase text-xs">Batal</button>
-                    <button onclick="saveProduct()" class="bg-blue-600 text-white py-4 rounded-[2rem] font-black shadow-lg shadow-blue-200">Simpan Data</button>
+                    <button onclick="saveProduct()" class="bg-blue-600 text-white py-4 rounded-[2rem] font-black shadow-lg shadow-blue-200">Simpan</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- FLOATING CART -->
-    <div id="cart-bar" class="fixed bottom-24 left-4 right-4 z-[90] hidden">
-        <button onclick="openCart()" class="w-full bg-green-500 text-white p-5 rounded-[2rem] font-black shadow-2xl flex justify-between items-center active:scale-95 transition-transform">
-            <span id="cart-count">0 Items</span>
-            <span id="cart-total">Rp 0</span>
-        </button>
-    </div>
-
-    <!-- MODAL KERANJANG -->
-    <div id="cart-modal" class="fixed inset-0 bg-black/40 z-[600] hidden flex items-end">
-        <div class="bg-white w-full rounded-t-[3rem] p-8 max-h-[85vh] overflow-y-auto shadow-2xl">
-            <div class="w-12 h-1.5 bg-slate-200 mx-auto mb-8 rounded-full"></div>
-            <div id="cart-items" class="space-y-4 mb-8"></div>
-            <div class="flex justify-between items-center mb-8">
-                <span class="text-slate-400 font-bold">Total Pembayaran</span>
-                <span id="cart-final-total" class="text-2xl font-black text-blue-600">Rp 0</span>
+    <!-- MODAL STOCK ADJUSTMENT -->
+    <div id="stock-adjust-modal" class="fixed inset-0 bg-black/60 z-[500] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+            <h3 class="font-black text-lg mb-2">Atur Stok</h3>
+            <p id="adj-prod-name" class="text-slate-400 text-sm mb-4">Produk</p>
+            <input type="hidden" id="adj-id">
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button onclick="setAdjMode('add')" id="btn-add" class="bg-blue-600 text-white py-2 rounded-xl font-bold text-sm">Tambah (+)</button>
+                <button onclick="setAdjMode('sub')" id="btn-sub" class="bg-slate-200 text-slate-600 py-2 rounded-xl font-bold text-sm">Kurang (-)</button>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="closeCart()" class="py-4 font-bold text-slate-400 uppercase text-xs">Kembali</button>
-                <button onclick="checkout()" class="bg-blue-600 text-white py-5 rounded-[2rem] font-black shadow-lg shadow-blue-100">PROSES BAYAR</button>
+            <input type="number" id="adj-qty" placeholder="Jumlah" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl mb-4">
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="closeStockAdj()" class="py-3 bg-slate-100 font-bold rounded-xl">Batal</button>
+                <button onclick="saveStockAdj()" class="py-3 bg-green-500 text-white font-bold rounded-xl">Simpan</button>
             </div>
         </div>
     </div>
 
     <!-- NAVIGATION -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex justify-around p-2 z-[80]">
-        <button onclick="switchTab('kasir')" class="nav-btn active-tab flex-1 py-3 text-[10px] font-black uppercase tracking-widest">Kasir</button>
-        <button onclick="switchTab('laporan')" class="nav-btn flex-1 py-3 text-slate-300 text-[10px] font-black uppercase tracking-widest">Laporan</button>
-        <button onclick="switchTab('stok')" class="nav-btn flex-1 py-3 text-slate-300 text-[10px] font-black uppercase tracking-widest">Stok</button>
+        <button onclick="switchTab('kasir')" class="nav-btn active-tab flex-1 py-3 text-[10px] font-black uppercase">Kasir</button>
+        <button onclick="switchTab('laporan')" class="nav-btn flex-1 py-3 text-slate-300 text-[10px] font-black uppercase">Laporan</button>
+        <button onclick="switchTab('stok')" class="nav-btn flex-1 py-3 text-slate-300 text-[10px] font-black uppercase">Stok</button>
     </nav>
 
     <script>
-        // --- DATA & CONFIG ---
+        // --- DATA & STATE ---
         let products = JSON.parse(localStorage.getItem('pos_products')) || [];
         let history = JSON.parse(localStorage.getItem('pos_history')) || [];
         let cart = [];
         let scanner = null;
-        let activeMode = ''; // 'pos' atau 'form'
+        let activeMode = '';
+        let adjMode = 'add';
 
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long' });
+        // --- AUDIO & VIBRATE ---
+        function playBeep() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.2);
+        }
+        function vibrate() { if (navigator.vibrate) navigator.vibrate(100); }
+
+        // --- CLOCK ---
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleString('id-ID', {weekday:'long', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+        }, 1000);
+
+        // --- NAVIGATION ---
+        function switchTab(t) {
+            document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(x => {
+                x.classList.remove('active-tab', 'text-slate-300');
+                x.classList.add('text-slate-300');
+            });
+            document.getElementById('tab-' + t).classList.add('active');
+            event.currentTarget.classList.remove('text-slate-300');
+            event.currentTarget.classList.add('active-tab');
+
+            if(t === 'laporan') renderHistory();
+            if(t === 'stok') renderStock();
         }
 
-        // --- CAMERA SYSTEM (STABLE OVERLAY) ---
+        // --- SCANNER ---
         async function startScanning(mode) {
             activeMode = mode;
             document.getElementById('scanner-overlay').style.display = 'flex';
-            
-            if (!scanner) {
-                scanner = new Html5Qrcode("reader");
-            }
-
-            const config = { fps: 15, qrbox: { width: 250, height: 180 } };
-            
+            if (!scanner) scanner = new Html5Qrcode("reader");
+            const config = { fps: 20, qrbox: { width: 250, height: 180 } };
             try {
                 await scanner.start({ facingMode: "environment" }, config, onScanSuccess);
             } catch (err) {
-                alert("Kamera gagal diakses. Pastikan Anda menggunakan HTTPS.");
+                alert("Kamera error: " + err);
                 stopScanning();
             }
         }
-
         async function stopScanning() {
-            if (scanner && scanner.isScanning) {
-                await scanner.stop();
-            }
+            if (scanner && scanner.isScanning) await scanner.stop();
             document.getElementById('scanner-overlay').style.display = 'none';
         }
-
         function onScanSuccess(code) {
-            vibrate();
+            playBeep(); vibrate();
             if (activeMode === 'form') {
                 document.getElementById('f-barcode').value = code;
-                const existing = products.find(p => p.barcode === code);
-                if(existing) {
-                    document.getElementById('f-nama').value = existing.name;
-                    document.getElementById('f-modal').value = existing.modal;
-                    document.getElementById('f-jual-pcs').value = existing.pricePcs;
-                    document.getElementById('f-jual-dus').value = existing.priceDus;
-                    document.getElementById('f-isi').value = existing.content;
-                    document.getElementById('f-stok').value = existing.stock;
-                }
+                const p = products.find(x => x.barcode === code);
+                if(p) fillForm(p);
                 stopScanning();
             } else {
-                const prod = products.find(p => p.barcode === code);
-                if(prod) {
-                    addToCart(prod.id, 'pcs');
-                    stopScanning(); // Optional: stop setelah dapat 1 barang
-                } else {
-                    alert("Barang tidak ditemukan: " + code);
+                // POS Mode: Add to cart
+                const p = products.find(x => x.barcode === code);
+                if(p) {
+                    addToCart(p.id, 'pcs'); // Default to pcs
                     stopScanning();
+                } else {
+                    alert("Barang tidak ditemukan!");
+                    // continue scanning
                 }
             }
         }
 
-        // --- CORE FEATURES ---
+        // --- PRODUCT LOGIC ---
+        function renderProducts() {
+            const q = document.getElementById('search-box').value.toLowerCase();
+            const grid = document.getElementById('product-grid');
+            const filtered = products.filter(p => p.name.toLowerCase().includes(q) || (p.barcode && p.barcode.includes(q)));
+            
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 text-center text-slate-400 mt-10">Belum ada produk</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-transparent active:border-blue-500 transition-all relative">
+                    <div class="absolute top-3 right-3 text-[10px] font-bold ${p.stock < 5 ? 'text-red-500' : 'text-slate-400'} bg-slate-100 px-2 py-1 rounded-lg">Stok: ${p.stock}</div>
+                    <h3 class="font-bold text-xs h-8 overflow-hidden text-slate-500 mb-4 pr-8">${p.name}</h3>
+                    <div class="space-y-2">
+                        <button onclick="addToCart(${p.id}, 'pcs')" class="w-full py-3 bg-blue-50 text-blue-600 rounded-2xl text-[10px] font-black uppercase active:scale-95">Pcs: ${p.pricePcs.toLocaleString()}</button>
+                        ${p.priceDus > 0 ? `<button onclick="addToCart(${p.id}, 'dus')" class="w-full py-3 bg-amber-50 text-amber-600 rounded-2xl text-[10px] font-black uppercase active:scale-95">Dus: ${p.priceDus.toLocaleString()}</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAddProduct(editId = null) {
+            document.getElementById('modal-title').innerText = editId ? "Edit Produk" : "Tambah Produk";
+            const form = document.getElementById('modal-barang');
+            form.classList.remove('hidden');
+            if(!editId) {
+                // Reset form
+                document.getElementById('f-id').value = '';
+                document.getElementById('f-barcode').value = '';
+                document.getElementById('f-nama').value = '';
+                document.getElementById('f-modal').value = '';
+                document.getElementById('f-stok').value = '';
+                document.getElementById('f-jual-pcs').value = '';
+                document.getElementById('f-jual-dus').value = '';
+                document.getElementById('f-isi').value = '';
+            }
+        }
+
+        function fillForm(p) {
+            document.getElementById('f-id').value = p.id;
+            document.getElementById('f-barcode').value = p.barcode;
+            document.getElementById('f-nama').value = p.name;
+            document.getElementById('f-modal').value = p.modal;
+            document.getElementById('f-jual-pcs').value = p.pricePcs;
+            document.getElementById('f-jual-dus').value = p.priceDus;
+            document.getElementById('f-stok').value = p.stock;
+            document.getElementById('f-isi').value = p.content;
+            document.getElementById('modal-title').innerText = "Edit Produk";
+            document.getElementById('modal-barang').classList.remove('hidden');
+        }
+
         function saveProduct() {
+            const id = document.getElementById('f-id').value;
             const data = {
-                id: Date.now(),
+                id: id ? parseInt(id) : Date.now(),
                 barcode: document.getElementById('f-barcode').value,
                 name: document.getElementById('f-nama').value,
                 modal: Number(document.getElementById('f-modal').value),
@@ -251,198 +367,226 @@
                 content: Number(document.getElementById('f-isi').value) || 1,
                 stock: Number(document.getElementById('f-stok').value)
             };
+            if(!data.name) return alert("Nama wajib diisi!");
 
-            if(!data.name || !data.barcode) return alert("Nama & Barcode wajib diisi!");
-
-            const idx = products.findIndex(p => p.barcode === data.barcode);
-            if(idx !== -1) products[idx] = data;
-            else products.push(data);
-
+            if(id) {
+                const idx = products.findIndex(p => p.id == id);
+                if(idx !== -1) products[idx] = data;
+            } else {
+                products.push(data);
+            }
             localStorage.setItem('pos_products', JSON.stringify(products));
             closeAddProduct();
             renderProducts();
+            renderStock(); // refresh stock tab if open
         }
 
+        function closeAddProduct() { document.getElementById('modal-barang').classList.add('hidden'); stopScanning(); }
+
+        // --- CART & CHECKOUT ---
         function addToCart(id, type) {
             const p = products.find(x => x.id === id);
             const key = `${id}-${type}`;
-            const existing = cart.find(c => c.key === key);
-            const sellPrice = type === 'pcs' ? p.pricePcs : p.priceDus;
-
-            if(existing) existing.qty++;
-            else cart.push({ ...p, key, type, sellPrice, qty: 1 });
-
+            const exist = cart.find(c => c.key === key);
+            
+            if(exist) exist.qty++;
+            else cart.push({ ...p, key, type, sellPrice: type === 'dus' ? p.priceDus : p.pricePcs, qty: 1 });
+            
             updateCartUI();
+            playBeep();
         }
 
         function updateCartUI() {
             const total = cart.reduce((s, i) => s + (i.sellPrice * i.qty), 0);
             const count = cart.reduce((s, i) => s + i.qty, 0);
+            document.getElementById('cart-count').innerText = `${count} Item`;
+            document.getElementById('cart-preview-total').innerText = `Rp ${total.toLocaleString()}`;
+            
+            const btn = document.getElementById('floating-cart');
+            if(cart.length > 0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
+        }
 
-            document.getElementById('cart-bar').style.display = cart.length > 0 ? 'block' : 'none';
-            document.getElementById('cart-count').innerText = `${count} Items`;
-            document.getElementById('cart-total').innerText = `Rp ${total.toLocaleString()}`;
-            document.getElementById('cart-final-total').innerText = `Rp ${total.toLocaleString()}`;
+        function openCart() {
+            document.getElementById('cart-modal').classList.remove('hidden');
+            renderCartList();
+            document.getElementById('cash-input').value = '';
+            document.getElementById('change-display').classList.add('hidden');
+            document.getElementById('btn-pay').disabled = true;
+            document.getElementById('btn-pay').className = "bg-slate-300 text-white py-4 rounded-2xl font-bold transition-colors";
+        }
 
-            document.getElementById('cart-items').innerHTML = cart.map(i => `
-                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl">
+        function closeCart() { document.getElementById('cart-modal').classList.add('hidden'); }
+
+        function renderCartList() {
+            const list = document.getElementById('cart-items');
+            const total = cart.reduce((s, i) => s + (i.sellPrice * i.qty), 0);
+            document.getElementById('checkout-total').innerText = `Rp ${total.toLocaleString()}`;
+            
+            list.innerHTML = cart.map(i => `
+                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
                     <div>
-                        <p class="font-bold text-sm">${i.name}</p>
-                        <p class="text-[10px] text-blue-600 font-black uppercase">${i.type} @ Rp ${i.sellPrice.toLocaleString()}</p>
+                        <p class="font-bold text-xs">${i.name}</p>
+                        <p class="text-[10px] text-slate-400">${i.type.toUpperCase()} @ ${i.sellPrice.toLocaleString()}</p>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <button onclick="changeQty('${i.key}', -1)" class="w-8 h-8 bg-white shadow rounded-full font-bold">-</button>
-                        <span class="font-bold text-sm">${i.qty}</span>
-                        <button onclick="changeQty('${i.key}', 1)" class="w-8 h-8 bg-white shadow rounded-full font-bold">+</button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="modQty('${i.key}', -1)" class="w-6 h-6 bg-white rounded-full shadow font-bold text-red-500">-</button>
+                        <span class="text-sm font-bold w-4 text-center">${i.qty}</span>
+                        <button onclick="modQty('${i.key}', 1)" class="w-6 h-6 bg-white rounded-full shadow font-bold text-blue-500">+</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function changeQty(key, delta) {
+        function modQty(key, d) {
             const item = cart.find(c => c.key === key);
-            if(item) {
-                item.qty += delta;
-                if(item.qty <= 0) cart = cart.filter(c => c.key !== key);
-            }
+            item.qty += d;
+            if(item.qty <= 0) cart = cart.filter(c => c.key !== key);
             updateCartUI();
+            if(cart.length > 0) renderCartList(); else closeCart();
         }
 
-        function checkout() {
-            if(cart.length === 0) return;
+        function calculateChange() {
             const total = cart.reduce((s, i) => s + (i.sellPrice * i.qty), 0);
-            const modal = cart.reduce((s, i) => {
-                const modalSatuan = i.type === 'pcs' ? i.modal : (i.modal * i.content);
-                return s + (modalSatuan * i.qty);
-            }, 0);
+            const cash = parseFloat(document.getElementById('cash-input').value) || 0;
+            const display = document.getElementById('change-display');
+            const btn = document.getElementById('btn-pay');
 
-            const trx = {
-                id: Date.now(),
-                total: total,
-                profit: total - modal,
-                date: new Date().toISOString(),
-                items: [...cart]
-            };
+            if(cash >= total) {
+                document.getElementById('change-val').innerText = `Rp ${(cash - total).toLocaleString()}`;
+                display.classList.remove('hidden');
+                btn.disabled = false;
+                btn.className = "bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200";
+            } else {
+                display.classList.add('hidden');
+                btn.disabled = true;
+                btn.className = "bg-slate-300 text-white py-4 rounded-2xl font-bold transition-colors";
+            }
+        }
 
-            // Potong Stok
-            cart.forEach(item => {
-                const p = products.find(x => x.id === item.id);
-                const qtyDipotong = item.type === 'pcs' ? item.qty : (item.qty * item.content);
-                p.stock -= qtyDipotong;
-            });
-
+        function processPayment() {
+            const total = cart.reduce((s, i) => s + (i.sellPrice * i.qty), 0);
+            const cash = parseFloat(document.getElementById('cash-input').value) || total;
+            
+            // Save History
+            const trx = { id: Date.now(), items: [...cart], total, cash, change: cash-total, date: new Date().toLocaleString() };
             history.unshift(trx);
             localStorage.setItem('pos_history', JSON.stringify(history));
+
+            // Reduce Stock
+            cart.forEach(i => {
+                const p = products.find(x => x.id === i.id);
+                const dec = i.type === 'dus' ? (i.qty * p.content) : i.qty;
+                p.stock = Math.max(0, p.stock - dec);
+            });
             localStorage.setItem('pos_products', JSON.stringify(products));
 
+            // Print Receipt (Hidden)
+            document.getElementById('receipt-items').innerHTML = cart.map(i => `
+                <div style="display:flex;justify-content:space-between"><span>${i.name} x${i.qty}</span><span>${(i.sellPrice*i.qty).toLocaleString()}</span></div>
+            `).join('');
+            document.getElementById('receipt-total').innerText = `Rp ${total.toLocaleString()}`;
+            document.getElementById('receipt-cash').innerText = `Rp ${cash.toLocaleString()}`;
+            document.getElementById('receipt-change').innerText = `Rp ${(cash-total).toLocaleString()}`;
+            
+            window.print();
+
+            // Reset
             cart = [];
             updateCartUI();
             closeCart();
-            alert("Transaksi Berhasil!");
             renderProducts();
+            alert("Transaksi Berhasil!");
         }
 
-        // --- UI RENDERERS ---
-        function renderProducts() {
-            const q = document.getElementById('search-box').value.toLowerCase();
-            const grid = document.getElementById('product-grid');
-            const filtered = products.filter(p => p.name.toLowerCase().includes(q));
-            
-            document.getElementById('empty-state').style.display = products.length === 0 ? 'block' : 'none';
-
-            grid.innerHTML = filtered.map(p => `
-                <div class="bg-white p-4 rounded-[2.5rem] shadow-sm border border-transparent active:border-blue-500 transition-all">
-                    <h3 class="font-bold text-xs h-8 overflow-hidden text-slate-500 mb-4">${p.name}</h3>
-                    <div class="space-y-2">
-                        <button onclick="addToCart(${p.id}, 'pcs')" class="w-full py-3 bg-blue-50 text-blue-600 rounded-2xl text-[10px] font-black uppercase tracking-tighter">Pcs: Rp ${p.pricePcs.toLocaleString()}</button>
-                        <button onclick="addToCart(${p.id}, 'dus')" class="w-full py-3 bg-amber-50 text-amber-600 rounded-2xl text-[10px] font-black uppercase tracking-tighter">Dus: Rp ${p.priceDus.toLocaleString()}</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
+        // --- STOCK MANAGEMENT ---
         function renderStock() {
-            document.getElementById('stock-list').innerHTML = products.map(p => `
-                <div class="bg-white p-5 rounded-[2rem] flex justify-between items-center shadow-sm">
+            const list = document.getElementById('stock-list');
+            list.innerHTML = products.map(p => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center">
                     <div>
-                        <p class="font-black text-sm">${p.name}</p>
-                        <p class="text-[10px] text-slate-400 font-mono uppercase">${p.barcode}</p>
+                        <p class="font-bold text-sm">${p.name}</p>
+                        <p class="text-[10px] text-slate-400">${p.barcode || '-'}</p>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xs font-black ${p.stock < 10 ? 'text-red-500' : 'text-green-500'} italic">Stok: ${p.stock}</p>
-                        <button onclick="editProduct(${p.id})" class="text-[10px] font-bold text-blue-600 uppercase underline">Edit</button>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-2 py-1 bg-slate-100 rounded-lg">${p.stock}</span>
+                        <button onclick="openStockAdj(${p.id})" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-xs font-bold">Edit</button>
+                        <button onclick="deleteProduct(${p.id})" class="bg-red-100 text-red-500 px-2 py-1 rounded-lg text-xs font-bold">Hapus</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function renderHistory() {
-            const today = new Date().toISOString().split('T')[0];
-            const filtered = history.filter(h => h.date.startsWith(today));
-            
-            const totalOmzet = filtered.reduce((s, h) => s + h.total, 0);
-            const totalProfit = filtered.reduce((s, h) => s + h.profit, 0);
-
-            document.getElementById('report-omzet').innerText = `Rp ${totalOmzet.toLocaleString()}`;
-            document.getElementById('report-profit').innerText = `Rp ${totalProfit.toLocaleString()}`;
-
-            document.getElementById('history-list').innerHTML = filtered.map(h => `
-                <div class="bg-white p-5 rounded-3xl shadow-sm flex justify-between items-center border-l-4 border-blue-600">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${new Date(h.date).toLocaleTimeString()}</p>
-                        <p class="font-black text-blue-600 italic">Rp ${h.total.toLocaleString()}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] text-slate-300 font-bold uppercase">Profit</p>
-                        <p class="text-xs font-bold text-green-500">+${h.profit.toLocaleString()}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // --- NAVIGATION & MODALS ---
-        function switchTab(t) {
-            document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active-tab', 'text-slate-300'));
-            
-            document.getElementById('tab-' + t).classList.add('active');
-            event.currentTarget.classList.add('active-tab');
-
-            if(t === 'stok') renderStock();
-            if(t === 'laporan') renderHistory();
-            if(t === 'kasir') renderProducts();
-        }
-
-        function openAddProduct() { document.getElementById('modal-barang').classList.remove('hidden'); }
-        function closeAddProduct() { 
-            document.getElementById('modal-barang').classList.add('hidden'); 
-            document.getElementById('f-barcode').value = '';
-            document.getElementById('f-nama').value = '';
-            document.getElementById('f-modal').value = '';
-            document.getElementById('f-jual-pcs').value = '';
-            document.getElementById('f-jual-dus').value = '';
-            document.getElementById('f-stok').value = '';
-            document.getElementById('f-isi').value = '';
-            stopScanning();
-        }
-        function openCart() { document.getElementById('cart-modal').classList.remove('hidden'); }
-        function closeCart() { document.getElementById('cart-modal').classList.add('hidden'); }
-        function editProduct(id) {
+        function openStockAdj(id) {
             const p = products.find(x => x.id === id);
-            document.getElementById('f-barcode').value = p.barcode;
-            document.getElementById('f-nama').value = p.name;
-            document.getElementById('f-modal').value = p.modal;
-            document.getElementById('f-jual-pcs').value = p.pricePcs;
-            document.getElementById('f-jual-dus').value = p.priceDus;
-            document.getElementById('f-stok').value = p.stock;
-            document.getElementById('f-isi').value = p.content;
-            openAddProduct();
+            document.getElementById('adj-id').value = id;
+            document.getElementById('adj-prod-name').innerText = p.name;
+            document.getElementById('adj-qty').value = '';
+            setAdjMode('add');
+            document.getElementById('stock-adjust-modal').classList.remove('hidden');
         }
-        function vibrate() { if(navigator.vibrate) navigator.vibrate(100); }
+        function closeStockAdj() { document.getElementById('stock-adjust-modal').classList.add('hidden'); }
+        function setAdjMode(m) {
+            adjMode = m;
+            document.getElementById('btn-add').className = m==='add' ? "bg-blue-600 text-white py-2 rounded-xl font-bold text-sm" : "bg-slate-200 text-slate-600 py-2 rounded-xl font-bold text-sm";
+            document.getElementById('btn-sub').className = m==='sub' ? "bg-red-500 text-white py-2 rounded-xl font-bold text-sm" : "bg-slate-200 text-slate-600 py-2 rounded-xl font-bold text-sm";
+        }
+        function saveStockAdj() {
+            const id = Number(document.getElementById('adj-id').value);
+            const qty = Number(document.getElementById('adj-qty').value);
+            if(!qty) return;
+            const p = products.find(x => x.id === id);
+            
+            if(adjMode === 'add') p.stock += qty;
+            else {
+                if(p.stock < qty) return alert("Stok tidak cukup!");
+                p.stock -= qty;
+            }
+            localStorage.setItem('pos_products', JSON.stringify(products));
+            closeStockAdj();
+            renderStock();
+        }
+        function deleteProduct(id) {
+            if(confirm("Hapus produk ini?")) {
+                products = products.filter(p => p.id !== id);
+                localStorage.setItem('pos_products', JSON.stringify(products));
+                renderStock();
+            }
+        }
 
-        setInterval(updateClock, 1000);
-        updateClock();
-        renderProducts();
+        // --- HISTORY ---
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            if(history.length === 0) {
+                list.innerHTML = "<p class='text-center text-slate-400 text-sm mt-10'>Belum ada transaksi</p>";
+                return;
+            }
+            list.innerHTML = history.slice(0, 20).map(h => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-500">
+                    <div class="flex justify-between text-[10px] text-slate-400 font-bold mb-1">
+                        <span>${h.date}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-black text-lg">Rp ${h.total.toLocaleString()}</span>
+                        <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">Lunas</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function resetHistory() {
+            if(confirm("Hapus semua riwayat transaksi?")) {
+                history = [];
+                localStorage.setItem('pos_history', JSON.stringify(history));
+                renderHistory();
+            }
+        }
+
+        window.onload = () => {
+            renderProducts();
+            document.body.addEventListener('click', () => {
+                const dummyCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if(dummyCtx.state === 'suspended') dummyCtx.resume();
+            }, { once: true });
+        };
     </script>
 </body>
 </html>
