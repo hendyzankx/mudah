@@ -3,485 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kasir Mobile Pro</title>
-    <!-- Tailwind CSS -->
+    <title>POS Pro - Mobile Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library QR/Barcode Scanner -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    
     <style>
-        /* Optimasi tampilan mobile */
-        body { -webkit-tap-highlight-color: transparent; }
-        .product-card:active { transform: scale(0.95); transition: transform 0.1s; }
-        
-        /* Custom Scrollbar untuk keranjang */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        
-        /* Loader sederhana */
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 3px solid #3498db;
-            width: 20px;
-            height: 20px;
-            -webkit-animation: spin 1s linear infinite; /* Safari */
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Scanner Area */
-        #reader { width: 100%; border-radius: 8px; overflow: hidden; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .active-tab { border-bottom: 3px solid #2563eb; color: #2563eb; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased pb-40">
+<body class="bg-gray-100 font-sans">
 
-    <!-- Header -->
-    <header class="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-30 flex justify-between items-center">
-        <h1 class="text-xl font-bold">POS Mobile</h1>
-        <button onclick="toggleHistory()" class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg text-xs font-semibold shadow transition">
-            📜 Riwayat
-        </button>
-    </header>
+    <!-- Navigasi Utama -->
+    <nav class="bg-white shadow-sm flex justify-around sticky top-0 z-50 border-b">
+        <button onclick="switchTab('kasir')" class="tab-btn active-tab py-4 px-6 font-bold text-sm">KASIR</button>
+        <button onclick="switchTab('riwayat')" class="tab-btn py-4 px-6 font-bold text-sm">RIWAYAT</button>
+        <button onclick="switchTab('stok')" class="tab-btn py-4 px-6 font-bold text-sm">STOK</button>
+    </nav>
 
-    <!-- Tab Navigasi (Produk vs Scan) -->
-    <div class="flex bg-white shadow-sm mb-4 sticky top-16 z-20">
-        <button id="tab-product" onclick="switchTab('product')" class="flex-1 py-3 text-blue-600 font-bold border-b-2 border-blue-600 transition">
-            Daftar Produk
-        </button>
-        <button id="tab-scan" onclick="switchTab('scan')" class="flex-1 py-3 text-gray-500 font-medium border-b-2 border-transparent hover:text-blue-500 transition">
-            Scan Barcode
-        </button>
+    <!-- TAB 1: KASIR -->
+    <div id="kasir" class="tab-content active p-4 pb-80">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar mb-4">
+            <button onclick="renderProducts('Semua')" class="bg-white border px-4 py-2 rounded-full text-xs font-bold shadow-sm active:bg-blue-500 active:text-white">Semua</button>
+            <button onclick="renderProducts('Makanan')" class="bg-white border px-4 py-2 rounded-full text-xs font-bold shadow-sm">Makanan</button>
+            <button onclick="renderProducts('Minuman')" class="bg-white border px-4 py-2 rounded-full text-xs font-bold shadow-sm">Minuman</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3" id="pos-grid">
+            <!-- Produk dirender di sini -->
+        </div>
     </div>
 
-    <main class="p-4">
-        <!-- Pencarian -->
-        <div class="mb-4 sticky top-28 z-10">
-            <input type="text" id="search-input" oninput="renderProducts()" placeholder="Cari barang..." class="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+    <!-- TAB 2: RIWAYAT -->
+    <div id="riwayat" class="tab-content p-4">
+        <h2 class="text-xl font-bold mb-4">Transaksi Terakhir</h2>
+        <div id="history-list" class="space-y-3">
+            <!-- Riwayat muncul di sini -->
         </div>
+    </div>
 
-        <!-- View: Daftar Produk -->
-        <div id="view-product" class="grid grid-cols-2 gap-4" style="display: block;">
-            <div id="product-list">
-                <!-- Produk akan muncul di sini via JS -->
-            </div>
-            <!-- Pesan Status Online/Offline -->
-            <div id="connection-status" class="mt-4 text-center text-xs font-semibold text-gray-400">
-                Menunggu status koneksi...
-            </div>
+    <!-- TAB 3: STOK -->
+    <div id="stok" class="tab-content p-4">
+        <h2 class="text-xl font-bold mb-4">Manajemen Inventaris</h2>
+        <div id="stock-list" class="bg-white rounded-xl shadow-sm divide-y">
+            <!-- Stok muncul di sini -->
         </div>
+    </div>
 
-        <!-- View: Scan Barcode -->
-        <div id="view-scan" class="hidden text-center">
-            <div id="reader" class="mb-4 bg-black"></div>
-            <p class="text-sm text-gray-600 mb-2">Arahkan kamera ke kode batang produk.</p>
-            <div id="scan-result" class="p-3 bg-blue-50 text-blue-800 rounded-lg hidden font-mono text-sm"></div>
-        </div>
-    </main>
-
-    <!-- Panel Keranjang (Bottom Sheet) -->
-    <section class="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.1)] rounded-t-2xl p-4 z-40 transition-transform duration-300">
-        <div class="flex justify-between items-center mb-2">
-            <h2 class="font-bold text-gray-700">Keranjang <span id="cart-count" class="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">0</span></h2>
-            <button onclick="clearCart()" class="text-red-500 text-xs font-bold hover:underline">Hapus Semua</button>
-        </div>
-        
-        <!-- List Item -->
-        <div id="cart-items" class="cart-container h-48 overflow-y-auto custom-scrollbar mb-4 space-y-2 pr-1">
-            <p class="text-gray-400 text-sm text-center py-4">Belum ada barang.</p>
-        </div>
-
-        <!-- Total & Action -->
-        <div class="border-t pt-4">
-            <div class="flex justify-between items-end mb-4">
-                <span class="text-gray-600">Total Belanja:</span>
-                <span id="total-price" class="text-2xl font-bold text-blue-600">Rp 0</span>
+    <!-- Floating Checkout Section -->
+    <div id="cart-footer" class="fixed bottom-0 left-0 right-0 bg-white border-t rounded-t-3xl shadow-2xl z-40">
+        <div class="p-6">
+            <div id="cart-items-preview" class="max-h-32 overflow-y-auto mb-3 space-y-2">
+                <!-- Preview belanjaan -->
             </div>
-            <button onclick="checkout()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl text-lg shadow-lg active:bg-green-700 transition flex justify-center items-center gap-2">
-                <span>BAYAR SEKARANG</span>
-            </button>
-        </div>
-    </section>
-
-    <!-- Modal Riwayat Transaksi -->
-    <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden">
-            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
-                <h3 class="font-bold text-lg">Riwayat Penjualan</h3>
-                <button onclick="toggleHistory()" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+            <div class="flex justify-between items-center mb-4 border-t pt-3">
+                <span class="text-gray-500 font-medium">Total Pembayaran</span>
+                <span id="grand-total" class="text-2xl font-black text-blue-600">Rp 0</span>
             </div>
-            <div id="history-list" class="p-4 overflow-y-auto space-y-3 flex-1 custom-scrollbar">
-                <!-- Riwayat akan muncul di sini -->
-            </div>
-            <div class="p-3 border-t bg-gray-50 text-center">
-                <button onclick="clearHistory()" class="text-red-500 text-sm font-semibold">Hapus Semua Riwayat</button>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="clearCart()" class="bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold">Batal</button>
+                <button onclick="checkout()" class="bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200">Proses</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- KONFIGURASI & DATA ---
-        
-        // Data Produk (Ditambahkan field 'barcode' untuk simulasi scan)
-        const products = [
-            { id: 1, name: 'Kopi Susu', price: 15000, color: 'bg-amber-100', barcode: '8991001' },
-            { id: 2, name: 'Roti Bakar', price: 12000, color: 'bg-yellow-100', barcode: '8991002' },
-            { id: 3, name: 'Teh Manis', price: 5000, color: 'bg-green-100', barcode: '8991003' },
-            { id: 4, name: 'Nasi Goreng', price: 20000, color: 'bg-orange-100', barcode: '8991004' },
-            { id: 5, name: 'Mie Goreng', price: 18000, color: 'bg-red-100', barcode: '8991005' },
-            { id: 6, name: 'Air Mineral', price: 4000, color: 'bg-blue-100', barcode: '8991006' },
+        // Data Awal & State
+        let masterProducts = [
+            { id: 1, name: 'Kopi Gula Aren', price: 18000, category: 'Minuman', stock: 20 },
+            { id: 2, name: 'Indomie Telur', price: 15000, category: 'Makanan', stock: 15 },
+            { id: 3, name: 'Es Teh Manis', price: 5000, category: 'Minuman', stock: 50 },
+            { id: 4, name: 'Pisang Goreng', price: 12000, category: 'Makanan', stock: 10 }
         ];
 
         let cart = [];
-        let html5QrcodeScanner = null;
-        let isScanning = false;
+        let history = JSON.parse(localStorage.getItem('pos_history')) || [];
 
-        // --- SERVICE WORKER (OFFLINE MODE) ---
-        // Membuat Service Worker secara manual di dalam file HTML
-        if ('serviceWorker' in navigator) {
-            // Kita buat blob URL untuk SW ini agar tetap satu file HTML
-            const swCode = `
-                const CACHE_NAME = 'pos-pro-v1';
-                self.addEventListener('install', (e) => {
-                    e.waitUntil(
-                        caches.open(CACHE_NAME).then((cache) => {
-                            // Cache file HTML ini dan library eksternal
-                            return cache.addAll([
-                                './', 
-                                'https://cdn.tailwindcss.com',
-                                'https://unpkg.com/html5-qrcode'
-                            ]);
-                        })
-                    );
-                });
-
-                self.addEventListener('fetch', (e) => {
-                    e.respondWith(
-                        caches.match(e.request).then((response) => {
-                            return response || fetch(e.request);
-                        })
-                    );
-                });
-            `;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register(swUrl)
-                    .then(registration => {
-                        console.log('ServiceWorker terdaftar: ', registration);
-                        updateOnlineStatus(); // Cek status awal
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker gagal: ', err);
-                    });
-            });
+        // Inisialisasi
+        function init() {
+            renderProducts('Semua');
+            updateCartUI();
+            renderHistory();
+            renderStock();
         }
 
-        // Cek Koneksi Internet
-        function updateOnlineStatus() {
-            const statusDiv = document.getElementById('connection-status');
-            if (navigator.onLine) {
-                statusDiv.innerText = "🟢 Online - Mode Sinkron Aktif";
-                statusDiv.className = "mt-4 text-center text-xs font-semibold text-green-500";
-            } else {
-                statusDiv.innerText = "🔴 Offline - Mode Lokal Aktif";
-                statusDiv.className = "mt-4 text-center text-xs font-semibold text-red-500";
-            }
-        }
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
+        // --- Fitur Inti ---
 
-        // --- LOGIKA UTAMA APLIKASI ---
-
-        // 1. Render Produk
-        function renderProducts() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const container = document.getElementById('product-list');
+        function renderProducts(cat) {
+            const grid = document.getElementById('pos-grid');
+            const data = cat === 'Semua' ? masterProducts : masterProducts.filter(p => p.category === cat);
             
-            const filtered = products.filter(p => p.name.toLowerCase().includes(query));
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-2 text-center py-8 text-gray-400">Produk tidak ditemukan</div>`;
-                return;
-            }
-
-            container.innerHTML = filtered.map(p => `
-                <div onclick="addToCart(${p.id})" class="product-card ${p.color} p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col items-center justify-center text-center cursor-pointer select-none">
-                    <span class="font-bold text-gray-800">${p.name}</span>
-                    <span class="text-xs text-gray-500 mb-1">Code: ${p.barcode}</span>
-                    <span class="text-sm font-semibold text-gray-700">Rp ${p.price.toLocaleString()}</span>
+            grid.innerHTML = data.map(p => `
+                <div onclick="addToCart(${p.id})" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative ${p.stock <= 0 ? 'opacity-50 grayscale' : ''}">
+                    <p class="text-[10px] font-bold text-blue-500 uppercase">${p.category}</p>
+                    <h3 class="font-bold text-gray-800 text-sm mb-1">${p.name}</h3>
+                    <p class="font-black text-blue-700">Rp ${p.price.toLocaleString()}</p>
+                    <span class="absolute top-2 right-2 text-[9px] bg-gray-100 px-2 py-1 rounded text-gray-500">Stok: ${p.stock}</span>
                 </div>
             `).join('');
         }
 
-        // 2. Keranjang Belanja
         function addToCart(id) {
-            const product = products.find(p => p.id === id);
+            const product = masterProducts.find(p => p.id === id);
+            if(product.stock <= 0) return alert("Stok Habis!");
+
             const inCart = cart.find(item => item.id === id);
-
-            if (inCart) {
-                inCart.qty++;
+            if(inCart) {
+                if(inCart.qty < product.stock) inCart.qty++;
+                else alert("Mencapai batas stok!");
             } else {
-                cart.push({ ...product, qty: 1 });
+                cart.push({...product, qty: 1});
             }
             updateCartUI();
-            
-            // Feedback visual kecil
-            const btn = document.getElementById('tab-product');
-            // Bisa tambahkan animasi getar di sini jika mau
-        }
-
-        function removeFromCart(id) {
-            const index = cart.findIndex(item => item.id === id);
-            if (index > -1) {
-                if (cart[index].qty > 1) {
-                    cart[index].qty--;
-                } else {
-                    cart.splice(index, 1);
-                }
-            }
-            updateCartUI();
-        }
-
-        function clearCart() {
-            if(cart.length > 0 && confirm('Kosongkan keranjang?')) {
-                cart = [];
-                updateCartUI();
-            }
         }
 
         function updateCartUI() {
-            const cartElement = document.getElementById('cart-items');
-            const totalElement = document.getElementById('total-price');
-            const countBadge = document.getElementById('cart-count');
+            const preview = document.getElementById('cart-items-preview');
+            const totalDisp = document.getElementById('grand-total');
             
-            // Hitung total item
-            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-            countBadge.innerText = totalQty;
-
-            if (cart.length === 0) {
-                cartElement.innerHTML = `<p class="text-gray-400 text-sm text-center py-4">Belum ada barang.</p>`;
-                totalElement.innerText = `Rp 0`;
+            if(cart.length === 0) {
+                preview.innerHTML = `<p class="text-xs text-gray-400 text-center">Keranjang kosong</p>`;
+                totalDisp.innerText = "Rp 0";
                 return;
             }
 
             let total = 0;
-            cartElement.innerHTML = cart.map(item => {
+            preview.innerHTML = cart.map(item => {
                 total += item.price * item.qty;
                 return `
-                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
-                        <div class="flex-1">
-                            <div class="font-semibold text-sm text-gray-800">${item.name}</div>
-                            <div class="text-xs text-gray-500">@ ${item.price.toLocaleString()}</div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="removeFromCart(${item.id})" class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold hover:bg-red-100 hover:text-red-500">-</button>
-                            <span class="font-bold text-sm w-4 text-center">${item.qty}</span>
-                            <button onclick="addToCart(${item.id})" class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold hover:bg-blue-200">+</button>
-                        </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="font-bold text-gray-700">${item.name} x${item.qty}</span>
+                        <span class="font-medium">Rp ${(item.price * item.qty).toLocaleString()}</span>
                     </div>
                 `;
             }).join('');
-
-            totalElement.innerText = `Rp ${total.toLocaleString()}`;
+            totalDisp.innerText = `Rp ${total.toLocaleString()}`;
         }
 
-        // 3. Checkout & Riwayat (LocalStorage)
         function checkout() {
-            if (cart.length === 0) {
-                // Menggunakan custom toast sederhana alih-alih alert standar
-                showToast("Keranjang masih kosong!", "error");
-                return;
-            }
+            if(cart.length === 0) return;
 
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const transaction = {
-                id: 'TRX-' + Date.now().toString().slice(-6),
-                date: new Date().toLocaleString('id-ID'),
+            const trx = {
+                id: Date.now(),
+                time: new Date().toLocaleTimeString(),
                 items: [...cart],
                 total: total
             };
 
-            // Simpan ke LocalStorage
-            saveTransaction(transaction);
+            // Potong Stok
+            cart.forEach(item => {
+                const prod = masterProducts.find(p => p.id === item.id);
+                prod.stock -= item.qty;
+            });
 
-            // Reset Cart
+            history.unshift(trx);
+            localStorage.setItem('pos_history', JSON.stringify(history));
+            
+            alert(`💰 Pembayaran Berhasil!\nTotal: Rp ${total.toLocaleString()}`);
+            
             cart = [];
             updateCartUI();
+            renderProducts('Semua');
+            renderHistory();
+            renderStock();
+        }
+
+        // --- Navigasi & UI Tambahan ---
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
             
-            // Feedback
-            showToast(`Transaksi Berhasil! Total: Rp ${total.toLocaleString()}`, "success");
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active-tab');
+
+            // Sembunyikan keranjang jika tidak di tab Kasir
+            document.getElementById('cart-footer').style.display = tabId === 'kasir' ? 'block' : 'none';
         }
 
-        function saveTransaction(trx) {
-            let history = JSON.parse(localStorage.getItem('riwayat')) || [];
-            history.unshift(trx); // Tambahkan ke paling atas
-            localStorage.setItem('riwayat', JSON.stringify(history));
-        }
-
-        function loadHistory() {
-            const list = document.getElementById('history-list');
-            const history = JSON.parse(localStorage.getItem('riwayat')) || [];
-
-            if (history.length === 0) {
-                list.innerHTML = '<p class="text-gray-400 text-center text-sm">Belum ada riwayat transaksi.</p>';
-                return;
-            }
-
-            list.innerHTML = history.map(trx => `
-                <div class="bg-white border rounded-lg p-3 shadow-sm text-sm">
-                    <div class="flex justify-between font-bold text-gray-700 mb-1">
-                        <span>${trx.id}</span>
-                        <span class="text-blue-600">Rp ${trx.total.toLocaleString()}</span>
+        function renderHistory() {
+            const container = document.getElementById('history-list');
+            container.innerHTML = history.map(h => `
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">#${h.id}</span>
+                        <span class="text-xs text-gray-400">${h.time}</span>
                     </div>
-                    <div class="text-xs text-gray-400 mb-2">${trx.date}</div>
-                    <div class="border-t pt-1">
-                        ${trx.items.map(i => `<div class="flex justify-between text-gray-600 text-xs py-0.5"><span>${i.name} x${i.qty}</span><span>${(i.price*i.qty).toLocaleString()}</span></div>`).join('')}
+                    <p class="font-black text-lg">Rp ${h.total.toLocaleString()}</p>
+                    <p class="text-[10px] text-gray-500 uppercase">${h.items.map(i => i.name).join(', ')}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderStock() {
+            const container = document.getElementById('stock-list');
+            container.innerHTML = masterProducts.map(p => `
+                <div class="p-4 flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-gray-800">${p.name}</p>
+                        <p class="text-xs text-gray-500">Harga Jual: Rp ${p.price.toLocaleString()}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${p.stock < 5 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
+                            Sisa: ${p.stock}
+                        </span>
                     </div>
                 </div>
             `).join('');
         }
 
-        function clearHistory() {
-            if(confirm("Hapus semua riwayat penjualan?")) {
-                localStorage.removeItem('riwayat');
-                loadHistory();
-            }
+        function clearCart() {
+            cart = [];
+            updateCartUI();
         }
 
-        // 4. Tab Navigasi & Scanner
-        function switchTab(tabName) {
-            const productView = document.getElementById('view-product');
-            const scanView = document.getElementById('view-scan');
-            const tabProduct = document.getElementById('tab-product');
-            const tabScan = document.getElementById('tab-scan');
-
-            if (tabName === 'product') {
-                productView.style.display = 'block';
-                scanView.classList.add('hidden');
-                
-                // Style Active
-                tabProduct.className = "flex-1 py-3 text-blue-600 font-bold border-b-2 border-blue-600 transition";
-                tabScan.className = "flex-1 py-3 text-gray-500 font-medium border-b-2 border-transparent hover:text-blue-500 transition";
-
-                stopScanner();
-            } else {
-                productView.style.display = 'none';
-                scanView.classList.remove('hidden');
-
-                // Style Active
-                tabScan.className = "flex-1 py-3 text-blue-600 font-bold border-b-2 border-blue-600 transition";
-                tabProduct.className = "flex-1 py-3 text-gray-500 font-medium border-b-2 border-transparent hover:text-blue-500 transition";
-
-                startScanner();
-            }
-        }
-
-        function startScanner() {
-            // Jangan inisialisasi ulang jika sudah jalan
-            if (html5QrcodeScanner) return;
-
-            // Perlu sedikit delay agar DOM ter-render sebelum scanner attach
-            setTimeout(() => {
-                html5QrcodeScanner = new Html5Qrcode("reader");
-                const config = { fps: 10, qrbox: { width: 250, height: 150 } };
-                
-                html5QrcodeScanner.start(
-                    { facingMode: "environment" }, // Gunakan kamera belakang
-                    config,
-                    onScanSuccess,
-                    onScanFailure
-                ).catch(err => {
-                    console.error("Error starting scanner", err);
-                    document.getElementById('scan-result').innerText = "Gagal akses kamera. Pastikan izin diberikan.";
-                    document.getElementById('scan-result').classList.remove('hidden');
-                });
-            }, 300);
-        }
-
-        function stopScanner() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => {
-                    html5QrcodeScanner.clear();
-                    html5QrcodeScanner = null;
-                    document.getElementById('scan-result').classList.add('hidden');
-                }).catch(err => {
-                    console.error("Failed to stop scanner", err);
-                });
-            }
-        }
-
-        function onScanSuccess(decodedText, decodedResult) {
-            // Sukses scan
-            console.log(`Scan result: ${decodedText}`, decodedResult);
-            
-            // Cari produk berdasarkan barcode
-            const product = products.find(p => p.barcode === decodedText);
-            
-            const resultDiv = document.getElementById('scan-result');
-            resultDiv.classList.remove('hidden');
-
-            if (product) {
-                resultDiv.innerText = `✅ Ditemukan: ${product.name}`;
-                resultDiv.className = "p-3 bg-green-100 text-green-800 rounded-lg font-mono text-sm mb-2";
-                addToCart(product.id);
-                
-                // Suara beep (opsional)
-                // const audio = new Audio('beep.mp3'); audio.play().catch(e=>{});
-
-                // Pindah ke tab produk setelah 1 detik
-                setTimeout(() => {
-                    switchTab('product');
-                    resultDiv.classList.add('hidden');
-                }, 1000);
-            } else {
-                resultDiv.innerText = `⚠️ Barang tidak terdaftar: ${decodedText}`;
-                resultDiv.className = "p-3 bg-red-100 text-red-800 rounded-lg font-mono text-sm mb-2";
-            }
-        }
-
-        function onScanFailure(error) {
-            // Jangan log setiap frame gagal scan karena akan spam console
-            // console.warn(`Code scan error = ${error}`);
-        }
-
-        // --- UTILS ---
-        function toggleHistory() {
-            const modal = document.getElementById('history-modal');
-            if (modal.classList.contains('hidden')) {
-                loadHistory();
-                modal.classList.remove('hidden');
-            } else {
-                modal.classList.add('hidden');
-            }
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-gray-800' : 'bg-red-600';
-            
-            toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-6 py-3 rounded-full shadow-lg z-50 text-sm font-semibold transition-opacity duration-300 opacity-0`;
-            toast.innerText = message;
-            
-            document.body.appendChild(toast);
-            
-            // Animasi masuk
-            setTimeout(() => toast.classList.remove('opacity-0'), 10);
-            
-            // Hilangkan setelah 3 detik
-            setTimeout(() => {
-                toast.classList.add('opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Inisialisasi Awal
-        renderProducts();
-        updateOnlineStatus();
+        init();
     </script>
 </body>
 </html>
