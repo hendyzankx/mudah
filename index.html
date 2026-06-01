@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Stok Manager Pro - Tab & Pencarian</title>
+    <title>Stok Manager - Beep & Auto Stop Kamera</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html5-qrcode library -->
@@ -59,7 +59,7 @@
         <!-- Header -->
         <div class="text-center mb-6">
             <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-600">📦 Stok Manager Pro</h1>
-            <p class="text-gray-500 mt-1">Scan Barcode | Foto Produk | Pencarian | Tab Daftar Stok</p>
+            <p class="text-gray-500 mt-1">Scan Barcode + Bunyi Beep | Kamera Otomatis Tutup | Tab Daftar Stok</p>
         </div>
 
         <!-- Tab Navigation -->
@@ -83,11 +83,11 @@
                         </h2>
                         <div class="flex gap-2">
                             <button id="btnStartScanner" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-medium shadow transition">▶ Mulai Kamera</button>
-                            <button id="btnStopScanner" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-xl text-sm font-medium shadow transition">⏹️ Stop</button>
+                            <button id="btnStopScanner" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-xl text-sm font-medium shadow transition">⏹️ Stop Kamera</button>
                         </div>
                     </div>
                     <div id="reader" class="w-full bg-black/5 rounded-xl"></div>
-                    <p class="text-xs text-gray-400 mt-2 text-center">Arahkan kamera ke barcode (EAN-13, UPC, Code128, dll)</p>
+                    <p class="text-xs text-gray-400 mt-2 text-center">✨ Setelah scan sukses ➜ bunyi beep ➜ kamera otomatis mati. Silakan tekan "Mulai Kamera" lagi untuk scan berikutnya.</p>
                 </div>
 
                 <!-- Kolom Kanan : Form Input Barang -->
@@ -96,20 +96,15 @@
                         <span class="text-emerald-600">✏️</span> Input / Edit Barang
                     </h2>
                     <div class="space-y-4">
-                        <!-- Barcode -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">🔖 Kode Barcode *</label>
                             <input type="text" id="barcodeInput" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition" placeholder="Hasil scan atau ketik manual" autocomplete="off">
-                            <p class="text-xs text-gray-400 mt-1">Scan barcode otomatis mengisi kolom ini</p>
+                            <p class="text-xs text-gray-400 mt-1">Scan barcode otomatis mengisi kolom ini, kamera langsung mati.</p>
                         </div>
-
-                        <!-- Harga -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">💰 Harga (Rp)</label>
                             <input type="number" id="hargaInput" class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-400" placeholder="0" min="0" step="1000">
                         </div>
-
-                        <!-- Foto Produk -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">📸 Foto Produk</label>
                             <div class="flex flex-wrap items-center gap-4">
@@ -122,10 +117,7 @@
                                     <span id="previewText" class="text-xs text-gray-400">Belum ada foto</span>
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-400 mt-1">Bisa langsung foto dari kamera atau pilih dari galeri</p>
                         </div>
-
-                        <!-- Tombol Aksi -->
                         <div class="flex flex-wrap gap-3 pt-2">
                             <button id="btnSimpan" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow transition flex-1 flex items-center justify-center gap-1">💾 Simpan Barang</button>
                             <button id="btnResetForm" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2.5 px-5 rounded-xl transition">Reset Form</button>
@@ -138,7 +130,6 @@
         <!-- Tab Content: Daftar Stok + Pencarian + Backup -->
         <div id="tabStokContent" class="tab-content hidden">
             <div class="bg-white rounded-2xl shadow-md p-5">
-                <!-- Header dengan Pencarian -->
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                         <span class="text-amber-600">📋</span> Semua Stok Barang
@@ -149,38 +140,22 @@
                         <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                 </div>
-                
-                <!-- Tabel Daftar Stok -->
                 <div class="table-wrapper">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Foto</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Barcode</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Harga</th>
-                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                            </tr>
+                            <tr><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Foto</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Barcode</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Harga</th><th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th></tr>
                         </thead>
-                        <tbody id="tabelStokBody" class="divide-y divide-gray-100">
-                            <tr><td colspan="4" class="text-center py-8 text-gray-400">Memuat data...</td></tr>
-                        </tbody>
+                        <tbody id="tabelStokBody" class="divide-y divide-gray-100"><tr><td colspan="4" class="text-center py-8 text-gray-400">Memuat data...</td></tr></tbody>
                     </table>
                 </div>
-
-                <!-- Backup & Restore -->
                 <div class="mt-8 pt-4 border-t border-gray-100">
-                    <h3 class="text-md font-semibold text-gray-700 flex items-center gap-2 mb-3">
-                        <span class="text-blue-600">💽</span> Backup & Restore Database
-                    </h3>
+                    <h3 class="text-md font-semibold text-gray-700 flex items-center gap-2 mb-3"><span class="text-blue-600">💽</span> Backup & Restore Database</h3>
                     <div class="flex flex-wrap gap-3">
-                        <button id="btnExportData" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl flex items-center gap-1 shadow text-sm font-medium">⬇️ Export JSON (Backup)</button>
-                        <label for="importFileInput" class="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl flex items-center gap-1 shadow text-sm font-medium">
-                            📂 Import & Restore
-                            <input type="file" id="importFileInput" accept="application/json" class="hidden">
-                        </label>
-                        <button id="btnHapusSemua" class="bg-red-100 hover:bg-red-200 text-red-700 px-5 py-2 rounded-xl text-sm font-medium transition">⚠️ Hapus Semua Data</button>
+                        <button id="btnExportData" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl flex items-center gap-1 shadow text-sm font-medium">⬇️ Export JSON</button>
+                        <label for="importFileInput" class="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl flex items-center gap-1 shadow text-sm font-medium">📂 Import & Restore<input type="file" id="importFileInput" accept="application/json" class="hidden"></label>
+                        <button id="btnHapusSemua" class="bg-red-100 hover:bg-red-200 text-red-700 px-5 py-2 rounded-xl text-sm font-medium transition">⚠️ Hapus Semua</button>
                     </div>
-                    <p class="text-xs text-gray-400 mt-3">Backup semua data termasuk foto (base64). Restore akan mengganti seluruh data yang ada.</p>
+                    <p class="text-xs text-gray-400 mt-3">Backup semua data termasuk foto (base64). Restore akan mengganti seluruh data.</p>
                 </div>
             </div>
         </div>
@@ -191,11 +166,10 @@
         const DB_NAME = "StockDB";
         const DB_VERSION = 2;
         const STORE_NAME = "inventory";
-
         let db = null;
         let currentImageBase64 = null;
-        let allItems = [];           // menyimpan semua item dari DB untuk keperluan filter
-        let searchQuery = "";        // query pencarian saat ini
+        let allItems = [];
+        let searchQuery = "";
 
         // DOM Elements
         const barcodeInput = document.getElementById('barcodeInput');
@@ -211,22 +185,40 @@
         const btnExportData = document.getElementById('btnExportData');
         const importFileInput = document.getElementById('importFileInput');
         const btnHapusSemua = document.getElementById('btnHapusSemua');
-        
-        // Tab elements
         const tabScannerBtn = document.getElementById('tabScannerBtn');
         const tabStokBtn = document.getElementById('tabStokBtn');
         const tabScannerContent = document.getElementById('tabScannerContent');
         const tabStokContent = document.getElementById('tabStokContent');
 
-        // ======================= FUNGSI INDEXEDDB =======================
+        // ======================= FUNGSI BEEP (Web Audio) =======================
+        function playBeep() {
+            try {
+                // Menggunakan AudioContext untuk beep singkat (tanpa file eksternal)
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const audioCtx = new AudioContext();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 880; // nada tinggi
+                gainNode.gain.value = 0.3;
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
+                oscillator.stop(audioCtx.currentTime + 0.3);
+                // Close context setelah selesai agar tidak menumpuk
+                setTimeout(() => { audioCtx.close().catch(e=>console.log); }, 400);
+            } catch(e) {
+                console.warn("Beep tidak didukung browser ini", e);
+            }
+        }
+
+        // ======================= INDEXEDDB =======================
         function openDatabase() {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
-                request.onerror = (e) => reject("Gagal membuka database");
-                request.onsuccess = (e) => {
-                    db = e.target.result;
-                    resolve(db);
-                };
+                request.onerror = () => reject("Gagal buka DB");
+                request.onsuccess = (e) => { db = e.target.result; resolve(db); };
                 request.onupgradeneeded = (e) => {
                     const dbRef = e.target.result;
                     if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
@@ -237,27 +229,15 @@
         }
 
         async function saveItem(barcode, harga, imageBase64) {
-            if (!barcode || barcode.trim() === "") {
-                alert("Barcode tidak boleh kosong! Silakan scan atau isi manual.");
-                return false;
-            }
-            if (isNaN(harga) || harga < 0) harga = 0;
-            const item = {
-                barcode: barcode.trim(),
-                harga: Number(harga),
-                imageBase64: imageBase64 || null,
-                updatedAt: new Date().toISOString()
-            };
+            if (!barcode.trim()) { alert("Barcode tidak boleh kosong!"); return false; }
+            const item = { barcode: barcode.trim(), harga: Number(harga)||0, imageBase64: imageBase64 || null, updatedAt: new Date().toISOString() };
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([STORE_NAME], "readwrite");
                 const store = transaction.objectStore(STORE_NAME);
                 const request = store.put(item);
                 request.onsuccess = () => resolve(true);
                 request.onerror = (err) => reject(err);
-                transaction.oncomplete = () => {
-                    refreshAllItems(); // ambil ulang semua data untuk filter
-                    renderDaftarStok(); // render dengan filter saat ini
-                };
+                transaction.oncomplete = () => { refreshAllItems(); renderDaftarStok(); };
             });
         }
 
@@ -278,10 +258,7 @@
                 const request = store.delete(barcode);
                 request.onsuccess = () => resolve(true);
                 request.onerror = (e) => reject(e);
-                transaction.oncomplete = () => {
-                    refreshAllItems();
-                    renderDaftarStok();
-                };
+                transaction.oncomplete = () => { refreshAllItems(); renderDaftarStok(); };
             });
         }
 
@@ -292,67 +269,34 @@
                 const request = store.clear();
                 request.onsuccess = () => resolve(true);
                 request.onerror = (e) => reject(e);
-                transaction.oncomplete = () => {
-                    refreshAllItems();
-                    renderDaftarStok();
-                };
+                transaction.oncomplete = () => { refreshAllItems(); renderDaftarStok(); };
             });
         }
 
-        // Memuat ulang allItems dari DB
         async function refreshAllItems() {
             if (!db) return;
             allItems = await getAllItems();
-            // Urutkan berdasarkan updatedAt terbaru
             allItems.sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
         }
 
-        // Render daftar stok berdasarkan filter searchQuery
         function renderDaftarStok() {
             if (!allItems) return;
-            let filtered = allItems;
-            if (searchQuery.trim() !== "") {
-                const lowerQuery = searchQuery.trim().toLowerCase();
-                filtered = allItems.filter(item => item.barcode.toLowerCase().includes(lowerQuery));
-            }
+            let filtered = searchQuery.trim() === "" ? allItems : allItems.filter(item => item.barcode.toLowerCase().includes(searchQuery.toLowerCase()));
             jumlahStokFilter.innerText = `${filtered.length} item`;
-            
-            if (filtered.length === 0) {
-                tabelBody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">Tidak ada barang yang cocok dengan pencarian</td></tr>`;
-                return;
-            }
-            
+            if (filtered.length === 0) { tabelBody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">Tidak ada barang yang cocok</td></tr>`; return; }
             tabelBody.innerHTML = filtered.map(item => `
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="px-3 py-2">
-                        ${item.imageBase64 ? `<img src="${item.imageBase64}" class="preview-img w-10 h-10 object-cover rounded-md shadow-sm" alt="foto">` : `<div class="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 text-xs">No img</div>`}
-                    </td>
+                    <td class="px-3 py-2">${item.imageBase64 ? `<img src="${item.imageBase64}" class="preview-img w-10 h-10 object-cover rounded-md shadow-sm">` : `<div class="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 text-xs">No img</div>`}</td>
                     <td class="px-3 py-2 font-mono text-xs font-medium">${escapeHtml(item.barcode)}</td>
-                    <td class="px-3 py-2 font-semibold text-gray-800">Rp ${formatRupiah(item.harga)}</td>
+                    <td class="px-3 py-2 font-semibold">Rp ${formatRupiah(item.harga)}</td>
                     <td class="px-3 py-2 text-center action-buttons">
-                        <button class="edit-item bg-amber-100 hover:bg-amber-200 text-amber-700 px-2 py-1 rounded-lg text-xs mr-1 transition" data-barcode="${escapeHtml(item.barcode)}">✏️ Edit</button>
-                        <button class="delete-item bg-red-100 hover:bg-red-200 text-red-600 px-2 py-1 rounded-lg text-xs transition" data-barcode="${escapeHtml(item.barcode)}">🗑️ Hapus</button>
+                        <button class="edit-item bg-amber-100 hover:bg-amber-200 text-amber-700 px-2 py-1 rounded-lg text-xs mr-1" data-barcode="${escapeHtml(item.barcode)}">✏️ Edit</button>
+                        <button class="delete-item bg-red-100 hover:bg-red-200 text-red-600 px-2 py-1 rounded-lg text-xs" data-barcode="${escapeHtml(item.barcode)}">🗑️ Hapus</button>
                     </td>
                 </tr>
             `).join('');
-            
-            // Event listener untuk tombol edit & hapus
-            document.querySelectorAll('.edit-item').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const barcode = btn.getAttribute('data-barcode');
-                    await loadItemToForm(barcode);
-                    // setelah load, pindah ke tab scanner agar user bisa edit
-                    activateTab('scanner');
-                });
-            });
-            document.querySelectorAll('.delete-item').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const barcode = btn.getAttribute('data-barcode');
-                    if (confirm(`Hapus barang dengan barcode ${barcode}?`)) {
-                        await deleteItem(barcode);
-                    }
-                });
-            });
+            document.querySelectorAll('.edit-item').forEach(btn => btn.addEventListener('click', async (e) => { await loadItemToForm(btn.getAttribute('data-barcode')); activateTab('scanner'); }));
+            document.querySelectorAll('.delete-item').forEach(btn => btn.addEventListener('click', async (e) => { if(confirm(`Hapus?`)) await deleteItem(btn.getAttribute('data-barcode')); }));
         }
 
         async function loadItemToForm(barcode) {
@@ -360,229 +304,97 @@
             if (!item) return;
             barcodeInput.value = item.barcode;
             hargaInput.value = item.harga;
-            if (item.imageBase64) {
-                currentImageBase64 = item.imageBase64;
-                fotoPreviewImg.src = item.imageBase64;
-                previewText.innerText = "Foto tersedia";
-            } else {
-                currentImageBase64 = null;
-                fotoPreviewImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='1'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpath d='M21 15l-5-4-3 3-4-4-6 6'/%3E%3C/svg%3E";
-                previewText.innerText = "Belum ada foto (edit & upload)";
-            }
+            if (item.imageBase64) { currentImageBase64 = item.imageBase64; fotoPreviewImg.src = item.imageBase64; previewText.innerText = "Foto tersedia"; }
+            else { currentImageBase64 = null; fotoPreviewImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'..."; previewText.innerText = "Belum ada foto"; }
         }
 
-        function resetForm() {
-            barcodeInput.value = "";
-            hargaInput.value = "";
-            currentImageBase64 = null;
-            fotoInput.value = "";
-            fotoPreviewImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='1'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpath d='M21 15l-5-4-3 3-4-4-6 6'/%3E%3C/svg%3E";
-            previewText.innerText = "Belum ada foto";
-            barcodeInput.focus();
-        }
+        function resetForm() { barcodeInput.value = ""; hargaInput.value = ""; currentImageBase64 = null; fotoInput.value = ""; fotoPreviewImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%239ca3af'..."; previewText.innerText = "Belum ada foto"; barcodeInput.focus(); }
+        function fileToBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); }); }
+        fotoInput.addEventListener('change', async (e) => { if(e.target.files[0]) { const base64 = await fileToBase64(e.target.files[0]); currentImageBase64 = base64; fotoPreviewImg.src = base64; previewText.innerText = "Foto baru siap"; } });
+        async function simpanHandler() { let barcode = barcodeInput.value.trim(); if(!barcode) { alert("Isi barcode!"); return; } let harga = parseInt(hargaInput.value,10)||0; await saveItem(barcode, harga, currentImageBase64); alert(`Tersimpan: ${barcode}`); resetForm(); }
 
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = (err) => reject(err);
-                reader.readAsDataURL(file);
-            });
-        }
-
-        fotoInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                try {
-                    const base64 = await fileToBase64(file);
-                    currentImageBase64 = base64;
-                    fotoPreviewImg.src = base64;
-                    previewText.innerText = "Foto baru siap";
-                } catch (err) {
-                    alert("Gagal memproses gambar");
-                }
-            }
-        });
-
-        async function simpanHandler() {
-            let barcode = barcodeInput.value.trim();
-            if (!barcode) {
-                alert("Barcode harus diisi! Scan atau tulis manual.");
-                return;
-            }
-            let harga = parseInt(hargaInput.value, 10);
-            if (isNaN(harga)) harga = 0;
-            await saveItem(barcode, harga, currentImageBase64);
-            alert(`Barang dengan barcode ${barcode} berhasil disimpan!`);
-            resetForm();
-        }
-
-        // ======================= SCANNER =======================
+        // ======================= SCANNER DENGAN BEEP DAN AUTO STOP =======================
         let html5QrCodeScanner = null;
-        const readerDiv = document.getElementById("reader");
-
         function startScanner() {
             if (html5QrCodeScanner) stopScanner();
-            html5QrCodeScanner = new Html5QrcodeScanner("reader", {
-                fps: 10,
-                qrbox: { width: 280, height: 200 },
-                aspectRatio: 1.333,
-                showTorchButtonIfSupported: true,
-                rememberLastUsedCamera: true,
-                formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
-                                    Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.CODE_128,
-                                    Html5QrcodeSupportedFormats.CODE_39 ]
-            }, false);
+            html5QrCodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 280, height: 200 }, aspectRatio: 1.333, showTorchButtonIfSupported: true, rememberLastUsedCamera: true, formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39 ] }, false);
             html5QrCodeScanner.render(onScanSuccess, onScanError);
         }
 
         function stopScanner() {
             if (html5QrCodeScanner) {
-                html5QrCodeScanner.clear().catch(e => console.warn(e));
+                html5QrCodeScanner.clear().catch(e=>console.warn);
                 html5QrCodeScanner = null;
             }
         }
 
-        let lastScannedBarcode = "";
+        let isProcessing = false; // mencegah double trigger
         function onScanSuccess(decodedText) {
-            if (lastScannedBarcode === decodedText) return;
-            lastScannedBarcode = decodedText;
-            setTimeout(() => { lastScannedBarcode = ""; }, 1000);
+            if (isProcessing) return;
+            isProcessing = true;
+            // Mainkan bunyi beep
+            playBeep();
+            // Isi form dengan barcode
             barcodeInput.value = decodedText;
             hargaInput.focus();
+            // Tampilkan notifikasi
             const notif = document.createElement('div');
-            notif.innerText = `✅ Barcode ${decodedText} discan`;
-            notif.className = "fixed bottom-4 left-4 bg-green-600 text-white px-4 py-2 rounded-xl shadow-lg text-sm z-50 animate-pulse";
+            notif.innerText = `✅ Barcode ${decodedText} discan | Kamera mati otomatis`;
+            notif.className = "fixed bottom-4 left-4 bg-green-600 text-white px-4 py-2 rounded-xl shadow-lg text-sm z-50";
             document.body.appendChild(notif);
-            setTimeout(() => notif.remove(), 1500);
+            setTimeout(() => notif.remove(), 2000);
+            // Matikan kamera setelah beep (tunda sedikit agar beep sempat terdengar)
+            setTimeout(() => {
+                stopScanner();
+                // Update status di UI: tombol start kembali aktif
+                const btnStart = document.getElementById('btnStartScanner');
+                if(btnStart) btnStart.classList.remove('opacity-50');
+                isProcessing = false;
+            }, 200);
         }
-        function onScanError(err) {}
+        function onScanError(err) { /* diam saja */ }
 
         // ======================= BACKUP & RESTORE =======================
-        async function exportData() {
-            const items = await getAllItems();
-            const dataStr = JSON.stringify(items, null, 2);
-            const blob = new Blob([dataStr], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `stok_backup_${new Date().toISOString().slice(0,19)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            alert(`Backup berhasil! ${items.length} item diekspor.`);
-        }
+        async function exportData() { const items = await getAllItems(); const dataStr = JSON.stringify(items, null, 2); const blob = new Blob([dataStr], {type:"application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `stok_backup_${new Date().toISOString().slice(0,19)}.json`; a.click(); URL.revokeObjectURL(url); alert(`${items.length} item diekspor.`); }
+        async function importData(file) { if(!file) return; const reader = new FileReader(); reader.onload = async (e) => { try { const imported = JSON.parse(e.target.result); if(!Array.isArray(imported)) throw new Error(); if(confirm(`Import ${imported.length} item, ganti semua data?`)) { await clearAllItems(); const transaction = db.transaction([STORE_NAME], "readwrite"); const store = transaction.objectStore(STORE_NAME); imported.forEach(item => { if(item.barcode && typeof item.harga === 'number') store.put(item); }); transaction.oncomplete = () => { refreshAllItems(); renderDaftarStok(); alert("Import sukses!"); resetForm(); }; } } catch(err) { alert("File JSON tidak valid"); } }; reader.readAsText(file); }
+        async function hapusSemua() { if(confirm("Hapus SEMUA data stok?")) { await clearAllItems(); resetForm(); alert("Semua data dihapus"); } }
 
-        async function importData(file) {
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const importedItems = JSON.parse(e.target.result);
-                    if (!Array.isArray(importedItems)) throw new Error("Format JSON tidak valid");
-                    if (confirm(`Import akan mengganti seluruh data (${importedItems.length} item). Lanjutkan?`)) {
-                        await clearAllItems();
-                        const transaction = db.transaction([STORE_NAME], "readwrite");
-                        const store = transaction.objectStore(STORE_NAME);
-                        for (const item of importedItems) {
-                            if (item.barcode && typeof item.harga === 'number') {
-                                store.put(item);
-                            }
-                        }
-                        transaction.oncomplete = () => {
-                            refreshAllItems();
-                            renderDaftarStok();
-                            alert("Import sukses, data telah diganti.");
-                            resetForm();
-                        };
-                        transaction.onerror = () => alert("Gagal menyimpan data import.");
-                    }
-                } catch (err) {
-                    alert("File JSON tidak valid: " + err.message);
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        async function hapusSemua() {
-            if (confirm("⚠️ PERINGATAN: Semua data stok akan dihapus permanen! Lanjutkan?")) {
-                await clearAllItems();
-                resetForm();
-                alert("Semua data berhasil dihapus.");
-            }
-        }
-
-        // Helper
-        function formatRupiah(angka) {
-            return new Intl.NumberFormat('id-ID').format(angka);
-        }
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-
-        // ======================= TAB MANAGEMENT =======================
+        // ======================= TAB =======================
         function activateTab(tabName) {
-            if (tabName === 'scanner') {
-                tabScannerBtn.classList.remove('tab-inactive');
-                tabScannerBtn.classList.add('tab-active');
-                tabStokBtn.classList.remove('tab-active');
-                tabStokBtn.classList.add('tab-inactive');
-                tabScannerContent.classList.remove('hidden');
-                tabStokContent.classList.add('hidden');
-                // Jika kamera belum di-start, tidak otomatis start, biar user klik.
+            if(tabName === 'scanner') {
+                tabScannerBtn.classList.add('tab-active'); tabScannerBtn.classList.remove('tab-inactive');
+                tabStokBtn.classList.add('tab-inactive'); tabStokBtn.classList.remove('tab-active');
+                tabScannerContent.classList.remove('hidden'); tabStokContent.classList.add('hidden');
             } else {
-                tabStokBtn.classList.remove('tab-inactive');
-                tabStokBtn.classList.add('tab-active');
-                tabScannerBtn.classList.remove('tab-active');
-                tabScannerBtn.classList.add('tab-inactive');
-                tabStokContent.classList.remove('hidden');
-                tabScannerContent.classList.add('hidden');
-                // Ketika pindah ke tab stok, refresh tampilan (pastikan data terbaru)
+                tabStokBtn.classList.add('tab-active'); tabStokBtn.classList.remove('tab-inactive');
+                tabScannerBtn.classList.add('tab-inactive'); tabScannerBtn.classList.remove('tab-active');
+                tabStokContent.classList.remove('hidden'); tabScannerContent.classList.add('hidden');
                 renderDaftarStok();
             }
         }
 
-        // Event listener untuk input pencarian (debounce sederhana)
+        // ======================= INIT =======================
         let debounceTimeout;
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => {
-                searchQuery = e.target.value;
-                renderDaftarStok();
-            }, 300);
-        });
-
-        // ======================= INIT APP =======================
-        async function initApp() {
+        searchInput.addEventListener('input', (e) => { clearTimeout(debounceTimeout); debounceTimeout = setTimeout(() => { searchQuery = e.target.value; renderDaftarStok(); }, 300); });
+        async function init() {
             await openDatabase();
             await refreshAllItems();
             renderDaftarStok();
             resetForm();
-
             btnSimpan.addEventListener('click', simpanHandler);
             btnResetForm.addEventListener('click', resetForm);
             btnExportData.addEventListener('click', exportData);
-            importFileInput.addEventListener('change', (e) => {
-                if (e.target.files.length) importData(e.target.files[0]);
-                importFileInput.value = '';
-            });
+            importFileInput.addEventListener('change', (e) => { if(e.target.files.length) importData(e.target.files[0]); importFileInput.value = ''; });
             btnHapusSemua.addEventListener('click', hapusSemua);
             document.getElementById('btnStartScanner').addEventListener('click', startScanner);
-            document.getElementById('btnStopScanner').addEventListener('click', stopScanner);
+            document.getElementById('btnStopScanner').addEventListener('click', () => { stopScanner(); isProcessing = false; });
             tabScannerBtn.addEventListener('click', () => activateTab('scanner'));
             tabStokBtn.addEventListener('click', () => activateTab('stok'));
-            // default aktif scanner
             activateTab('scanner');
         }
-
-        initApp().catch(console.error);
+        init().catch(console.error);
+        function formatRupiah(angka) { return new Intl.NumberFormat('id-ID').format(angka); }
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; }); }
     </script>
 </body>
 </html>
