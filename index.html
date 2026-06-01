@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Stok Manager - Kompresi Gambar Otomatis</title>
+    <title>Stok Manager - Perbesar Gambar & Kompresi</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html5-qrcode library -->
@@ -27,6 +27,12 @@
             border-radius: 12px;
             border: 1px solid #e2e8f0;
             background: #f1f5f9;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        .preview-img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         .table-wrapper {
             overflow-x: auto;
@@ -45,21 +51,67 @@
         .tab-inactive:hover {
             background-color: #e5e7eb;
         }
+        /* Modal untuk perbesar gambar */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .modal-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .close-modal-btn {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #fff;
+            font-size: 45px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            z-index: 1001;
+        }
+        .close-modal-btn:hover {
+            color: #f97316;
+        }
         @media (max-width: 640px) {
             .action-buttons button {
                 font-size: 0.7rem;
                 padding: 0.2rem 0.4rem;
+            }
+            .close-modal-btn {
+                top: 10px;
+                right: 20px;
+                font-size: 35px;
             }
         }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen font-sans">
 
+    <!-- Modal untuk memperbesar gambar -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="close-modal-btn" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" class="modal-img" alt="Perbesar Foto">
+    </div>
+
     <div class="container mx-auto px-4 py-6 max-w-7xl">
         <!-- Header -->
         <div class="text-center mb-6">
             <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-600">📦 Stok Manager Pro</h1>
-            <p class="text-gray-500 mt-1">Scan Barcode + Beep | Auto Stop Kamera | Kompresi Gambar Otomatis (Hemat Ribuan Barang)</p>
+            <p class="text-gray-500 mt-1">Scan Barcode + Beep | Auto Stop Kamera | Kompresi Gambar | Klik Gambar untuk Perbesar</p>
         </div>
 
         <!-- Tab Navigation -->
@@ -117,7 +169,7 @@
                                     <span id="previewText" class="text-xs text-gray-400">Belum ada foto</span>
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-400 mt-1">Ukuran foto otomatis diperkecil (lebar maks 400px, kualitas 70% JPEG) untuk menghemat penyimpanan.</p>
+                            <p class="text-xs text-gray-400 mt-1">Ukuran foto otomatis diperkecil (lebar maks 400px, kualitas 70% JPEG) untuk menghemat penyimpanan. Klik gambar di daftar stok untuk memperbesar.</p>
                         </div>
                         <div class="flex flex-wrap gap-3 pt-2">
                             <button id="btnSimpan" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow transition flex-1 flex items-center justify-center gap-1">💾 Simpan Barang</button>
@@ -144,9 +196,10 @@
                 <div class="table-wrapper">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50">
-                            <tr><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Foto</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Barcode</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Harga</th><th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th></tr>
+                            <tr><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Foto (klik perbesar)</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Barcode</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Harga</th><th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th></tr>
                         </thead>
-                        <tbody id="tabelStokBody" class="divide-y divide-gray-100"><tr><td colspan="4" class="text-center py-8 text-gray-400">Memuat data......</td></tr></tbody>
+                        <tbody id="tabelStokBody" class="divide-y divide-gray-100"><tr><td colspan="4" class="text-center py-8 text-gray-400">Memuat data......</td></tr>
+                        </tbody>
                     </table>
                 </div>
                 <div class="mt-8 pt-4 border-t border-gray-100">
@@ -156,7 +209,7 @@
                         <label for="importFileInput" class="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl flex items-center gap-1 shadow text-sm font-medium">📂 Import & Restore<input type="file" id="importFileInput" accept="application/json" class="hidden"></label>
                         <button id="btnHapusSemua" class="bg-red-100 hover:bg-red-200 text-red-700 px-5 py-2 rounded-xl text-sm font-medium transition">⚠️ Hapus Semua</button>
                     </div>
-                    <p class="text-xs text-gray-400 mt-3">Semua foto disimpan dalam versi terkompres (max 400px, ~10-30KB per gambar). Hemat ruang untuk ribuan produk.</p>
+                    <p class="text-xs text-gray-400 mt-3">Semua foto disimpan dalam versi terkompres (max 400px, ~10-30KB per gambar). Klik gambar untuk melihat versi besar.</p>
                 </div>
             </div>
         </div>
@@ -190,58 +243,61 @@
         const tabStokBtn = document.getElementById('tabStokBtn');
         const tabScannerContent = document.getElementById('tabScannerContent');
         const tabStokContent = document.getElementById('tabStokContent');
+        
+        // Modal image
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        window.closeImageModal = function() {
+            imageModal.style.display = 'none';
+        };
+        window.showImageModal = function(src) {
+            if (src) {
+                modalImage.src = src;
+                imageModal.style.display = 'flex';
+            }
+        };
+        // Tutup modal jika klik di luar gambar (sudah diatur di onclick modal)
 
         // ======================= FUNGSI KOMPRESI GAMBAR =======================
-        // Mengompres gambar dari file (atau base64) menjadi base64 dengan ukuran maxWidth, kualitas JPEG
         function compressImage(fileOrDataUrl, maxWidth = 400, quality = 0.7) {
             return new Promise((resolve, reject) => {
-                // Buat elemen gambar
                 const img = new Image();
                 img.onload = () => {
-                    // Hitung skala
                     let width = img.width;
                     let height = img.height;
                     if (width > maxWidth) {
                         height = (height * maxWidth) / width;
                         width = maxWidth;
                     }
-                    // Buat canvas
                     const canvas = document.createElement('canvas');
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    // Konversi ke JPEG dengan kualitas tertentu (base64)
                     const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
                     resolve(compressedBase64);
                 };
                 img.onerror = (err) => reject(err);
-                // Jika input berupa File, konversi ke dataURL dulu
                 if (fileOrDataUrl instanceof File) {
                     const reader = new FileReader();
                     reader.onload = (e) => { img.src = e.target.result; };
                     reader.onerror = (err) => reject(err);
                     reader.readAsDataURL(fileOrDataUrl);
                 } else {
-                    // Asumsikan string base64 dataURL
                     img.src = fileOrDataUrl;
                 }
             });
         }
 
-        // Fungsi untuk memproses file foto dari input, kompres, lalu set ke currentImageBase64 dan preview
         async function processAndSetPhoto(file) {
             if (!file || !file.type.startsWith('image/')) {
                 alert("File bukan gambar.");
                 return false;
             }
             try {
-                // Kompresi gambar
                 const compressed = await compressImage(file, 400, 0.7);
                 currentImageBase64 = compressed;
-                // Tampilkan preview hasil kompresi
                 fotoPreviewImg.src = compressed;
-                // Hitung perkiraan ukuran (base64 length)
                 const sizeKB = (compressed.length * 0.75 / 1024).toFixed(1);
                 previewText.innerText = `Foto terkompres (${sizeKB} KB)`;
                 return true;
@@ -252,17 +308,15 @@
             }
         }
 
-        // Jika user memilih file via input
         fotoInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (file) {
                 await processAndSetPhoto(file);
             }
-            // Reset value agar bisa memilih file yang sama lagi nanti
             fotoInput.value = '';
         });
 
-        // ======================= BEEP (Web Audio) =======================
+        // ======================= BEEP =======================
         function playBeep() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -357,12 +411,14 @@
             let filtered = searchQuery.trim() === "" ? allItems : allItems.filter(item => item.barcode.toLowerCase().includes(searchQuery.toLowerCase()));
             jumlahStokFilter.innerText = `${filtered.length} item`;
             if (filtered.length === 0) { 
-                tabelBody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">Tidak ada barang yang cocok</td></tr>`; 
+                tabelBody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">Tidak ada barang yang cocok</td></td>`; 
                 return; 
             }
             tabelBody.innerHTML = filtered.map(item => `
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="px-3 py-2">${item.imageBase64 ? `<img src="${item.imageBase64}" class="preview-img w-10 h-10 object-cover rounded-md shadow-sm" alt="foto">` : `<div class="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 text-xs">No img</div>`}</td>
+                    <td class="px-3 py-2">
+                        ${item.imageBase64 ? `<img src="${item.imageBase64}" class="preview-img w-10 h-10 object-cover rounded-md shadow-sm" alt="foto" onclick="event.stopPropagation(); showImageModal('${item.imageBase64}')" style="cursor:pointer;">` : `<div class="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 text-xs">No img</div>`}
+                    </td>
                     <td class="px-3 py-2 font-mono text-xs font-medium">${escapeHtml(item.barcode)}</td>
                     <td class="px-3 py-2 font-semibold">Rp ${formatRupiah(item.harga)}</td>
                     <td class="px-3 py-2 text-center action-buttons">
@@ -371,8 +427,15 @@
                     </td>
                 </tr>
             `).join('');
-            document.querySelectorAll('.edit-item').forEach(btn => btn.addEventListener('click', async (e) => { await loadItemToForm(btn.getAttribute('data-barcode')); activateTab('scanner'); }));
-            document.querySelectorAll('.delete-item').forEach(btn => btn.addEventListener('click', async (e) => { if(confirm(`Hapus barang ini?`)) await deleteItem(btn.getAttribute('data-barcode')); }));
+            
+            document.querySelectorAll('.edit-item').forEach(btn => btn.addEventListener('click', async (e) => { 
+                const barcode = btn.getAttribute('data-barcode');
+                await loadItemToForm(barcode); 
+                activateTab('scanner'); 
+            }));
+            document.querySelectorAll('.delete-item').forEach(btn => btn.addEventListener('click', async (e) => { 
+                if(confirm(`Hapus barang ini?`)) await deleteItem(btn.getAttribute('data-barcode')); 
+            }));
         }
 
         async function loadItemToForm(barcode) {
@@ -383,7 +446,6 @@
             if (item.imageBase64) { 
                 currentImageBase64 = item.imageBase64; 
                 fotoPreviewImg.src = item.imageBase64; 
-                // estimasi ukuran
                 const sizeKB = (item.imageBase64.length * 0.75 / 1024).toFixed(1);
                 previewText.innerText = `Foto terkompres (${sizeKB} KB)`; 
             } else { 
@@ -407,13 +469,12 @@
             let barcode = barcodeInput.value.trim(); 
             if(!barcode) { alert("Isi barcode!"); return; } 
             let harga = parseInt(hargaInput.value,10)||0; 
-            // currentImageBase64 sudah berisi base64 terkompres (jika ada)
             await saveItem(barcode, harga, currentImageBase64); 
             alert(`Tersimpan: ${barcode} (foto terkompres jika ada)`); 
             resetForm(); 
         }
 
-        // ======================= SCANNER DENGAN BEEP DAN AUTO STOP =======================
+        // ======================= SCANNER =======================
         let html5QrCodeScanner = null;
         let isProcessing = false;
         function startScanner() {
